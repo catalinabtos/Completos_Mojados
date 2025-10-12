@@ -1,0 +1,16 @@
+{
+  "levels": [
+    {
+      "world": 1,
+      "level": 1,
+      "goal_money": 100,
+      "tables": 4,
+      "queue_slots": 3,
+      "customers": 12,
+      "order_mix": {"italiano": 0.8, "dinamico": 0.2},
+      "timers": {"patience": 18, "prep_pan": 0.3, "prep_sausage": 0.5},
+      "beverages_enabled": true,
+      "toppings_enabled": ["palta", "tomate", "mayo", "americana", "salsa_verde"]
+    }
+  ]
+}
