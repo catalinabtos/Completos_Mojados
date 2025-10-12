@@ -1,0 +1,11 @@
+{
+  "base": ["pan", "salchicha"],
+  "completos": {
+    "italiano": ["palta", "tomate", "mayo"],
+    "dinamico": ["tomate", "americana", "mayo", "salsa_verde"],
+    "chacarero": ["poroto_verde", "aji", "tomate", "mayo"]
+  },
+  "extras": ["queso", "chucrut", "ketchup", "mostaza", "aji", "salsa_verde"],
+  "bebidas": ["lata", "cola", "limon", "naranja"],
+  "opciones": {"hielo": true}
+}
