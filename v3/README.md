@@ -9,8 +9,8 @@ Está hecho con TypeScript + Vite (sin motor gráfico) y se empaqueta como app n
 | # | Lugar | Duración | Meta | Novedades |
 |---|-------|----------|------|-----------|
 | 1 | Plaza de Armas | 2:00 | $35.000 | Italiano, Completo, tutorial guiado |
-| 2 | Mercado Central | 2:30 | $45.000 | Dinámico, bebidas, 4 puestos |
-| 3 | Estadio Fiscal | 2:45 | $70.000 | Chacarero, mote con huesillo, lluvia, 5 puestos |
+| 2 | Mercado Central | 2:30 | $42.000 | Dinámico, bebidas, 4 puestos |
+| 3 | Estadio Fiscal | 2:45 | $60.000 | Chacarero, mote con huesillo, lluvia, 5 puestos |
 
 Ganas el nivel si llegas a la meta: 1 estrella. Con 125 % de la meta ganas 2 estrellas y con 150 %, 3. Ganar un nivel desbloquea el siguiente. El progreso se guarda en el teléfono.
 

@@ -3,7 +3,7 @@ import { LEVELS, starsFor } from '../src/engine/data';
 import { simulate } from '../src/engine/bot';
 
 for (const level of LEVELS) {
-  for (const reaction of [0.35, 0.5, 0.7, 1.0]) {
+  for (const reaction of [0.5, 0.7, 0.9, 1.1, 1.3]) {
     const runs = Array.from({ length: 30 }, (_, i) => simulate(level, 1000 + i, reaction));
     const avg = (k: 'money' | 'served' | 'lost' | 'burnt') => runs.reduce((s, r) => s + r[k], 0) / runs.length;
     const wins = runs.filter((r) => r.won).length;

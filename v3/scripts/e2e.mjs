@@ -84,8 +84,8 @@ for (const level of [1, 2, 3]) {
   const start = Date.now();
   while (!(await page.locator('.results').count())) {
     const action = await page.evaluate(decide);
-    if (action) await page.locator(action.sel).nth(action.idx).click({ timeout: 2000 }).catch(() => {});
-    await page.waitForTimeout(450);
+    if (action) await page.locator(action.sel).nth(action.idx).click({ timeout: 2000, force: true }).catch(() => {});
+    await page.waitForTimeout(300);
     if (!shot && Date.now() - start > 25000) {
       await page.screenshot({ path: `${shots}/2${level}-jugando-nivel-${level}.png` });
       shot = true;
