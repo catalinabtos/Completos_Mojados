@@ -1,6 +1,6 @@
 # Completos Mojados v3 (iOS)
 
-Juego de gestión de tiempo para iPhone: atiendes un carrito de completos en Talca. Cocinas vienesas en la plancha, armas cada completo con los ingredientes que pide el cliente, le sirves su bebida y cobras antes de que se aburra.
+Juego de gestión de tiempo para iPhone: atiendes un carrito de completos en Talca. Calientas los panes en la vaporera y las vienesas en la olla, al estilo talquino, armas cada completo con los ingredientes que pide el cliente, le sirves su bebida y cobras antes de que se aburra.
 
 Está hecho con TypeScript + Vite (sin motor gráfico) y se empaqueta como app nativa de iOS con [Capacitor](https://capacitorjs.com/).
 
@@ -8,33 +8,44 @@ Está hecho con TypeScript + Vite (sin motor gráfico) y se empaqueta como app n
 
 | # | Lugar | Duración | Meta | Novedades |
 |---|-------|----------|------|-----------|
-| 1 | Plaza de Armas | 2:00 | $35.000 | Italiano, Completo, tutorial guiado |
-| 2 | Mercado Central | 2:30 | $42.000 | Dinámico, bebidas, 4 puestos |
-| 3 | Estadio Fiscal | 2:45 | $60.000 | Chacarero, mote con huesillo, lluvia, 5 puestos |
+| 1 | 5 Oriente con 2 Sur | 1:40 | $23.000 | Completo talquino, olla y vaporera, tutorial guiado |
+| 2 | Plaza de Armas | 2:00 | $31.000 | Italiano |
+| 3 | Mercado Central | 2:10 | $35.000 | Bebidas y jugos |
+| 4 | Universidad de Talca | 2:20 | $38.000 | Dinámico, 4 puestos |
+| 5 | Estación de Talca | 2:20 | $35.000 | Clientes que llegan en oleadas |
+| 6 | Estadio Fiscal | 2:30 | $50.000 | Chacarero, lluvia |
+| 7 | Costanera del Río Claro | 2:30 | $53.000 | Mote con huesillo, 5 puestos |
+| 8 | Temporal en 1 Sur | 2:30 | $38.000 | Los panes se aguan más rápido |
+| 9 | Fiestas Patrias | 2:45 | $54.000 | 4 puestos en olla y vaporera |
+| 10 | Feria del Completo | 3:00 | $68.000 | Turno final |
+
+Cada nivel está calibrado con un bot: el nivel 1 se gana haciendo una acción cada 1,35 s y el nivel 10 exige una cada 0,75 s.
 
 Ganas el nivel si llegas a la meta: 1 estrella. Con 125 % de la meta ganas 2 estrellas y con 150 %, 3. Ganar un nivel desbloquea el siguiente. El progreso se guarda en el teléfono.
 
 ## Cómo se juega
 
-1. Toca la **plancha** para poner una vienesa. Cuando se dore, tócala para pasarla al pan. Si la dejas mucho tiempo, se quema.
-2. Toca **Pan**, después la vienesa lista y luego los **ingredientes** del pedido (el orden no importa).
-3. Si el cliente pidió bebida, tócala en la **hielera**.
-4. **Toca al cliente** para entregarle el pedido. Mientras más rápido, más propina; los pedidos perfectos seguidos suman combo.
+1. Toca la **vaporera** para poner un pan sobre la toalla. Cuando esté blandito, tócalo para pasarlo a la tabla. Si lo dejas mucho rato, se agua.
+2. Toca la **olla** para echar una vienesa al agua caliente. Cuando esté lista, tócala para ponerla en el pan. Si la olvidas, se revienta.
+3. Agrega los **ingredientes** del pedido (el orden no importa).
+4. Si el cliente pidió bebida, tócala en la **hielera**.
+5. **Toca al cliente** para entregarle el pedido. Mientras más rápido, más propina; los pedidos perfectos seguidos suman combo.
 
 ## Desarrollo
 
 ```bash
 npm install
 npm run dev        # http://localhost:5173
-npm test           # tests del motor + simulación de los 3 niveles
+npm test           # tests del motor + simulación de los 10 niveles
 npm run build
 ```
 
 - `src/engine/` — lógica pura del juego (`game.ts`), contenido y niveles (`data.ts`) y un bot (`bot.ts`) que los tests usan para comprobar que cada nivel se puede ganar.
 - `src/ui/` — pantallas, vista del juego, sonido (WebAudio) y guardado.
 - `scripts/balance.ts` — `npx vite-node scripts/balance.ts` muestra cuánto gana el bot en cada nivel según su velocidad de reacción. Sirve para ajustar la dificultad.
-- `scripts/e2e.mjs` — juega los 3 niveles en Chromium con viewport de iPhone, tocando la interfaz real.
-- `scripts/make-icons.mjs` — regenera el ícono y la pantalla de carga.
+- `scripts/e2e.mjs` — juega los 10 niveles en Chromium con viewport de iPhone, tocando la interfaz real.
+- `scripts/make-icons.mjs` — regenera el ícono y la pantalla de carga a partir de la mascota (`src/ui/mascot.svg`).
+- `docs/arte-prompts.md` — prompts para generar ilustraciones con un modelo de imágenes.
 
 ## iOS
 

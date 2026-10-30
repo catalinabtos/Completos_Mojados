@@ -1,22 +1,28 @@
 // Jugador automático usado en los tests para verificar que los niveles se pueden ganar.
 
 import { RECIPES, type LevelConfig } from './data';
-import { Game, type Customer } from './game';
+import { Game, type Customer, type StationId } from './game';
 
 export interface BotResult {
   money: number;
   won: boolean;
   served: number;
   lost: number;
-  burnt: number;
+  ruined: number;
 }
 
-/** Ejecuta una sola acción, la que el bot considera más urgente. Devuelve false si no hizo nada. */
-export function botAct(game: Game): boolean {
-  const burnt = game.grill.findIndex((s) => s.state === 'burnt');
-  if (burnt >= 0) {
-    game.tapGrill(burnt);
-    return true;
+export type BotAction =
+  | { kind: 'slot'; station: StationId; index: number }
+  | { kind: 'topping'; topping: string }
+  | { kind: 'drink'; drink: string }
+  | { kind: 'serve'; seat: number }
+  | { kind: 'trash' };
+
+/** Decide la acción más urgente, o null si no conviene hacer nada. */
+export function botDecide(game: Game): BotAction | null {
+  for (const station of ['olla', 'vapor'] as const) {
+    const ruined = game.slots(station).findIndex((s) => s.state === 'ruined');
+    if (ruined >= 0) return { kind: 'slot', station, index: ruined };
   }
 
   const seated = game.seats
@@ -27,9 +33,7 @@ export function botAct(game: Game): boolean {
   // Entregar bebidas pendientes de quienes ya tienen su completo.
   for (const c of seated) {
     if (c.gotCompleto && !c.gotDrink && c.drink) {
-      if (game.heldDrink !== c.drink) game.tapDrink(c.drink);
-      else game.serve(c.seat!);
-      return true;
+      return game.heldDrink !== c.drink ? { kind: 'drink', drink: c.drink } : { kind: 'serve', seat: c.seat! };
     }
   }
 
@@ -41,49 +45,59 @@ export function botAct(game: Game): boolean {
     const target = needing.find((c) => c.recipe === trayRecipe);
     if (target) {
       if (target.drink && !target.gotDrink && game.heldDrink !== target.drink) {
-        game.tapDrink(target.drink);
-      } else {
-        game.serve(target.seat!);
+        return { kind: 'drink', drink: target.drink };
       }
-      return true;
+      return { kind: 'serve', seat: target.seat! };
     }
   }
 
   const target = needing[0];
-  const active = game.grill.filter((s) => s.state === 'cooking' || s.state === 'ready').length;
-  const empty = game.grill.findIndex((s) => s.state === 'empty');
-  const demand = needing.length + game.queue.length;
-
   if (target) {
     if (!tray) {
-      game.tapPan();
-      return true;
-    }
-    if (!tray.vienesa) {
-      const ready = game.grill.findIndex((s) => s.state === 'ready');
-      if (ready >= 0) {
-        game.tapGrill(ready);
-        return true;
-      }
+      const pan = game.vapor.findIndex((s) => s.state === 'ready');
+      if (pan >= 0) return { kind: 'slot', station: 'vapor', index: pan };
+    } else if (!tray.vienesa) {
+      const vienesa = game.olla.findIndex((s) => s.state === 'ready');
+      if (vienesa >= 0) return { kind: 'slot', station: 'olla', index: vienesa };
     } else {
-      const missing = RECIPES[target.recipe].toppings.find((t) => !tray.toppings.includes(t));
-      const wrong = tray.toppings.some((t) => !RECIPES[target.recipe].toppings.includes(t));
-      if (wrong) {
-        game.trashTray();
-        return true;
-      }
-      if (missing) {
-        game.tapTopping(missing);
-        return true;
-      }
+      const want = RECIPES[target.recipe].toppings;
+      if (tray.toppings.some((t) => !want.includes(t))) return { kind: 'trash' };
+      const missing = want.find((t) => !tray.toppings.includes(t));
+      if (missing) return { kind: 'topping', topping: missing };
     }
   }
 
-  if (empty >= 0 && active < Math.max(1, demand)) {
-    game.tapGrill(empty);
-    return true;
+  // Mantener la olla y la vaporera al ritmo de la demanda.
+  // Se prepara para los clientes sentados sin completo, más uno si hay fila.
+  const demand = Math.max(1, needing.length + (game.queue.length > 0 ? 1 : 0));
+  for (const station of ['vapor', 'olla'] as const) {
+    const slots = game.slots(station);
+    const active = slots.filter((s) => s.state === 'cooking' || s.state === 'ready').length;
+    const inTray = station === 'vapor' ? (tray ? 1 : 0) : tray?.vienesa ? 1 : 0;
+    const empty = slots.findIndex((s) => s.state === 'empty');
+    if (empty >= 0 && active + inTray < demand) return { kind: 'slot', station, index: empty };
   }
-  return false;
+  return null;
+}
+
+export function applyBotAction(game: Game, action: BotAction): void {
+  switch (action.kind) {
+    case 'slot':
+      game.tapSlot(action.station, action.index);
+      break;
+    case 'topping':
+      game.tapTopping(action.topping as never);
+      break;
+    case 'drink':
+      game.tapDrink(action.drink as never);
+      break;
+    case 'serve':
+      game.serve(action.seat);
+      break;
+    case 'trash':
+      game.trashTray();
+      break;
+  }
 }
 
 /** Simula un nivel completo. `reaction` es el tiempo entre acciones del jugador. */
@@ -94,7 +108,13 @@ export function simulate(level: LevelConfig, seed: number, reaction: number): Bo
   while (!game.finished) {
     game.step(dt);
     cooldown -= dt;
-    if (cooldown <= 0 && botAct(game)) cooldown = reaction;
+    if (cooldown <= 0) {
+      const action = botDecide(game);
+      if (action) {
+        applyBotAction(game, action);
+        cooldown = reaction;
+      }
+    }
     game.drainEvents();
   }
   return {
@@ -102,6 +122,6 @@ export function simulate(level: LevelConfig, seed: number, reaction: number): Bo
     won: game.won,
     served: game.stats.served,
     lost: game.stats.lost,
-    burnt: game.stats.burnt
+    ruined: game.stats.ruined
   };
 }

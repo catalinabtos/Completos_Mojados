@@ -1,16 +1,25 @@
 // Pantalla de juego: dibuja el estado del motor en el DOM y traduce toques en acciones.
 
 import { DRINKS, RECIPES, TOPPINGS, formatCLP, type LevelConfig } from '../engine/data';
-import { Game, type Customer, type GameEvent } from '../engine/game';
+import { Game, type Customer, type GameEvent, type StationId } from '../engine/game';
 import { play } from './audio';
 import { el } from './dom';
 
 const FACES = ['👩', '👨', '👵', '👴', '🧑‍🦱', '👩‍🦰', '🧔', '👱‍♀️', '🧑‍🎓', '👷', '👩‍🔧', '🧑‍🍳', '👨‍🦳', '👧'];
 const RAIN_EXTRAS = ['☂️', '🧣', '⚽'];
-const SCENERY: Record<number, string[]> = {
-  1: ['🌳', '⛪', '🌳', '⛲', '🌳'],
-  2: ['🏪', '🍎', '🥕', '🌽', '🏪'],
-  3: ['🚩', '🏟️', '🚩', '🏟️', '🚩']
+const SCENERY: Record<LevelConfig['scene'], string[]> = {
+  calle: ['🏠', '🌳', '🏪', '🌳', '🏠'],
+  plaza: ['🌳', '⛪', '🌳', '⛲', '🌳'],
+  mercado: ['🏪', '🍎', '🥕', '🌽', '🏪'],
+  universidad: ['🌳', '🏫', '📚', '🏫', '🌳'],
+  estacion: ['🚉', '🚃', '🚃', '🚃', '🌳'],
+  estadio: ['🚩', '🏟️', '🚩', '🏟️', '🚩'],
+  rio: ['🌳', '🌊', '🛶', '🌊', '🌳'],
+  feria: ['🎪', '🇨🇱', '🎡', '🇨🇱', '🎪']
+};
+const STATION_LABEL: Record<StationId, { title: string; empty: string; item: string }> = {
+  olla: { title: 'Olla', empty: '+ vienesa', item: 'Vienesa' },
+  vapor: { title: 'Vaporera', empty: '+ pan', item: 'Pan' }
 };
 
 export interface GameViewOptions {
@@ -51,7 +60,7 @@ export class GameView {
   private readonly comboEl: HTMLElement;
   private readonly queueEl: HTMLElement;
   private readonly seatViews: SeatView[] = [];
-  private readonly grillEls: HTMLElement[] = [];
+  private readonly slotEls: Record<StationId, HTMLElement[]> = { olla: [], vapor: [] };
   private readonly trayEl: HTMLElement;
   private readonly trayLabel: HTMLElement;
   private readonly heldDrinkEl: HTMLElement;
@@ -76,6 +85,11 @@ export class GameView {
     this.goalFill = el('div', { class: 'goal-fill' });
     this.timeEl = el('span', { class: 'time' }, '');
     this.comboEl = el('span', { class: 'combo' }, '');
+    const recipesBtn = el('button', { class: 'icon-btn', 'aria-label': 'Recetas' }, '📖');
+    recipesBtn.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      opts.onRecipes();
+    });
     const hud = el(
       'header',
       { class: 'hud' },
@@ -86,7 +100,8 @@ export class GameView {
         el('div', { class: 'hud-money-row' }, this.moneyEl, el('span', { class: 'goal' }, `meta ${formatCLP(level.goal)}`)),
         el('div', { class: 'goal-bar' }, this.goalFill, el('div', { class: 'goal-mark' }))
       ),
-      el('div', { class: 'hud-time' }, '⏱ ', this.timeEl)
+      el('div', { class: 'hud-time' }, '⏱ ', this.timeEl),
+      recipesBtn
     );
 
     // ── Calle con clientes
@@ -99,48 +114,24 @@ export class GameView {
     }
     const street = el(
       'section',
-      { class: `street level-${level.id}` },
+      { class: `street scene-${level.scene} weather-${level.weather}` },
       el('div', { class: 'awning' }),
-      el('div', { class: 'scenery' }, ...(SCENERY[level.id] ?? []).map((icon) => el('span', {}, icon))),
+      el('div', { class: 'scenery' }, ...SCENERY[level.scene].map((icon) => el('span', {}, icon))),
       el('div', { class: 'place' }, `📍 ${level.name}`),
       this.comboEl,
       this.queueEl,
       seatsEl,
       el('div', { class: 'counter' }, el('span', {}, 'COMPLETOS MOJADOS · TALCA'))
     );
-    if (level.rain) street.append(this.createRain());
+    if (this.rainy) street.append(this.createRain());
 
-    // ── Cocina
-    const grill = el('div', { class: 'grill' }, el('div', { class: 'station-title' }, 'Plancha'));
-    const slots = el('div', { class: 'grill-slots' });
-    for (let i = 0; i < level.grillSlots; i += 1) {
-      const slot = el('button', { class: 'grill-slot empty', 'aria-label': `Plancha ${i + 1}` },
-        el('div', { class: 'vienesa' }),
-        el('div', { class: 'steam' }, '♨️'),
-        el('div', { class: 'cook-ring' })
-      );
-      this.tap(slot, () => this.game.tapGrill(i));
-      slots.append(slot);
-      this.grillEls.push(slot);
-    }
-    grill.append(slots);
-
+    // ── Cocina: olla (vienesas en agua), tabla y vaporera (panes sobre la toalla)
     this.trayEl = el('div', { class: 'tray-food' });
     this.trayLabel = el('div', { class: 'tray-label' }, '');
     this.heldDrinkEl = el('div', { class: 'held-drink' });
-    const board = el('div', { class: 'board' }, el('div', { class: 'station-title' }, 'Tabla'), this.trayEl, this.trayLabel, this.heldDrinkEl);
-
-    const panBtn = el('button', { class: 'pan-btn' }, el('span', { class: 'big-icon' }, '🍞'), 'Pan');
-    this.tap(panBtn, () => this.game.tapPan());
-    const trashBtn = el('button', { class: 'trash-btn' }, el('span', { class: 'big-icon' }, '🗑️'), 'Botar');
+    const trashBtn = el('button', { class: 'trash-btn', 'aria-label': 'Botar lo que hay en la tabla' }, '🗑️ Botar');
     this.tap(trashBtn, () => this.game.trashTray());
-    const recipesBtn = el('button', { class: 'recipes-btn' }, el('span', { class: 'big-icon' }, '📖'), 'Recetas');
-    recipesBtn.addEventListener('pointerdown', (e) => {
-      e.preventDefault();
-      opts.onRecipes();
-    });
-    const side = el('div', { class: 'side-buttons' }, panBtn, trashBtn, recipesBtn);
-
+    const board = el('div', { class: 'board' }, el('div', { class: 'station-title' }, 'Tabla'), this.trayEl, this.trayLabel, this.heldDrinkEl, trashBtn);
     const toppings = el('div', { class: 'toppings' });
     for (const id of level.toppings) {
       const t = TOPPINGS[id];
@@ -150,7 +141,10 @@ export class GameView {
       toppings.append(btn);
     }
 
-    const kitchenChildren: HTMLElement[] = [el('div', { class: 'kitchen-top' }, grill, board, side), toppings];
+    const kitchenChildren: HTMLElement[] = [
+      el('div', { class: 'kitchen-top' }, this.createStation('olla'), board, this.createStation('vapor')),
+      toppings
+    ];
     if (level.drinks.length > 0) {
       const cooler = el('div', { class: 'cooler' }, el('div', { class: 'station-title' }, 'Bebidas'));
       for (const id of level.drinks) {
@@ -182,6 +176,30 @@ export class GameView {
       this.handleEvents();
       this.render();
     });
+  }
+
+  private get rainy(): boolean {
+    return this.opts.level.weather === 'lluvia' || this.opts.level.weather === 'tormenta';
+  }
+
+  private createStation(station: StationId): HTMLElement {
+    const label = STATION_LABEL[station];
+    const count = this.opts.level[station].slots;
+    const slots = el('div', { class: 'slots' });
+    for (let i = 0; i < count; i += 1) {
+      const slot = el(
+        'button',
+        { class: 'slot empty', 'aria-label': `${label.title} ${i + 1}` },
+        el('div', { class: station === 'olla' ? 'item vienesa' : 'item pan' }),
+        el('div', { class: 'steam' }, '♨️'),
+        el('div', { class: 'progress' })
+      );
+      slot.dataset.empty = label.empty;
+      this.tap(slot, () => this.game.tapSlot(station, i));
+      slots.append(slot);
+      this.slotEls[station].push(slot);
+    }
+    return el('div', { class: `station station-${station}` }, el('div', { class: 'station-title' }, label.title), slots);
   }
 
   private createSeat(seat: number): SeatView {
@@ -249,18 +267,17 @@ export class GameView {
 
   private onEvent(ev: GameEvent) {
     switch (ev.type) {
-      case 'grill':
-        play('sizzle');
+      case 'cook':
+        play(ev.station === 'olla' ? 'splash' : 'sizzle');
         break;
       case 'ready':
         play('ready');
         break;
-      case 'burnt':
+      case 'ruined':
         play('burnt');
-        this.toast('¡Se quemó una vienesa! Tócala para botarla');
+        this.toast(ev.station === 'olla' ? '¡Se reventó una vienesa! Tócala para botarla' : '¡Se aguó un pan! Tócalo para botarlo');
         break;
       case 'pickup':
-      case 'pan':
       case 'topping':
       case 'drink':
         play('tap');
@@ -334,7 +351,7 @@ export class GameView {
     this.queueEl.textContent = q > 0 ? `En la fila: ${'🧍'.repeat(q)}` : '';
 
     this.renderSeats();
-    this.renderGrill();
+    this.renderStations();
     this.renderTray();
     this.renderTutorial();
   }
@@ -359,7 +376,7 @@ export class GameView {
         if (view.shownId !== c.id) {
           view.shownId = c.id;
           view.face.textContent = FACES[c.face % FACES.length];
-          view.extra.textContent = g.level.rain ? RAIN_EXTRAS[c.face % RAIN_EXTRAS.length] : '';
+          view.extra.textContent = this.rainy ? RAIN_EXTRAS[c.face % RAIN_EXTRAS.length] : '';
         }
         view.root.className = `seat ${c.state}${c.mood ? ' ' + c.mood : ''}`;
         if (c.mood === 'angry') view.face.textContent = '😠';
@@ -380,17 +397,20 @@ export class GameView {
     });
   }
 
-  private renderGrill() {
+  private renderStations() {
     const g = this.game;
-    g.grill.forEach((slot, i) => {
-      const elSlot = this.grillEls[i];
-      const cls = `grill-slot ${slot.state}`;
-      if (elSlot.className !== cls) elSlot.className = cls;
-      let progress = 0;
-      if (slot.state === 'cooking') progress = slot.t / g.level.cookTime;
-      else if (slot.state === 'ready') progress = (slot.t - g.level.cookTime) / g.level.burnTime;
-      elSlot.style.setProperty('--p', `${Math.min(1, progress) * 360}deg`);
-    });
+    for (const station of ['olla', 'vapor'] as const) {
+      const { cook, hold } = g.level[station];
+      g.slots(station).forEach((slot, i) => {
+        const elSlot = this.slotEls[station][i];
+        const cls = `slot ${slot.state}`;
+        if (elSlot.className !== cls) elSlot.className = cls;
+        let progress = 0;
+        if (slot.state === 'cooking') progress = slot.t / cook;
+        else if (slot.state === 'ready') progress = (slot.t - cook) / hold;
+        elSlot.style.setProperty('--p', `${Math.min(1, progress) * 100}%`);
+      });
+    }
   }
 
   private renderTray() {
@@ -401,7 +421,7 @@ export class GameView {
     this.lastTrayKey = key;
 
     if (!tray) {
-      this.trayEl.replaceChildren(el('div', { class: 'tray-empty' }, 'Toca 🍞 Pan'));
+      this.trayEl.replaceChildren(el('div', { class: 'tray-empty' }, 'Saca un pan de la vaporera'));
       this.trayLabel.textContent = '';
     } else {
       const layers = tray.toppings.map((t) => el('div', { class: `layer layer-${t}`, style: `--c:${TOPPINGS[t].color}` }));
@@ -424,12 +444,14 @@ export class GameView {
     const g = this.game;
     const seated = g.seats.map((id) => g.customer(id)).find((c) => c && c.state === 'seated');
     let text: string;
-    if (!seated) text = 'Espera a tu primer cliente… mientras, toca la plancha 🔥 para poner una vienesa';
-    else if (g.grill.every((s) => s.state === 'empty') && !g.tray?.vienesa) text = '1. Toca la plancha 🔥 para cocinar una vienesa';
-    else if (!g.tray) text = '2. Toca 🍞 Pan para poner un pan en la tabla';
-    else if (!g.tray.vienesa) text = g.grill.some((s) => s.state === 'ready') ? '3. ¡La vienesa está dorada! Tócala para ponerla en el pan' : '3. Espera a que la vienesa se dore…';
-    else if (!g.trayRecipe() || g.trayRecipe() !== seated.recipe) text = `4. Agrega los ingredientes del ${RECIPES[seated.recipe].name}: ${RECIPES[seated.recipe].toppings.map((t) => TOPPINGS[t].name).join(', ')}`;
-    else text = '5. ¡Listo! Toca al cliente para entregarle su completo';
+    const anyCooking = (station: StationId) => g.slots(station).some((x) => x.state !== 'empty');
+    if (!seated) text = 'Mientras llega tu primer cliente, toca la vaporera para poner un pan y la olla para poner una vienesa';
+    else if (!g.tray && !anyCooking('vapor')) text = '1. Toca la vaporera para calentar un pan al vapor';
+    else if (!g.tray?.vienesa && !anyCooking('olla')) text = '2. Toca la olla para echar una vienesa al agua';
+    else if (!g.tray) text = g.vapor.some((x) => x.state === 'ready') ? '3. ¡El pan está blandito! Tócalo para pasarlo a la tabla' : '3. Espera a que el pan se caliente…';
+    else if (!g.tray.vienesa) text = g.olla.some((x) => x.state === 'ready') ? '4. ¡La vienesa está caliente! Tócala para ponerla en el pan' : '4. Espera a que la vienesa se caliente…';
+    else if (g.trayRecipe() !== seated.recipe) text = `5. Agrega ${RECIPES[seated.recipe].toppings.map((t) => TOPPINGS[t].name.toLowerCase()).join(', ')}`;
+    else text = '6. ¡Listo! Toca al cliente para entregarle su completo';
     this.tutorialEl.hidden = false;
     if (this.tutorialEl.textContent !== text) this.tutorialEl.textContent = text;
   }

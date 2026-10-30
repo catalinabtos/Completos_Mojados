@@ -3,10 +3,19 @@
 import { DRINKS, LEVELS, RECIPES, TOPPINGS, formatCLP, starsFor, type LevelConfig, type RecipeId } from '../engine/data';
 import type { Game } from '../engine/game';
 import { button, el } from './dom';
+import mascotSvg from './mascot.svg?raw';
 import type { SaveData } from './storage';
+
+const LEVEL_HUES = [8, 140, 30, 200, 260, 120, 190, 230, 0, 45];
 
 function starsText(n: number): string {
   return '★'.repeat(n) + '☆'.repeat(3 - n);
+}
+
+function titleArt(): HTMLElement {
+  const art = el('div', { class: 'title-art' });
+  art.innerHTML = mascotSvg;
+  return art;
 }
 
 export function titleScreen(save: SaveData, onPlay: () => void, onHowTo: () => void, onToggleSound: () => void): HTMLElement {
@@ -14,7 +23,7 @@ export function titleScreen(save: SaveData, onPlay: () => void, onHowTo: () => v
   return el(
     'div',
     { class: 'screen title-screen' },
-    el('div', { class: 'title-art' }, el('div', { class: 'title-dog' }, '🌭'), el('div', { class: 'title-drops' }, '💧💧💧')),
+    titleArt(),
     el('h1', {}, 'Completos', el('br'), 'Mojados'),
     el('p', { class: 'tagline' }, 'El carrito más rápido de Talca'),
     el('div', { class: 'menu' }, button('¡Jugar!', onPlay, 'btn primary big'), button('Cómo jugar', onHowTo, 'btn'), sound)
@@ -23,8 +32,8 @@ export function titleScreen(save: SaveData, onPlay: () => void, onHowTo: () => v
 
 export function howToScreen(onBack: () => void): HTMLElement {
   const steps = [
-    ['🔥', 'Toca la plancha para cocinar una vienesa. Sácala cuando esté dorada, ¡antes de que se queme!'],
-    ['🍞', 'Toca Pan para poner un pan en la tabla y luego toca la vienesa lista.'],
+    ['🍞', 'Toca la vaporera para poner un pan sobre la toalla. Cuando esté blandito, tócalo para pasarlo a la tabla. Si lo dejas mucho rato, se agua.'],
+    ['💧', 'Toca la olla para echar una vienesa al agua caliente. Cuando esté lista, tócala para ponerla en el pan. Si la olvidas, se revienta.'],
     ['🍅', 'Agrega los ingredientes que muestra el globo del cliente. El orden no importa.'],
     ['🥤', 'Si pide bebida, tócala en la hielera y entrégala también.'],
     ['👆', 'Toca al cliente para servirle. Mientras más rápido, más propina.'],
@@ -61,6 +70,7 @@ export function levelSelectScreen(save: SaveData, onPick: (level: LevelConfig) =
       },
       `level-card level-${level.id}${locked ? ' locked' : ''}`
     );
+    card.style.setProperty('--h', String(LEVEL_HUES[level.id - 1] ?? 20));
     return card;
   });
   return el(
@@ -142,7 +152,7 @@ export function resultsScreen(game: Game, isRecord: boolean, hasNext: boolean, o
       el('li', {}, `😤 Clientes perdidos: ${s.lost}`),
       el('li', {}, `💸 Propinas: ${formatCLP(s.tips)}`),
       el('li', {}, `🔥 Mejor combo: ×${s.maxCombo}`),
-      el('li', {}, `⚫ Vienesas quemadas: ${s.burnt}`)
+      el('li', {}, `💥 Vienesas reventadas y panes aguados: ${s.ruined}`)
     ),
     el('div', { class: 'menu' }, ...actions)
   );

@@ -9,11 +9,13 @@ import {
   type ToppingId
 } from './data';
 
-export type GrillState = 'empty' | 'cooking' | 'ready' | 'burnt';
+/** Olla con agua para las vienesas y vaporera (pan sobre toalla) para los panes. */
+export type StationId = 'olla' | 'vapor';
+export type SlotState = 'empty' | 'cooking' | 'ready' | 'ruined';
 
-export interface GrillSlot {
-  state: GrillState;
-  /** Segundos desde que se puso la vienesa. */
+export interface Slot {
+  state: SlotState;
+  /** Segundos desde que se puso la vienesa o el pan. */
   t: number;
 }
 
@@ -43,11 +45,10 @@ export interface Customer {
 export type GameEvent =
   | { type: 'arrive'; customer: number }
   | { type: 'seat'; customer: number; seat: number }
-  | { type: 'grill'; slot: number }
-  | { type: 'ready'; slot: number }
-  | { type: 'burnt'; slot: number }
-  | { type: 'pickup'; slot: number }
-  | { type: 'pan' }
+  | { type: 'cook'; station: StationId; slot: number }
+  | { type: 'ready'; station: StationId; slot: number }
+  | { type: 'ruined'; station: StationId; slot: number }
+  | { type: 'pickup'; station: StationId; slot: number }
   | { type: 'topping'; topping: ToppingId }
   | { type: 'drink'; drink: DrinkId }
   | { type: 'trash' }
@@ -61,7 +62,8 @@ export type GameEvent =
 export interface Stats {
   served: number;
   lost: number;
-  burnt: number;
+  /** Vienesas reventadas + panes aguados. */
+  ruined: number;
   tips: number;
   maxCombo: number;
 }
@@ -82,6 +84,10 @@ export function createRng(seed: number): () => number {
   };
 }
 
+function emptySlots(n: number): Slot[] {
+  return Array.from({ length: n }, () => ({ state: 'empty' as SlotState, t: 0 }));
+}
+
 export class Game {
   readonly level: LevelConfig;
   time = 0;
@@ -90,12 +96,13 @@ export class Game {
   finished = false;
   won = false;
 
-  grill: GrillSlot[];
+  olla: Slot[];
+  vapor: Slot[];
   tray: Tray | null = null;
   heldDrink: DrinkId | null = null;
   customers: Customer[] = [];
   seats: (number | null)[];
-  stats: Stats = { served: 0, lost: 0, burnt: 0, tips: 0, maxCombo: 0 };
+  stats: Stats = { served: 0, lost: 0, ruined: 0, tips: 0, maxCombo: 0 };
   events: GameEvent[] = [];
 
   private readonly rng: () => number;
@@ -106,7 +113,8 @@ export class Game {
   constructor(level: LevelConfig, seed = Date.now()) {
     this.level = level;
     this.rng = createRng(seed);
-    this.grill = Array.from({ length: level.grillSlots }, () => ({ state: 'empty' as GrillState, t: 0 }));
+    this.olla = emptySlots(level.olla.slots);
+    this.vapor = emptySlots(level.vapor.slots);
     this.seats = Array.from({ length: level.seats }, () => null);
     this.seatTimers = Array.from({ length: level.seats }, () => 0);
     this.nextArrival = 1.2;
@@ -125,6 +133,10 @@ export class Game {
     return this.customers.filter((c) => c.state === 'queued');
   }
 
+  slots(station: StationId): Slot[] {
+    return station === 'olla' ? this.olla : this.vapor;
+  }
+
   // ───────────────────────── Simulación ─────────────────────────
 
   step(dt: number): void {
@@ -132,7 +144,8 @@ export class Game {
     this.time += dt;
 
     this.updateArrivals(dt);
-    this.updateGrill(dt);
+    this.updateStation('olla', dt);
+    this.updateStation('vapor', dt);
     this.updateCustomers(dt);
     this.seatFromQueue(dt);
 
@@ -194,18 +207,19 @@ export class Game {
     return entries[entries.length - 1][0];
   }
 
-  private updateGrill(dt: number) {
-    this.grill.forEach((slot, i) => {
-      if (slot.state === 'empty' || slot.state === 'burnt') return;
+  private updateStation(station: StationId, dt: number) {
+    const { cook, hold } = this.level[station];
+    this.slots(station).forEach((slot, i) => {
+      if (slot.state === 'empty' || slot.state === 'ruined') return;
       slot.t += dt;
-      if (slot.state === 'cooking' && slot.t >= this.level.cookTime) {
+      if (slot.state === 'cooking' && slot.t >= cook) {
         slot.state = 'ready';
-        this.events.push({ type: 'ready', slot: i });
+        this.events.push({ type: 'ready', station, slot: i });
       }
-      if (slot.state === 'ready' && slot.t >= this.level.cookTime + this.level.burnTime) {
-        slot.state = 'burnt';
-        this.stats.burnt += 1;
-        this.events.push({ type: 'burnt', slot: i });
+      if (slot.state === 'ready' && slot.t >= cook + hold) {
+        slot.state = 'ruined';
+        this.stats.ruined += 1;
+        this.events.push({ type: 'ruined', station, slot: i });
       }
     });
   }
@@ -259,32 +273,43 @@ export class Game {
 
   // ───────────────────────── Acciones del jugador ─────────────────────────
 
-  tapGrill(slotIndex: number): void {
+  /** Toque en un puesto de la olla (vienesas) o de la vaporera (panes). */
+  tapSlot(station: StationId, index: number): void {
     if (this.finished) return;
-    const slot = this.grill[slotIndex];
+    const slot = this.slots(station)[index];
     if (!slot) return;
     switch (slot.state) {
       case 'empty':
         slot.state = 'cooking';
         slot.t = 0;
-        this.events.push({ type: 'grill', slot: slotIndex });
+        this.events.push({ type: 'cook', station, slot: index });
         break;
       case 'cooking':
-        this.hint('Todavía está cruda, espera un poco');
+        this.hint(station === 'olla' ? 'La vienesa todavía está fría' : 'El pan todavía no está blandito');
         break;
       case 'ready':
-        if (!this.tray) {
-          this.hint('Primero pon un pan');
-        } else if (this.tray.vienesa) {
-          this.hint('Este pan ya tiene vienesa');
+        if (station === 'vapor') {
+          if (this.tray) {
+            this.hint('Ya tienes un pan en la tabla');
+            return;
+          }
+          this.tray = { vienesa: false, toppings: [] };
         } else {
+          if (!this.tray) {
+            this.hint('Primero saca un pan de la vaporera');
+            return;
+          }
+          if (this.tray.vienesa) {
+            this.hint('Este pan ya tiene vienesa');
+            return;
+          }
           this.tray.vienesa = true;
-          slot.state = 'empty';
-          slot.t = 0;
-          this.events.push({ type: 'pickup', slot: slotIndex });
         }
+        slot.state = 'empty';
+        slot.t = 0;
+        this.events.push({ type: 'pickup', station, slot: index });
         break;
-      case 'burnt':
+      case 'ruined':
         slot.state = 'empty';
         slot.t = 0;
         this.events.push({ type: 'trash' });
@@ -292,24 +317,14 @@ export class Game {
     }
   }
 
-  tapPan(): void {
-    if (this.finished) return;
-    if (this.tray) {
-      this.hint('Ya tienes un pan en la tabla');
-      return;
-    }
-    this.tray = { vienesa: false, toppings: [] };
-    this.events.push({ type: 'pan' });
-  }
-
   tapTopping(topping: ToppingId): void {
     if (this.finished) return;
     if (!this.tray) {
-      this.hint('Primero pon un pan');
+      this.hint('Primero saca un pan de la vaporera');
       return;
     }
     if (!this.tray.vienesa) {
-      this.hint('Falta la vienesa de la plancha');
+      this.hint('Falta la vienesa de la olla');
       return;
     }
     if (this.tray.toppings.includes(topping)) {

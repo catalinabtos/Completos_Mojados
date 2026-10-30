@@ -1,6 +1,6 @@
 # Completos Mojados
 
-> **Versión actual: [`v3/`](v3/README.md)**: juego para iPhone con 3 niveles en Talca, empaquetado con Capacitor y publicado en TestFlight vía GitHub Actions.
+> **Versión actual: [`v3/`](v3/README.md)**: juego para iPhone con 10 niveles en Talca, empaquetado con Capacitor y con publicación a TestFlight vía GitHub Actions.
 > `v1/` (Unity) y `v2/` (web con Pixi) son prototipos anteriores.
 
 ---

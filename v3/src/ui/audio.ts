@@ -1,6 +1,6 @@
 // Efectos de sonido sintetizados con WebAudio (sin archivos de audio).
 
-type Sfx = 'tap' | 'sizzle' | 'ready' | 'burnt' | 'cash' | 'angry' | 'error' | 'win' | 'lose' | 'trash';
+type Sfx = 'tap' | 'sizzle' | 'splash' | 'ready' | 'burnt' | 'cash' | 'angry' | 'error' | 'win' | 'lose' | 'trash';
 
 let ctx: AudioContext | null = null;
 let enabled = true;
@@ -59,6 +59,10 @@ export function play(sfx: Sfx) {
       break;
     case 'sizzle':
       noise(0.45, 0.06, 3000);
+      break;
+    case 'splash':
+      noise(0.3, 0.07, 500);
+      tone(320, 0, 0.18, 'sine', 0.06, 160);
       break;
     case 'ready':
       tone(880, 0, 0.1, 'sine', 0.1);

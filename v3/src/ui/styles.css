@@ -110,20 +110,14 @@ button {
   text-align: center;
 }
 .title-art {
-  position: relative;
-  font-size: 110px;
-  line-height: 1;
-  filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.2));
+  width: min(78vw, 300px);
+  filter: drop-shadow(0 10px 0 rgba(90, 40, 10, 0.25));
   animation: bob 2.4s ease-in-out infinite;
 }
-.title-drops {
-  font-size: 26px;
-  position: absolute;
-  top: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-  letter-spacing: 10px;
-  animation: drip 1.6s ease-in infinite;
+.title-art svg {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 .title-screen h1 {
   margin: 8px 0 0;
@@ -141,22 +135,10 @@ button {
 }
 @keyframes bob {
   50% {
-    transform: translateY(-8px) rotate(-3deg);
+    transform: translateY(-8px) rotate(-2deg);
   }
 }
-@keyframes drip {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, -10px);
-  }
-  30% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, 40px);
-  }
-}
+
 
 /* ───────────── Pantallas de panel ───────────── */
 
@@ -219,14 +201,8 @@ button {
   color: #fff;
   box-shadow: 0 5px 0 rgba(0, 0, 0, 0.35);
 }
-.level-card.level-1 {
-  background: linear-gradient(135deg, #2f8f4e, #1d6b39);
-}
-.level-card.level-2 {
-  background: linear-gradient(135deg, #e07b24, #b4501a);
-}
-.level-card.level-3 {
-  background: linear-gradient(135deg, #4b5d7a, #2c3850);
+.level-card {
+  background: linear-gradient(135deg, hsl(var(--h) 55% 42%), hsl(var(--h) 60% 30%));
 }
 .level-card.locked {
   filter: grayscale(0.9) brightness(0.6);
@@ -524,24 +500,76 @@ button {
   flex-direction: column;
   justify-content: flex-end;
 }
-.street.level-1 {
+.street.scene-calle {
+  background:
+    linear-gradient(180deg, transparent 55%, #9a9a94 55%, #85857f 100%),
+    linear-gradient(180deg, #8fcdf0, #cdeafa 55%);
+}
+.street.scene-plaza {
   background:
     linear-gradient(180deg, transparent 55%, #6fae5a 55%, #5a9a49 100%),
-    radial-gradient(circle at 85% 18%, #fff3a8 0 22px, transparent 23px),
     linear-gradient(180deg, #7cc6f2, #bfe6fb 55%);
 }
-.street.level-2 {
+.street.scene-mercado {
   background:
     linear-gradient(180deg, transparent 52%, #b58b5f 52%, #9a7149 100%),
-    repeating-linear-gradient(90deg, #e7b36a 0 46px, #d99b4f 46px 50px, transparent 50px 70px) 0 20% / 100% 32% no-repeat,
     linear-gradient(180deg, #f6c27a, #ffe2b0 55%);
 }
-.street.level-3 {
+.street.scene-universidad {
   background:
-    linear-gradient(180deg, transparent 52%, #5d6b62 52%, #4a554e 100%),
-    radial-gradient(ellipse at 20% 12%, #fffbe0 0 10px, transparent 11px),
-    radial-gradient(ellipse at 80% 12%, #fffbe0 0 10px, transparent 11px),
-    linear-gradient(180deg, #5f6f86, #8d9bb0 55%);
+    linear-gradient(180deg, transparent 55%, #7db36a 55%, #649a52 100%),
+    linear-gradient(180deg, #92d0f5, #d6effc 55%);
+}
+.street.scene-estacion {
+  background:
+    linear-gradient(180deg, transparent 56%, #6b5a4b 56%, #6b5a4b 59%, #a0a09a 59%, #8b8b85 100%),
+    linear-gradient(180deg, #a9c4d8, #dfe9f0 55%);
+}
+.street.scene-estadio {
+  background:
+    linear-gradient(180deg, transparent 52%, #4f8a4a 52%, #3f7339 100%),
+    linear-gradient(180deg, #8fb6d8, #c7dcee 55%);
+}
+.street.scene-rio {
+  background:
+    linear-gradient(180deg, transparent 50%, #4aa3d6 50%, #4aa3d6 60%, #d9c08a 60%, #c7ab72 100%),
+    linear-gradient(180deg, #6ec3f5, #c2e8fd 50%);
+}
+.street.scene-feria {
+  background:
+    linear-gradient(180deg, transparent 55%, #b98a52 55%, #a07443 100%),
+    repeating-linear-gradient(90deg, #d7362b 0 30px, #fff 30px 60px, #2856b8 60px 90px) 0 8% / 100% 8px no-repeat,
+    linear-gradient(180deg, #ffcf6e, #ffeec4 55%);
+}
+/* Clima: capas que oscurecen el cielo sin tapar a los clientes */
+.street.weather-nublado::before,
+.street.weather-lluvia::before,
+.street.weather-noche::before,
+.street.weather-tormenta::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.street.weather-nublado::before {
+  background: linear-gradient(180deg, rgba(120, 130, 145, 0.45), transparent 55%);
+}
+.street.weather-lluvia::before {
+  background: linear-gradient(180deg, rgba(70, 80, 100, 0.6), rgba(70, 80, 100, 0.25));
+}
+.street.weather-noche::before {
+  background:
+    radial-gradient(circle at 82% 16%, #fff7d1 0 16px, transparent 17px),
+    linear-gradient(180deg, rgba(15, 20, 50, 0.8), rgba(15, 20, 50, 0.4));
+}
+.street.weather-tormenta::before {
+  background: linear-gradient(180deg, rgba(10, 15, 35, 0.85), rgba(10, 15, 35, 0.5));
+}
+.street.weather-noche .scenery,
+.street.weather-tormenta .scenery,
+.street.weather-lluvia .scenery {
+  filter: saturate(0.6) brightness(0.8);
 }
 .awning {
   position: absolute;
@@ -560,22 +588,18 @@ button {
   position: absolute;
   left: 0;
   right: 0;
-  top: 46%;
-  transform: translateY(-100%);
+  bottom: 46%;
   display: flex;
   justify-content: space-around;
   align-items: flex-end;
-  font-size: 54px;
+  font-size: 48px;
   line-height: 1;
   opacity: 0.9;
   pointer-events: none;
   z-index: 1;
 }
 .scenery span:nth-child(2n) {
-  font-size: 70px;
-}
-.street.level-3 .scenery {
-  filter: saturate(0.6) brightness(0.85);
+  font-size: 60px;
 }
 .place {
   position: absolute;
@@ -805,7 +829,7 @@ button {
 }
 .kitchen-top {
   display: grid;
-  grid-template-columns: 1fr 1.25fr 64px;
+  grid-template-columns: 1fr 1.3fr 1fr;
   gap: 8px;
 }
 .station-title {
@@ -817,103 +841,132 @@ button {
   margin-bottom: 4px;
 }
 
-.grill {
-  background: #3b3f45;
-  border-radius: 14px;
+.station {
+  position: relative;
+  border-radius: 16px 16px 22px 22px;
   padding: 6px;
+  border: 4px solid #6d7580;
+  border-top-width: 6px;
 }
-.grill .station-title {
-  color: rgba(255, 255, 255, 0.7);
+.station-olla {
+  background: linear-gradient(180deg, #8fd3f4, #4ba3d8);
 }
-.grill-slots {
+.station-vapor {
+  background: linear-gradient(180deg, #e9eef2, #c9d2da);
+}
+.station .station-title {
+  color: rgba(0, 0, 0, 0.6);
+}
+.station-olla .station-title {
+  color: #08324d;
+}
+.slots {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
 }
-.grill-slot {
+.slot {
   position: relative;
-  height: 40px;
+  height: 34px;
   border-radius: 10px;
-  background: repeating-linear-gradient(90deg, #22252a 0 6px, #2d3036 6px 12px);
+  background: rgba(255, 255, 255, 0.25);
   overflow: hidden;
 }
-.grill-slot.empty::before {
-  content: '+ vienesa';
+.station-vapor .slot {
+  /* La toalla a cuadros sobre la que reposan los panes */
+  background: repeating-linear-gradient(45deg, #ffffff 0 6px, #e6edf3 6px 12px);
+}
+.slot.empty::before {
+  content: attr(data-empty);
   position: absolute;
   inset: 0;
   display: grid;
   place-items: center;
-  color: rgba(255, 255, 255, 0.55);
-  font-size: 13px;
-  font-weight: 700;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 12px;
+  font-weight: 800;
 }
-.vienesa {
+.item {
   position: absolute;
   left: 12%;
   right: 12%;
   top: 50%;
-  height: 16px;
-  margin-top: -8px;
   border-radius: 99px;
-  background: #e58f86;
   opacity: 0;
-  transition: background 0.4s;
+  transition: background 0.4s, transform 0.3s;
 }
-.grill-slot:not(.empty) .vienesa {
+.item.vienesa {
+  height: 14px;
+  margin-top: -7px;
+  background: #f0a39a;
+}
+.item.pan {
+  height: 20px;
+  margin-top: -10px;
+  background: #f3d19d;
+  box-shadow: inset 0 -4px 0 rgba(150, 90, 30, 0.25);
+}
+.slot:not(.empty) .item {
   opacity: 1;
 }
-.grill-slot.cooking .vienesa {
-  animation: sizzle 0.25s linear infinite alternate;
+.slot.cooking .item.vienesa {
+  animation: bob-water 0.8s ease-in-out infinite alternate;
 }
-.grill-slot.ready .vienesa {
-  background: linear-gradient(180deg, #c7643b, #9b3f22);
+.slot.ready .item.vienesa {
+  background: linear-gradient(180deg, #e2654b, #b9442c);
   box-shadow: 0 0 0 2px #ffd84d;
 }
-.grill-slot.burnt .vienesa {
-  background: #1b1310;
+.slot.ready .item.pan {
+  background: linear-gradient(180deg, #fbe2b6, #efc27e);
+  box-shadow: 0 0 0 2px #ffd84d, inset 0 -4px 0 rgba(150, 90, 30, 0.2);
+}
+.slot.ruined .item.vienesa {
+  background: repeating-linear-gradient(90deg, #8d3b2b 0 8px, #f0d5c7 8px 10px);
+  transform: scaleY(1.3);
+}
+.slot.ruined .item.pan {
+  background: #c9b48e;
+  transform: scaleY(0.7);
+  opacity: 0.8;
 }
 .steam {
   position: absolute;
   right: 4px;
   top: 0;
-  font-size: 16px;
+  font-size: 14px;
   opacity: 0;
 }
-.grill-slot.ready .steam {
+.slot.ready .steam {
   opacity: 1;
   animation: rise 1s ease-out infinite;
 }
-.grill-slot.burnt::after {
-  content: '💨 botar';
+.slot.ruined::after {
+  content: 'botar';
   position: absolute;
   inset: 0;
   display: grid;
   place-items: center;
   color: #fff;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 900;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
 }
-.cook-ring {
+.progress {
   position: absolute;
   left: 0;
   bottom: 0;
   height: 4px;
-  width: calc(var(--p, 0deg) / 360deg * 100%);
-  background: #7ee08f;
+  width: var(--p, 0%);
 }
-.grill-slot.cooking .cook-ring {
+.slot.cooking .progress {
   background: #f2a516;
 }
-.grill-slot.ready .cook-ring {
+.slot.ready .progress {
   background: #e5484d;
 }
-.grill-slot.empty .cook-ring,
-.grill-slot.burnt .cook-ring {
-  display: none;
-}
-@keyframes sizzle {
+@keyframes bob-water {
   to {
-    transform: translateY(-1px);
+    transform: translateY(-3px);
   }
 }
 @keyframes rise {
@@ -1029,12 +1082,6 @@ button {
   }
 }
 
-.side-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.side-buttons button,
 .topping,
 .drink {
   display: flex;
@@ -1049,23 +1096,22 @@ button {
   line-height: 1.1;
   padding: 4px 2px;
 }
-.side-buttons button {
-  flex: 1;
-}
-.pan-btn {
-  background: #ffe6a8 !important;
-}
 .trash-btn {
-  background: #ffd3cf !important;
+  margin-top: 4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  font-weight: 800;
 }
 .big-icon {
   font-size: 22px;
   line-height: 1.1;
 }
-.side-buttons button:active,
 .topping:active,
 .drink:active,
-.grill-slot:active {
+.slot:active,
+.trash-btn:active {
   transform: translateY(2px);
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
 }
@@ -1204,8 +1250,8 @@ button {
   .topping {
     height: 48px;
   }
-  .grill-slot {
-    height: 34px;
+  .slot {
+    height: 30px;
   }
   .drink {
     height: 44px;

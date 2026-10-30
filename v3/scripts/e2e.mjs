@@ -1,5 +1,5 @@
 // Prueba de punta a punta en Chromium con viewport de iPhone: recorre los menús y juega
-// los 3 niveles tocando la interfaz real. Uso: node scripts/e2e.mjs [url] [carpeta-capturas]
+// los niveles tocando la interfaz real. Uso: node scripts/e2e.mjs [url] [carpeta-capturas]
 import { createRequire } from 'node:module';
 
 // Playwright viene instalado globalmente (NODE_PATH) en el entorno de pruebas.
@@ -32,8 +32,11 @@ function decide() {
     dinamico: ['tomate', 'palta', 'americana', 'mayo'],
     chacarero: ['tomate', 'poroto_verde', 'aji', 'mayo']
   };
-  const burnt = g.grill.findIndex((s) => s.state === 'burnt');
-  if (burnt >= 0) return { sel: '.grill-slot', idx: burnt };
+  const slotSel = (station) => `.station-${station} .slot`;
+  for (const station of ['olla', 'vapor']) {
+    const ruined = g.slots(station).findIndex((s) => s.state === 'ruined');
+    if (ruined >= 0) return { sel: slotSel(station), idx: ruined };
+  }
   const seated = g.seats
     .map((id) => g.customers.find((c) => c.id === id))
     .filter((c) => c && c.state === 'seated')
@@ -55,13 +58,13 @@ function decide() {
     }
   }
   const target = needing[0];
-  const active = g.grill.filter((s) => s.state === 'cooking' || s.state === 'ready').length;
-  const empty = g.grill.findIndex((s) => s.state === 'empty');
   if (target) {
-    if (!tray) return { sel: '.pan-btn', idx: 0 };
-    if (!tray.vienesa) {
-      const ready = g.grill.findIndex((s) => s.state === 'ready');
-      if (ready >= 0) return { sel: '.grill-slot', idx: ready };
+    if (!tray) {
+      const pan = g.vapor.findIndex((s) => s.state === 'ready');
+      if (pan >= 0) return { sel: slotSel('vapor'), idx: pan };
+    } else if (!tray.vienesa) {
+      const v = g.olla.findIndex((s) => s.state === 'ready');
+      if (v >= 0) return { sel: slotSel('olla'), idx: v };
     } else {
       const want = RECIPES[target.recipe];
       if (tray.toppings.some((t) => !want.includes(t))) return { sel: '.trash-btn', idx: 0 };
@@ -69,12 +72,21 @@ function decide() {
       if (missing) return { sel: `.topping[data-topping="${missing}"]`, idx: 0 };
     }
   }
-  if (empty >= 0 && active < Math.max(1, needing.length + g.queue.length)) return { sel: '.grill-slot', idx: empty };
+  const demand = Math.max(1, needing.length + (g.queue.length > 0 ? 1 : 0));
+  for (const station of ['vapor', 'olla']) {
+    const slots = g.slots(station);
+    const active = slots.filter((s) => s.state === 'cooking' || s.state === 'ready').length;
+    const inTray = station === 'vapor' ? (tray ? 1 : 0) : tray && tray.vienesa ? 1 : 0;
+    const empty = slots.findIndex((s) => s.state === 'empty');
+    if (empty >= 0 && active + inTray < demand) return { sel: slotSel(station), idx: empty };
+  }
   return null;
 }
 
+// Por defecto juega los 10 niveles en orden; se puede limitar con LEVELS=1,2,3.
+const LEVEL_IDS = (process.env.LEVELS ?? '1,2,3,4,5,6,7,8,9,10').split(',').map(Number);
 const results = [];
-for (const level of [1, 2, 3]) {
+for (const level of LEVEL_IDS) {
   await page.locator('.level-card').nth(level - 1).click();
   await page.screenshot({ path: `${shots}/1${level}-intro-nivel-${level}.png` });
   await page.getByText('¡A trabajar!').click();
@@ -90,7 +102,7 @@ for (const level of [1, 2, 3]) {
       await page.screenshot({ path: `${shots}/2${level}-jugando-nivel-${level}.png` });
       shot = true;
     }
-    if (Date.now() - start > 240000) throw new Error('El nivel no terminó');
+    if (Date.now() - start > 300000) throw new Error('El nivel no terminó');
   }
   await page.screenshot({ path: `${shots}/3${level}-resultado-nivel-${level}.png` });
   const text = await page.locator('.results').innerText();

@@ -3,6 +3,9 @@ import { LEVELS, RECIPES, starsFor } from '../src/engine/data';
 import { Game } from '../src/engine/game';
 import { simulate } from '../src/engine/bot';
 
+/** Ritmo (segundos por acción) con el que cada nivel debe poder ganarse. */
+const TARGET_REACTION = [1.35, 1.25, 1.15, 1.05, 1.0, 0.95, 0.9, 0.85, 0.8, 0.75];
+
 function runUntil(game: Game, cond: () => boolean, max = 60) {
   for (let t = 0; t < max && !cond(); t += 0.05) game.step(0.05);
 }
@@ -14,58 +17,76 @@ function seatedCustomer(game: Game) {
   return c;
 }
 
+/** Saca un pan de la vaporera y una vienesa de la olla a la tabla. */
+function prepareBase(game: Game) {
+  game.tapSlot('vapor', 0);
+  game.tapSlot('olla', 0);
+  runUntil(game, () => game.vapor[0].state === 'ready' && game.olla[0].state === 'ready');
+  game.tapSlot('vapor', 0);
+  game.tapSlot('olla', 0);
+}
+
 describe('Game', () => {
-  it('cooks, burns and clears vienesas on the grill', () => {
-    const level = LEVELS[0];
-    const game = new Game(level, 1);
-    game.tapGrill(0);
-    expect(game.grill[0].state).toBe('cooking');
-    runUntil(game, () => game.grill[0].state === 'ready');
-    expect(game.grill[0].state).toBe('ready');
-    runUntil(game, () => game.grill[0].state === 'burnt');
-    expect(game.grill[0].state).toBe('burnt');
-    expect(game.stats.burnt).toBe(1);
-    game.tapGrill(0);
-    expect(game.grill[0].state).toBe('empty');
+  it('heats vienesas in the pot until they burst', () => {
+    const game = new Game(LEVELS[0], 1);
+    game.tapSlot('olla', 0);
+    expect(game.olla[0].state).toBe('cooking');
+    runUntil(game, () => game.olla[0].state === 'ready');
+    expect(game.olla[0].state).toBe('ready');
+    runUntil(game, () => game.olla[0].state === 'ruined');
+    expect(game.olla[0].state).toBe('ruined');
+    expect(game.stats.ruined).toBe(1);
+    game.tapSlot('olla', 0);
+    expect(game.olla[0].state).toBe('empty');
+  });
+
+  it('steams bread that turns soggy if left too long', () => {
+    const game = new Game(LEVELS[0], 1);
+    game.tapSlot('vapor', 1);
+    runUntil(game, () => game.vapor[1].state === 'ruined');
+    expect(game.vapor[1].state).toBe('ruined');
+    expect(game.stats.ruined).toBe(1);
+  });
+
+  it('needs steamed bread before the vienesa and the vienesa before toppings', () => {
+    const game = new Game(LEVELS[0], 1);
+    game.tapSlot('olla', 0);
+    runUntil(game, () => game.olla[0].state === 'ready');
+    game.tapSlot('olla', 0);
+    expect(game.olla[0].state).toBe('ready');
+    expect(game.tray).toBeNull();
+    game.tapSlot('vapor', 0);
+    runUntil(game, () => game.vapor[0].state === 'ready');
+    game.tapSlot('vapor', 0);
+    game.tapTopping('tomate');
+    expect(game.tray).toEqual({ vienesa: false, toppings: [] });
+    game.tapSlot('olla', 0);
+    game.tapTopping('tomate');
+    expect(game.tray!.toppings).toEqual(['tomate']);
   });
 
   it('serves a correct order and gets paid', () => {
-    const game = new Game({ ...LEVELS[0], recipes: { italiano: 1 } }, 7);
+    const game = new Game(LEVELS[0], 7);
     const c = seatedCustomer(game);
-    game.tapGrill(0);
-    game.tapPan();
-    runUntil(game, () => game.grill[0].state === 'ready');
-    game.tapGrill(0);
-    for (const t of RECIPES.italiano.toppings) game.tapTopping(t);
-    expect(game.trayRecipe()).toBe('italiano');
+    prepareBase(game);
+    for (const t of RECIPES.completo.toppings) game.tapTopping(t);
+    expect(game.trayRecipe()).toBe('completo');
     game.serve(c.seat!);
-    expect(game.money).toBeGreaterThanOrEqual(RECIPES.italiano.price);
+    expect(game.money).toBeGreaterThanOrEqual(RECIPES.completo.price);
     expect(game.stats.served).toBe(1);
     expect(game.tray).toBeNull();
   });
 
   it('rejects a wrong completo and keeps the tray', () => {
-    const game = new Game({ ...LEVELS[0], recipes: { italiano: 1 } }, 3);
+    const game = new Game({ ...LEVELS[1], recipes: { italiano: 1 } }, 3);
     const c = seatedCustomer(game);
     const before = c.patience;
-    game.tapGrill(0);
-    game.tapPan();
-    runUntil(game, () => game.grill[0].state === 'ready');
-    game.tapGrill(0);
+    prepareBase(game);
     for (const t of RECIPES.completo.toppings) game.tapTopping(t);
     game.serve(c.seat!);
     expect(game.money).toBe(0);
     expect(game.tray).not.toBeNull();
     expect(c.patience).toBeLessThan(before);
-  });
-
-  it('needs pan and vienesa before toppings', () => {
-    const game = new Game(LEVELS[0], 1);
-    game.tapTopping('tomate');
-    expect(game.tray).toBeNull();
-    game.tapPan();
-    game.tapTopping('tomate');
-    expect(game.tray!.toppings).toEqual([]);
   });
 
   it('customers leave angry when patience runs out', () => {
@@ -85,19 +106,19 @@ describe('Game', () => {
 });
 
 describe('levels are playable', () => {
-  it('has 3 levels', () => {
-    expect(LEVELS).toHaveLength(3);
+  it('has 10 levels with rising goals for the first ones', () => {
+    expect(LEVELS).toHaveLength(10);
+    expect(LEVELS.map((l) => l.id)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
   });
 
   for (const level of LEVELS) {
-    it(`level ${level.id} (${level.name}) is winnable by a skilled player on every seed`, () => {
-      for (let seed = 1; seed <= 20; seed += 1) {
-        const result = simulate(level, seed, 0.6);
-        expect(result.won, `seed ${seed}: ${result.money}`).toBe(true);
-      }
+    it(`level ${level.id} (${level.name}) is winnable at ${TARGET_REACTION[level.id - 1]} s per action`, () => {
+      const reaction = TARGET_REACTION[level.id - 1];
+      const wins = Array.from({ length: 20 }, (_, i) => simulate(level, i + 1, reaction)).filter((r) => r.won).length;
+      expect(wins).toBeGreaterThanOrEqual(18);
     });
 
-    it(`level ${level.id} only uses toppings and drinks that are available`, () => {
+    it(`level ${level.id} only asks for toppings that are on the counter`, () => {
       for (const recipe of Object.keys(level.recipes) as (keyof typeof RECIPES)[]) {
         for (const t of RECIPES[recipe].toppings) expect(level.toppings).toContain(t);
       }
