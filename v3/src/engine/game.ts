@@ -8,6 +8,7 @@ import {
   type RecipeId,
   type ToppingId
 } from './data';
+import type { GameOptions } from './upgrades';
 
 /** Olla con agua para las vienesas y vaporera (pan sobre toalla) para los panes. */
 export type StationId = 'olla' | 'vapor';
@@ -52,6 +53,7 @@ export type GameEvent =
   | { type: 'topping'; topping: ToppingId }
   | { type: 'drink'; drink: DrinkId }
   | { type: 'trash' }
+  | { type: 'shelf' }
   | { type: 'serve'; customer: number; seat: number }
   | { type: 'paid'; customer: number; seat: number; amount: number; tip: number; combo: number }
   | { type: 'reject'; customer: number; seat: number; reason: string }
@@ -88,6 +90,17 @@ function emptySlots(n: number): Slot[] {
   return Array.from({ length: n }, () => ({ state: 'empty' as SlotState, t: 0 }));
 }
 
+/** Receta que coincide exactamente con un completo armado, si existe. */
+export function recipeOf(tray: Tray | null): RecipeId | null {
+  if (!tray || !tray.vienesa) return null;
+  for (const recipe of Object.values(RECIPES)) {
+    if (recipe.toppings.length === tray.toppings.length && recipe.toppings.every((t) => tray.toppings.includes(t))) {
+      return recipe.id;
+    }
+  }
+  return null;
+}
+
 export class Game {
   readonly level: LevelConfig;
   time = 0;
@@ -99,6 +112,9 @@ export class Game {
   olla: Slot[];
   vapor: Slot[];
   tray: Tray | null = null;
+  /** Completo guardado en la repisa (mejora del carrito). */
+  shelf: Tray | null = null;
+  readonly options: GameOptions;
   heldDrink: DrinkId | null = null;
   customers: Customer[] = [];
   seats: (number | null)[];
@@ -110,8 +126,9 @@ export class Game {
   private nextId = 1;
   private seatTimers: number[];
 
-  constructor(level: LevelConfig, seed = Date.now()) {
+  constructor(level: LevelConfig, seed = Date.now(), options: Partial<GameOptions> = {}) {
     this.level = level;
+    this.options = { shelf: false, tipBonus: 0, ...options };
     this.rng = createRng(seed);
     this.olla = emptySlots(level.olla.slots);
     this.vapor = emptySlots(level.vapor.slots);
@@ -335,6 +352,17 @@ export class Game {
     this.events.push({ type: 'topping', topping });
   }
 
+  /** Toque en la repisa: guarda el completo de la tabla, lo devuelve o los intercambia. */
+  tapShelf(): void {
+    if (this.finished || !this.options.shelf) return;
+    if (!this.tray && !this.shelf) {
+      this.hint('Arma un completo y guárdalo en la repisa');
+      return;
+    }
+    [this.tray, this.shelf] = [this.shelf, this.tray];
+    this.events.push({ type: 'shelf' });
+  }
+
   tapDrink(drink: DrinkId): void {
     if (this.finished) return;
     this.heldDrink = drink;
@@ -351,17 +379,11 @@ export class Game {
 
   /** Receta que coincide exactamente con lo que hay en la tabla, si existe. */
   trayRecipe(): RecipeId | null {
-    const tray = this.tray;
-    if (!tray || !tray.vienesa) return null;
-    for (const recipe of Object.values(RECIPES)) {
-      if (
-        recipe.toppings.length === tray.toppings.length &&
-        recipe.toppings.every((t) => tray.toppings.includes(t))
-      ) {
-        return recipe.id;
-      }
-    }
-    return null;
+    return recipeOf(this.tray);
+  }
+
+  shelfRecipe(): RecipeId | null {
+    return recipeOf(this.shelf);
   }
 
   serve(seatIndex: number): void {
@@ -371,7 +393,13 @@ export class Game {
 
     let delivered = false;
 
-    if (this.tray && !c.gotCompleto) {
+    // Si el completo de la tabla no es el que pidió, se le entrega el de la repisa cuando sí coincide.
+    const fromShelf = !c.gotCompleto && this.shelf && recipeOf(this.shelf) === c.recipe && recipeOf(this.tray) !== c.recipe;
+    if (fromShelf) {
+      c.gotCompleto = true;
+      this.shelf = null;
+      delivered = true;
+    } else if (this.tray && !c.gotCompleto) {
       if (!this.tray.vienesa) {
         this.reject(c, 'Le falta la vienesa');
         return;
@@ -416,7 +444,7 @@ export class Game {
     const tipRate = ratio > 0.66 ? 0.3 : ratio > 0.33 ? 0.15 : 0.05;
     this.combo += 1;
     const comboBonus = Math.min(this.combo - 1, 5) * 200;
-    const tip = Math.round((base * tipRate) / 50) * 50 + comboBonus;
+    const tip = Math.round((base * tipRate * (1 + this.options.tipBonus)) / 50) * 50 + comboBonus;
     const amount = base + tip;
     this.money += amount;
     this.stats.served += 1;
