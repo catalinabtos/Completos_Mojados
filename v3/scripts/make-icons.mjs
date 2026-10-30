@@ -1,12 +1,12 @@
-// Genera el ícono de la app (1024×1024) y la pantalla de carga (2732×2732) a partir de la mascota de Canva.
+// Genera el ícono de la app (1024×1024) y la pantalla de carga (2732×2732) a partir de la mascota vectorial.
 // Uso: NODE_PATH=$(npm root -g) node scripts/make-icons.mjs  (luego se quita el canal alfa con Python/PIL)
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 
 const { chromium } = createRequire(import.meta.url)('playwright');
 const out = 'ios/App/App/Assets.xcassets';
-const mascotData = readFileSync('src/ui/art/canva/mascota-feliz.webp').toString('base64');
-const mascot = `<img src="data:image/webp;base64,${mascotData}" style="width:100%;display:block">`;
+const mascotData = readFileSync('src/ui/art/mascota-feliz.svg').toString('base64');
+const mascot = `<img src="data:image/svg+xml;base64,${mascotData}" style="width:100%;display:block">`;
 
 const icon = `<html><body style="margin:0">
 <div style="width:1024px;height:1024px;position:relative;overflow:hidden;

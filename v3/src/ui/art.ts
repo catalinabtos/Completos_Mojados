@@ -1,5 +1,5 @@
 // Ilustraciones del juego (estilo "Carrito de esquina": trazo café grueso, relleno plano).
-// Todo el arte (fondos, ingredientes, bebidas, clientes, mascota y estaciones) se generó con Canva.
+// Fondos, ingredientes, bebidas, clientes y estaciones se generaron con Canva; la mascota está dibujada en vector para que se vea nítida en grande.
 
 import type { DrinkId, ToppingId } from '../engine/data';
 import bebida from './art/canva/bebida.webp';
@@ -20,9 +20,9 @@ import mayo from './art/canva/mayo.webp';
 import palta from './art/canva/palta.webp';
 import poroto from './art/canva/poroto.webp';
 import tomate from './art/canva/tomate.webp';
-import mascotaCelebra from './art/canva/mascota-celebra.webp';
-import mascotaFeliz from './art/canva/mascota-feliz.webp';
-import mascotaPreocupada from './art/canva/mascota-preocupada.webp';
+import mascotaCelebra from './art/mascota-celebra.svg';
+import mascotaFeliz from './art/mascota-feliz.svg';
+import mascotaPreocupada from './art/mascota-preocupada.svg';
 import olla from './art/canva/olla.webp';
 import vaporera from './art/canva/vaporera.webp';
 import bg1 from './art/bg/nivel-1.jpg';
