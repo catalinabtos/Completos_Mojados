@@ -369,7 +369,7 @@ export class GameView {
         view.bubbleTitle.textContent = recipe.name;
         view.bubbleItems.replaceChildren(
           el('span', { class: `want completo${c.gotCompleto ? ' done' : ''}` }, '🌭', ...recipe.toppings.map((t) => el('small', {}, TOPPINGS[t].icon))),
-          ...(c.drink ? [el('span', { class: `want drink${c.gotDrink ? ' done' : ''}` }, DRINKS[c.drink].icon)] : [])
+          ...(c.drink ? [el('span', { class: `want want-drink${c.gotDrink ? ' done' : ''}` }, DRINKS[c.drink].icon)] : [])
         );
       }
 
