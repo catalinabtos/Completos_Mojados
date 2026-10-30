@@ -3,7 +3,7 @@
 import { DRINKS, RECIPES, TOPPINGS, formatCLP, type LevelConfig } from '../engine/data';
 import { Game, type Customer, type GameEvent, type StationId } from '../engine/game';
 import { play } from './audio';
-import { CUSTOMER_ART, DRINK_ART, TOPPING_ART, img } from './art';
+import { CUSTOMER_ART, DRINK_ART, LEVEL_BG, TOPPING_ART, img } from './art';
 import { el, svgIcon } from './dom';
 
 const SCENERY: Record<LevelConfig['scene'], string[]> = {
@@ -112,15 +112,15 @@ export class GameView {
     }
     const street = el(
       'section',
-      { class: `street scene-${level.scene} weather-${level.weather}` },
+      { class: `street scene-${level.scene} weather-${level.weather}${LEVEL_BG[level.id] ? ' has-bg' : ''}` },
       el('div', { class: 'awning' }),
-      el('div', { class: 'scenery' }, ...SCENERY[level.scene].map((icon) => el('span', {}, icon))),
-      el('div', { class: 'place' }, level.name),
+      LEVEL_BG[level.id] ? null : el('div', { class: 'scenery' }, ...SCENERY[level.scene].map((icon) => el('span', {}, icon))),
       this.comboEl,
       this.queueEl,
       seatsEl,
-      el('div', { class: 'counter' }, el('span', {}, 'COMPLETOS MOJADOS · TALCA'))
+      el('div', { class: 'counter' }, el('span', {}, level.name))
     );
+    if (LEVEL_BG[level.id]) street.style.backgroundImage = `url("${LEVEL_BG[level.id]}")`;
     if (this.rainy) street.append(this.createRain());
 
     // ── Cocina: olla (vienesas en agua), tabla y vaporera (panes sobre la toalla)
@@ -197,7 +197,7 @@ export class GameView {
       slots.append(slot);
       this.slotEls[station].push(slot);
     }
-    return el('div', { class: `station station-${station}` }, el('div', { class: 'station-title' }, label.title), slots);
+    return el('div', { class: `station station-${station}${count >= 4 ? ' wide' : ''}` }, el('div', { class: 'station-title' }, label.title), slots);
   }
 
   private createSeat(seat: number): SeatView {
