@@ -3,7 +3,7 @@
 import { DRINKS, RECIPES, TOPPINGS, formatCLP, type LevelConfig } from '../engine/data';
 import { Game, type Customer, type GameEvent, type StationId } from '../engine/game';
 import { play } from './audio';
-import { CUSTOMER_ART, DRINK_ART, LEVEL_BG, TOPPING_ART, img } from './art';
+import { CUSTOMER_ART, DRINK_ART, LEVEL_BG, STATION_ART, TOPPING_ART, img } from './art';
 import { el, svgIcon } from './dom';
 
 const SCENERY: Record<LevelConfig['scene'], string[]> = {
@@ -197,11 +197,12 @@ export class GameView {
       slots.append(slot);
       this.slotEls[station].push(slot);
     }
-    return el('div', { class: `station station-${station}${count >= 4 ? ' wide' : ''}` }, el('div', { class: 'station-title' }, label.title), slots);
+    const title = el('div', { class: 'station-title' }, img(STATION_ART[station], '', 'station-art'), label.title);
+    return el('div', { class: `station station-${station}${count >= 4 ? ' wide' : ''}` }, title, slots);
   }
 
   private createSeat(seat: number): SeatView {
-    const face = img(CUSTOMER_ART[0], '', 'face');
+    const face = img(CUSTOMER_ART[0].normal, '', 'face');
     const bubbleTitle = el('div', { class: 'bubble-title' });
     const bubbleItems = el('div', { class: 'bubble-items' });
     const bubble = el('div', { class: 'bubble' }, bubbleTitle, bubbleItems);
@@ -370,10 +371,7 @@ export class GameView {
       const key = `${c.id}|${c.state}|${c.mood}|${c.gotCompleto}|${c.gotDrink}`;
       if (key !== view.key) {
         view.key = key;
-        if (view.shownId !== c.id) {
-          view.shownId = c.id;
-          view.face.src = CUSTOMER_ART[c.face % CUSTOMER_ART.length];
-        }
+        if (view.shownId !== c.id) view.shownId = c.id;
         view.root.className = `seat ${c.state}${c.mood ? ' ' + c.mood : ''}`;
 
         const recipe = RECIPES[c.recipe];
@@ -387,7 +385,11 @@ export class GameView {
       const ratio = c.patience / c.patienceMax;
       view.patienceFill.style.width = `${Math.max(0, ratio * 100)}%`;
       view.patienceFill.style.background = ratio > 0.6 ? '#3fb950' : ratio > 0.3 ? '#f2a516' : '#e5484d';
-      view.root.classList.toggle('impatient', c.state === 'seated' && ratio < 0.3);
+      const impatient = c.state === 'seated' && ratio < 0.35;
+      view.root.classList.toggle('impatient', impatient);
+      const art = CUSTOMER_ART[c.face % CUSTOMER_ART.length];
+      const src = c.mood === 'angry' ? art.enojado : impatient ? art.impaciente : art.normal;
+      if (view.face.getAttribute('src') !== src) view.face.src = src;
     });
   }
 

@@ -1,5 +1,5 @@
 // Ilustraciones del juego (estilo "Carrito de esquina": trazo café grueso, relleno plano).
-// Ingredientes, bebidas, clientes y fondos se generaron con Canva; la mascota es vectorial.
+// Todo el arte (fondos, ingredientes, bebidas, clientes, mascota y estaciones) se generó con Canva.
 
 import type { DrinkId, ToppingId } from '../engine/data';
 import bebida from './art/canva/bebida.webp';
@@ -20,9 +20,11 @@ import mayo from './art/canva/mayo.webp';
 import palta from './art/canva/palta.webp';
 import poroto from './art/canva/poroto.webp';
 import tomate from './art/canva/tomate.webp';
-import mascotaCelebra from './art/mascota-celebra.svg';
-import mascotaFeliz from './art/mascota-feliz.svg';
-import mascotaPreocupada from './art/mascota-preocupada.svg';
+import mascotaCelebra from './art/canva/mascota-celebra.webp';
+import mascotaFeliz from './art/canva/mascota-feliz.webp';
+import mascotaPreocupada from './art/canva/mascota-preocupada.webp';
+import olla from './art/canva/olla.webp';
+import vaporera from './art/canva/vaporera.webp';
 import bg1 from './art/bg/nivel-1.jpg';
 import bg2 from './art/bg/nivel-2.jpg';
 import bg3 from './art/bg/nivel-3.jpg';
@@ -48,7 +50,33 @@ export const TOPPING_ART: Record<ToppingId, string> = {
 
 export const DRINK_ART: Record<DrinkId, string> = { bebida, jugo, mote };
 
-export const CUSTOMER_ART = [estudiante, abuelita, hincha, trabajador, oficinista, casera, nino, huaso];
+const MOOD_ART = import.meta.glob<string>('./art/canva/*-{impaciente,enojado}.webp', { eager: true, import: 'default' });
+
+export interface CustomerArt {
+  normal: string;
+  impaciente: string;
+  enojado: string;
+}
+
+/** Cada cliente con sus tres caras: normal, impaciente y enojado. */
+export const CUSTOMER_ART: CustomerArt[] = (
+  [
+    ['estudiante', estudiante],
+    ['abuelita', abuelita],
+    ['hincha', hincha],
+    ['trabajador', trabajador],
+    ['oficinista', oficinista],
+    ['casera', casera],
+    ['nino', nino],
+    ['huaso', huaso]
+  ] as const
+).map(([name, normal]) => ({
+  normal,
+  impaciente: MOOD_ART[`./art/canva/${name}-impaciente.webp`],
+  enojado: MOOD_ART[`./art/canva/${name}-enojado.webp`]
+}));
+
+export const STATION_ART = { olla, vapor: vaporera };
 
 /** Fondo ilustrado de cada nivel (generados con Canva), por id de nivel. */
 export const LEVEL_BG: Record<number, string> = { 1: bg1, 2: bg2, 3: bg3, 4: bg4, 5: bg5, 6: bg6, 7: bg7, 8: bg8, 9: bg9, 10: bg10 };

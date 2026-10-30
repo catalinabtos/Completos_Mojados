@@ -929,9 +929,6 @@ img {
 .seat.leaving.happy .person {
   transform: translateY(-24px) scale(1.12);
 }
-.seat.leaving.angry .face {
-  filter: sepia(1) saturate(4) hue-rotate(-30deg) !important;
-}
 .bubble {
   position: relative;
   width: 100%;
@@ -1097,6 +1094,16 @@ img {
   margin-bottom: 4px;
 }
 
+.station .station-title {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.station-art {
+  width: 30px;
+  height: 30px;
+  margin: -6px 0 -4px -2px;
+}
 .station {
   border: var(--borde);
   border-radius: 14px 14px 22px 22px;
