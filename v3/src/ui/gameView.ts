@@ -373,8 +373,6 @@ export class GameView {
         if (view.shownId !== c.id) {
           view.shownId = c.id;
           view.face.src = CUSTOMER_ART[c.face % CUSTOMER_ART.length];
-          // Variación de tono para que no se vean todos iguales.
-          view.face.style.filter = `hue-rotate(${((c.face * 47) % 90) - 45}deg)`;
         }
         view.root.className = `seat ${c.state}${c.mood ? ' ' + c.mood : ''}`;
 

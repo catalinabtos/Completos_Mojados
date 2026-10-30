@@ -1,20 +1,25 @@
 // Ilustraciones del juego (estilo "Carrito de esquina": trazo café grueso, relleno plano).
+// Ingredientes, bebidas, clientes y fondos se generaron con Canva; la mascota es vectorial.
 
 import type { DrinkId, ToppingId } from '../engine/data';
-import bebida from './art/beb-bebida.svg';
-import jugo from './art/beb-jugo.svg';
-import mote from './art/beb-mote.svg';
-import abuelita from './art/cliente-abuelita.svg';
-import estudiante from './art/cliente-estudiante.svg';
-import hincha from './art/cliente-hincha.svg';
-import trabajador from './art/cliente-trabajador.svg';
-import aji from './art/ing-aji.svg';
-import americana from './art/ing-americana.svg';
-import chucrut from './art/ing-chucrut.svg';
-import mayo from './art/ing-mayo.svg';
-import palta from './art/ing-palta.svg';
-import poroto from './art/ing-poroto.svg';
-import tomate from './art/ing-tomate.svg';
+import bebida from './art/canva/bebida.webp';
+import jugo from './art/canva/jugo.webp';
+import mote from './art/canva/mote.webp';
+import abuelita from './art/canva/abuelita.webp';
+import casera from './art/canva/casera.webp';
+import huaso from './art/canva/huaso.webp';
+import nino from './art/canva/nino.webp';
+import oficinista from './art/canva/oficinista.webp';
+import estudiante from './art/canva/estudiante.webp';
+import hincha from './art/canva/hincha.webp';
+import trabajador from './art/canva/trabajador.webp';
+import aji from './art/canva/aji.webp';
+import americana from './art/canva/americana.webp';
+import chucrut from './art/canva/chucrut.webp';
+import mayo from './art/canva/mayo.webp';
+import palta from './art/canva/palta.webp';
+import poroto from './art/canva/poroto.webp';
+import tomate from './art/canva/tomate.webp';
 import mascotaCelebra from './art/mascota-celebra.svg';
 import mascotaFeliz from './art/mascota-feliz.svg';
 import mascotaPreocupada from './art/mascota-preocupada.svg';
@@ -43,7 +48,7 @@ export const TOPPING_ART: Record<ToppingId, string> = {
 
 export const DRINK_ART: Record<DrinkId, string> = { bebida, jugo, mote };
 
-export const CUSTOMER_ART = [estudiante, abuelita, hincha, trabajador];
+export const CUSTOMER_ART = [estudiante, abuelita, hincha, trabajador, oficinista, casera, nino, huaso];
 
 /** Fondo ilustrado de cada nivel (generados con Canva), por id de nivel. */
 export const LEVEL_BG: Record<number, string> = { 1: bg1, 2: bg2, 3: bg3, 4: bg4, 5: bg5, 6: bg6, 7: bg7, 8: bg8, 9: bg9, 10: bg10 };
