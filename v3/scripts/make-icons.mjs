@@ -5,7 +5,7 @@ import { createRequire } from 'node:module';
 
 const { chromium } = createRequire(import.meta.url)('playwright');
 const out = 'ios/App/App/Assets.xcassets';
-const mascot = readFileSync('src/ui/mascot.svg', 'utf8');
+const mascot = readFileSync('src/ui/art/mascota-feliz.svg', 'utf8');
 
 const icon = `<html><body style="margin:0">
 <div style="width:1024px;height:1024px;position:relative;overflow:hidden;

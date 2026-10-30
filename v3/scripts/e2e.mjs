@@ -18,7 +18,7 @@ await page.goto(url);
 await page.screenshot({ path: `${shots}/01-portada.png` });
 await page.getByText('Cómo jugar').click();
 await page.screenshot({ path: `${shots}/02-como-jugar.png` });
-await page.getByText('Volver').click();
+await page.getByText('¡Entendido!').click();
 await page.getByText('¡Jugar!').click();
 await page.screenshot({ path: `${shots}/03-niveles.png` });
 
@@ -87,7 +87,7 @@ function decide() {
 const LEVEL_IDS = (process.env.LEVELS ?? '1,2,3,4,5,6,7,8,9,10').split(',').map(Number);
 const results = [];
 for (const level of LEVEL_IDS) {
-  await page.locator('.level-card').nth(level - 1).click();
+  await page.locator('.stop').nth(level - 1).click();
   await page.screenshot({ path: `${shots}/1${level}-intro-nivel-${level}.png` });
   await page.getByText('¡A trabajar!').click();
   await page.waitForFunction(() => !!window.__cmGame);
@@ -109,7 +109,7 @@ for (const level of LEVEL_IDS) {
   const won = await page.locator('.results.won').count();
   results.push({ level, won: !!won, summary: text.replace(/\n+/g, ' | ') });
   console.log(`Nivel ${level}: ${won ? 'GANADO' : 'perdido'} — ${text.replace(/\n+/g, ' | ')}`);
-  await page.getByText('Niveles').click();
+  await page.getByText('La ruta', { exact: true }).click();
 }
 
 await page.screenshot({ path: `${shots}/40-niveles-final.png` });

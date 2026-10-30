@@ -1,85 +1,90 @@
-// Pantallas de menú: inicio, selección de nivel, introducción, recetas, pausa y resultados.
+// Pantallas de menú: portada, cómo jugar, la ruta de niveles, introducción, recetas, pausa y resultados.
 
 import { DRINKS, LEVELS, RECIPES, TOPPINGS, formatCLP, starsFor, type LevelConfig, type RecipeId } from '../engine/data';
 import type { Game } from '../engine/game';
-import { button, el } from './dom';
-import mascotSvg from './mascot.svg?raw';
+import { DRINK_ART, MASCOT, TOPPING_ART, img } from './art';
+import { button, el, svgIcon } from './dom';
 import type { SaveData } from './storage';
 
-const LEVEL_HUES = [8, 140, 30, 200, 260, 120, 190, 230, 0, 45];
-
-function starsText(n: number): string {
-  return '★'.repeat(n) + '☆'.repeat(3 - n);
+function starsEl(n: number, cls = 'stars'): HTMLElement {
+  return el('span', { class: cls, 'aria-label': `${n} de 3 estrellas` }, '★'.repeat(n) + '☆'.repeat(3 - n));
 }
 
-function titleArt(): HTMLElement {
-  const art = el('div', { class: 'title-art' });
-  art.innerHTML = mascotSvg;
-  return art;
+function awning(): HTMLElement {
+  return el('div', { class: 'awning big' });
 }
 
 export function titleScreen(save: SaveData, onPlay: () => void, onHowTo: () => void, onToggleSound: () => void): HTMLElement {
-  const sound = button(save.sound ? '🔊 Sonido' : '🔇 Sin sonido', onToggleSound, 'btn ghost');
+  const sound = button([svgIcon(save.sound ? 'sound' : 'mute'), save.sound ? 'Sonido' : 'Sin sonido'], onToggleSound, 'btn secondary');
   return el(
     'div',
     { class: 'screen title-screen' },
-    titleArt(),
-    el('h1', {}, 'Completos', el('br'), 'Mojados'),
-    el('p', { class: 'tagline' }, 'El carrito más rápido de Talca'),
-    el('div', { class: 'menu' }, button('¡Jugar!', onPlay, 'btn primary big'), button('Cómo jugar', onHowTo, 'btn'), sound)
+    awning(),
+    el(
+      'div',
+      { class: 'title-body' },
+      img(MASCOT.feliz, 'Mascota: un completo talquino sonriente', 'title-art'),
+      el('h1', {}, 'Completos Mojados'),
+      el('p', { class: 'tagline' }, 'El carrito más rápido de Talca'),
+      el(
+        'div',
+        { class: 'menu' },
+        button('¡Jugar!', onPlay, 'btn primary big'),
+        el('div', { class: 'menu-row' }, button('Cómo jugar', onHowTo, 'btn secondary'), sound)
+      )
+    ),
+    el('p', { class: 'made-in' }, 'Hecho en el Maule')
   );
 }
 
 export function howToScreen(onBack: () => void): HTMLElement {
-  const steps = [
-    ['🍞', 'Toca la vaporera para poner un pan sobre la toalla. Cuando esté blandito, tócalo para pasarlo a la tabla. Si lo dejas mucho rato, se agua.'],
-    ['💧', 'Toca la olla para echar una vienesa al agua caliente. Cuando esté lista, tócala para ponerla en el pan. Si la olvidas, se revienta.'],
-    ['🍅', 'Agrega los ingredientes que muestra el globo del cliente. El orden no importa.'],
-    ['🥤', 'Si pide bebida, tócala en la hielera y entrégala también.'],
-    ['👆', 'Toca al cliente para servirle. Mientras más rápido, más propina.'],
-    ['⭐', 'Junta la meta de plata antes de que termine el turno para pasar de nivel.']
+  const steps: [string, string][] = [
+    ['Vaporera', 'Toca la vaporera para poner un pan sobre la toalla. Cuando esté blandito, tócalo para pasarlo a la tabla. Si lo dejas mucho rato, se agua.'],
+    ['Olla', 'Toca la olla para echar una vienesa al agua caliente. Cuando esté lista, tócala para ponerla en el pan. Si la olvidas, se revienta.'],
+    ['Ingredientes', 'Agrega lo que muestra el globo del cliente. El orden no importa.'],
+    ['Hielera', 'Si pide bebida, tócala en la hielera y entrégala también.'],
+    ['Servir', 'Toca al cliente para entregarle su pedido. Mientras más rápido, más propina.'],
+    ['Meta', 'Junta la plata de la meta antes de que termine el turno para pasar a la siguiente esquina.']
   ];
   return el(
     'div',
     { class: 'screen panel-screen' },
-    el('h2', {}, 'Cómo jugar'),
-    el('ol', { class: 'howto' }, ...steps.map(([icon, text]) => el('li', {}, el('span', { class: 'howto-icon' }, icon), el('span', {}, text)))),
-    button('Volver', onBack, 'btn primary')
+    header('Cómo jugar', onBack),
+    el(
+      'div',
+      { class: 'panel-body' },
+      el('ol', { class: 'howto' }, ...steps.map(([title, text], i) => el('li', {}, el('span', { class: 'howto-num' }, String(i + 1)), el('div', {}, el('strong', {}, title), el('p', {}, text))))),
+      button('¡Entendido!', onBack, 'btn primary big')
+    )
   );
 }
 
+function header(title: string, onBack: () => void): HTMLElement {
+  const back = button(svgIcon('back'), onBack, 'back-btn');
+  back.setAttribute('aria-label', 'Volver');
+  return el('header', { class: 'screen-header' }, back, el('h2', {}, title));
+}
+
 export function levelSelectScreen(save: SaveData, onPick: (level: LevelConfig) => void, onBack: () => void): HTMLElement {
-  const cards = LEVELS.map((level) => {
+  const stops = LEVELS.map((level) => {
     const locked = level.id > save.unlocked;
+    const current = level.id === save.unlocked;
     const stars = save.stars[level.id] ?? 0;
     const best = save.best[level.id];
-    const card = button(
+    const state = locked ? 'locked' : current && stars === 0 ? 'current' : 'done';
+    const detail = locked ? `Meta ${formatCLP(level.goal)}` : best ? `Récord ${formatCLP(best)}` : `Meta ${formatCLP(level.goal)} · ¡te toca!`;
+    return button(
       [
-        el('div', { class: 'level-num' }, locked ? '🔒' : String(level.id)),
-        el(
-          'div',
-          { class: 'level-info' },
-          el('strong', {}, level.name),
-          el('span', {}, level.place),
-          el('span', { class: 'level-goal' }, `Meta ${formatCLP(level.goal)}${best ? ` · Récord ${formatCLP(best)}` : ''}`)
-        ),
-        el('div', { class: 'level-stars' }, starsText(stars))
+        el('span', { class: 'stop-badge' }, locked ? svgIcon('lock', 22) : String(level.id)),
+        el('span', { class: 'stop-card' }, el('span', { class: 'stop-info' }, el('strong', {}, level.name), el('span', {}, detail)), starsEl(stars))
       ],
       () => {
         if (!locked) onPick(level);
       },
-      `level-card level-${level.id}${locked ? ' locked' : ''}`
+      `stop ${state}`
     );
-    card.style.setProperty('--h', String(LEVEL_HUES[level.id - 1] ?? 20));
-    return card;
   });
-  return el(
-    'div',
-    { class: 'screen panel-screen' },
-    el('h2', {}, 'Elige tu esquina'),
-    el('div', { class: 'level-list' }, ...cards),
-    button('Volver', onBack, 'btn ghost')
-  );
+  return el('div', { class: 'screen panel-screen route-screen' }, header('La ruta del carrito', onBack), el('div', { class: 'route' }, ...stops));
 }
 
 function recipeCard(id: RecipeId, isNew = false): HTMLElement {
@@ -87,8 +92,8 @@ function recipeCard(id: RecipeId, isNew = false): HTMLElement {
   return el(
     'div',
     { class: `recipe-card${isNew ? ' new' : ''}` },
-    el('div', { class: 'recipe-head' }, el('strong', {}, r.name), el('span', {}, formatCLP(r.price))),
-    el('div', { class: 'recipe-items' }, el('span', { class: 'chip' }, '🍞 Pan'), el('span', { class: 'chip' }, '🌭 Vienesa'), ...r.toppings.map((t) => el('span', { class: 'chip', style: `--c:${TOPPINGS[t].color}` }, `${TOPPINGS[t].icon} ${TOPPINGS[t].name}`)))
+    el('div', { class: 'recipe-head' }, el('strong', {}, r.name), isNew ? el('span', { class: 'new-badge' }, 'Nuevo') : null, el('span', { class: 'price' }, formatCLP(r.price))),
+    el('div', { class: 'recipe-items' }, ...r.toppings.map((t) => el('span', { class: 'chip' }, img(TOPPING_ART[t]), TOPPINGS[t].name)))
   );
 }
 
@@ -99,32 +104,46 @@ export function recipesPanel(level: LevelConfig): HTMLElement {
     { class: 'recipes' },
     ...ids.map((id) => recipeCard(id, level.newThings.includes(RECIPES[id].name))),
     level.drinks.length > 0
-      ? el('div', { class: 'recipe-card' }, el('div', { class: 'recipe-head' }, el('strong', {}, 'Bebidas')), el('div', { class: 'recipe-items' }, ...level.drinks.map((d) => el('span', { class: 'chip' }, `${DRINKS[d].icon} ${DRINKS[d].name} ${formatCLP(DRINKS[d].price)}`))))
+      ? el(
+          'div',
+          { class: 'recipe-card drinks-card' },
+          el('div', { class: 'recipe-head' }, el('strong', {}, 'Hielera')),
+          el('div', { class: 'recipe-items' }, ...level.drinks.map((d) => el('span', { class: 'chip' }, img(DRINK_ART[d]), `${DRINKS[d].name} ${formatCLP(DRINKS[d].price)}`)))
+        )
       : null
   );
 }
 
 export function introScreen(level: LevelConfig, onStart: () => void, onBack: () => void): HTMLElement {
+  const mins = `${Math.floor(level.duration / 60)}:${String(level.duration % 60).padStart(2, '0')}`;
   return el(
     'div',
-    { class: `screen panel-screen intro level-${level.id}` },
-    el('div', { class: 'intro-tag' }, `Nivel ${level.id}`),
-    el('h2', {}, level.name),
-    el('p', { class: 'intro-place' }, `📍 ${level.place}`),
-    el('p', {}, level.intro),
-    el('div', { class: 'intro-facts' },
-      el('span', {}, `🎯 Meta ${formatCLP(level.goal)}`),
-      el('span', {}, `⏱ ${Math.floor(level.duration / 60)}:${String(level.duration % 60).padStart(2, '0')}`),
-      el('span', {}, `🪑 ${level.seats} puestos`)
-    ),
-    el('div', { class: 'new-things' }, ...level.newThings.map((t) => el('span', { class: 'new-badge' }, `Nuevo: ${t}`))),
-    recipesPanel(level),
-    el('div', { class: 'menu' }, button('¡A trabajar!', onStart, 'btn primary big'), button('Volver', onBack, 'btn ghost'))
+    { class: `screen panel-screen intro` },
+    header(`Esquina ${level.id}`, onBack),
+    el(
+      'div',
+      { class: 'panel-body' },
+      el('div', { class: 'intro-hero' }, el('h2', {}, level.name), el('p', { class: 'intro-place' }, level.place)),
+      el('p', { class: 'intro-text' }, level.intro),
+      el(
+        'div',
+        { class: 'intro-facts' },
+        el('span', {}, el('small', {}, 'Meta'), formatCLP(level.goal)),
+        el('span', {}, el('small', {}, 'Turno'), mins),
+        el('span', {}, el('small', {}, 'Puestos'), String(level.seats))
+      ),
+      recipesPanel(level),
+      button('¡A trabajar!', onStart, 'btn primary big')
+    )
   );
 }
 
-export function overlay(title: string, body: HTMLElement | null, actions: HTMLButtonElement[]): HTMLElement {
-  return el('div', { class: 'overlay' }, el('div', { class: 'overlay-card' }, el('h2', {}, title), body, el('div', { class: 'menu' }, ...actions)));
+export function overlay(title: string, body: HTMLElement | null, actions: HTMLButtonElement[], art?: string): HTMLElement {
+  return el(
+    'div',
+    { class: 'overlay' },
+    el('div', { class: 'overlay-card' }, art ? img(art, '', 'overlay-art') : null, el('h2', {}, title), body, el('div', { class: 'menu' }, ...actions))
+  );
 }
 
 export function resultsScreen(game: Game, isRecord: boolean, hasNext: boolean, onNext: () => void, onRetry: () => void, onLevels: () => void): HTMLElement {
@@ -132,28 +151,34 @@ export function resultsScreen(game: Game, isRecord: boolean, hasNext: boolean, o
   const stars = starsFor(level, game.money);
   const won = game.won;
   const s = game.stats;
-  const actions = [
-    won && hasNext ? button('Siguiente nivel ▶', onNext, 'btn primary big') : null,
-    button(won ? 'Jugar de nuevo' : 'Reintentar', onRetry, won && hasNext ? 'btn' : 'btn primary big'),
-    button('Niveles', onLevels, 'btn ghost')
+  const primary = won && hasNext ? button('Siguiente esquina', onNext, 'btn primary big') : button(won ? 'Jugar de nuevo' : 'Reintentar', onRetry, 'btn primary big');
+  const secondary = [
+    won && hasNext ? button('Otra vez', onRetry, 'btn secondary') : null,
+    button('La ruta', onLevels, 'btn secondary')
   ].filter((b): b is HTMLButtonElement => b !== null);
+  const row = (label: string, value: string) => [el('span', {}, label), el('span', { class: 'num' }, value)];
   return el(
     'div',
-    { class: `screen panel-screen results ${won ? 'won' : 'lost'}` },
-    el('div', { class: 'result-emoji' }, won ? (stars === 3 ? '🏆' : '🌭') : '🌧️'),
+    { class: `screen results ${won ? 'won' : 'lost'}` },
+    img(won ? MASCOT.celebra : MASCOT.preocupada, '', 'result-art'),
     el('h2', {}, won ? (level.id === LEVELS.length ? '¡Rey del completo talquino!' : '¡Turno superado!') : 'No llegaste a la meta'),
-    el('div', { class: 'result-stars' }, starsText(stars)),
-    el('div', { class: 'result-money' }, formatCLP(game.money), el('small', {}, ` / meta ${formatCLP(level.goal)}`)),
-    isRecord ? el('div', { class: 'record' }, '¡Nuevo récord!') : null,
+    starsEl(stars, 'stars result-stars'),
     el(
-      'ul',
-      { class: 'result-stats' },
-      el('li', {}, `🌭 Clientes atendidos: ${s.served}`),
-      el('li', {}, `😤 Clientes perdidos: ${s.lost}`),
-      el('li', {}, `💸 Propinas: ${formatCLP(s.tips)}`),
-      el('li', {}, `🔥 Mejor combo: ×${s.maxCombo}`),
-      el('li', {}, `💥 Vienesas reventadas y panes aguados: ${s.ruined}`)
+      'div',
+      { class: 'result-card' },
+      el('div', { class: 'result-money' }, el('span', { class: 'money-big' }, formatCLP(game.money)), el('span', {}, `meta ${formatCLP(level.goal)}`)),
+      isRecord ? el('div', { class: 'record' }, '¡Nuevo récord!') : null,
+      el(
+        'div',
+        { class: 'result-stats' },
+        ...row('Atendidos', String(s.served)),
+        ...row('Se fueron enojados', String(s.lost)),
+        ...row('Propinas', formatCLP(s.tips)),
+        ...row('Mejor combo', `×${s.maxCombo}`),
+        ...row('Reventadas y aguados', String(s.ruined))
+      )
     ),
-    el('div', { class: 'menu' }, ...actions)
+    el('div', { class: 'spacer' }),
+    el('div', { class: 'menu' }, primary, secondary.length > 1 ? el('div', { class: 'menu-row' }, ...secondary) : secondary[0])
   );
 }

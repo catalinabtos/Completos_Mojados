@@ -1,7 +1,12 @@
+import '@fontsource/lilita-one/latin-400.css';
+import '@fontsource/nunito/latin-700.css';
+import '@fontsource/nunito/latin-800.css';
+import '@fontsource/nunito/latin-900.css';
 import './ui/styles.css';
 
 import { LEVELS, starsFor, type LevelConfig } from './engine/data';
 import type { Game } from './engine/game';
+import { MASCOT } from './ui/art';
 import { play, setSoundEnabled, unlockAudio } from './ui/audio';
 import { button } from './ui/dom';
 import { GameView } from './ui/gameView';
@@ -68,9 +73,9 @@ function pause(view: GameView) {
   view.setPaused(true);
   currentOverlay = overlay('Pausa', null, [
     button('Continuar', () => resume(view), 'btn primary big'),
-    button('Reiniciar nivel', () => startLevel(view.game.level), 'btn'),
-    button('Salir', goLevels, 'btn ghost')
-  ]);
+    button('Reiniciar turno', () => startLevel(view.game.level), 'btn secondary'),
+    button('Salir a la ruta', goLevels, 'btn ghost')
+  ], MASCOT.feliz);
   view.root.append(currentOverlay);
 }
 

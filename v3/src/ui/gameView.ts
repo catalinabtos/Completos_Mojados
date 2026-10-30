@@ -3,10 +3,9 @@
 import { DRINKS, RECIPES, TOPPINGS, formatCLP, type LevelConfig } from '../engine/data';
 import { Game, type Customer, type GameEvent, type StationId } from '../engine/game';
 import { play } from './audio';
-import { el } from './dom';
+import { CUSTOMER_ART, DRINK_ART, TOPPING_ART, img } from './art';
+import { el, svgIcon } from './dom';
 
-const FACES = ['👩', '👨', '👵', '👴', '🧑‍🦱', '👩‍🦰', '🧔', '👱‍♀️', '🧑‍🎓', '👷', '👩‍🔧', '🧑‍🍳', '👨‍🦳', '👧'];
-const RAIN_EXTRAS = ['☂️', '🧣', '⚽'];
 const SCENERY: Record<LevelConfig['scene'], string[]> = {
   calle: ['🏠', '🌳', '🏪', '🌳', '🏠'],
   plaza: ['🌳', '⛪', '🌳', '⛲', '🌳'],
@@ -33,8 +32,7 @@ export interface GameViewOptions {
 interface SeatView {
   root: HTMLElement;
   person: HTMLElement;
-  face: HTMLElement;
-  extra: HTMLElement;
+  face: HTMLImageElement;
   bubble: HTMLElement;
   bubbleTitle: HTMLElement;
   bubbleItems: HTMLElement;
@@ -76,7 +74,7 @@ export class GameView {
     this.game = new Game(level, seed);
 
     // ── HUD
-    const pauseBtn = el('button', { class: 'icon-btn', 'aria-label': 'Pausa' }, '⏸');
+    const pauseBtn = el('button', { class: 'icon-btn', 'aria-label': 'Pausa' }, svgIcon('pause'));
     pauseBtn.addEventListener('pointerdown', (e) => {
       e.preventDefault();
       opts.onPause();
@@ -85,7 +83,7 @@ export class GameView {
     this.goalFill = el('div', { class: 'goal-fill' });
     this.timeEl = el('span', { class: 'time' }, '');
     this.comboEl = el('span', { class: 'combo' }, '');
-    const recipesBtn = el('button', { class: 'icon-btn', 'aria-label': 'Recetas' }, '📖');
+    const recipesBtn = el('button', { class: 'icon-btn', 'aria-label': 'Recetas' }, svgIcon('book'));
     recipesBtn.addEventListener('pointerdown', (e) => {
       e.preventDefault();
       opts.onRecipes();
@@ -100,7 +98,7 @@ export class GameView {
         el('div', { class: 'hud-money-row' }, this.moneyEl, el('span', { class: 'goal' }, `meta ${formatCLP(level.goal)}`)),
         el('div', { class: 'goal-bar' }, this.goalFill, el('div', { class: 'goal-mark' }))
       ),
-      el('div', { class: 'hud-time' }, '⏱ ', this.timeEl),
+      el('div', { class: 'hud-time' }, this.timeEl),
       recipesBtn
     );
 
@@ -117,7 +115,7 @@ export class GameView {
       { class: `street scene-${level.scene} weather-${level.weather}` },
       el('div', { class: 'awning' }),
       el('div', { class: 'scenery' }, ...SCENERY[level.scene].map((icon) => el('span', {}, icon))),
-      el('div', { class: 'place' }, `📍 ${level.name}`),
+      el('div', { class: 'place' }, level.name),
       this.comboEl,
       this.queueEl,
       seatsEl,
@@ -129,13 +127,13 @@ export class GameView {
     this.trayEl = el('div', { class: 'tray-food' });
     this.trayLabel = el('div', { class: 'tray-label' }, '');
     this.heldDrinkEl = el('div', { class: 'held-drink' });
-    const trashBtn = el('button', { class: 'trash-btn', 'aria-label': 'Botar lo que hay en la tabla' }, '🗑️ Botar');
+    const trashBtn = el('button', { class: 'trash-btn', 'aria-label': 'Botar lo que hay en la tabla' }, 'Botar');
     this.tap(trashBtn, () => this.game.trashTray());
     const board = el('div', { class: 'board' }, el('div', { class: 'station-title' }, 'Tabla'), this.trayEl, this.trayLabel, this.heldDrinkEl, trashBtn);
     const toppings = el('div', { class: 'toppings' });
     for (const id of level.toppings) {
       const t = TOPPINGS[id];
-      const btn = el('button', { class: 'topping', style: `--c:${t.color}` }, el('span', { class: 'big-icon' }, t.icon), t.name);
+      const btn = el('button', { class: 'topping', style: `--c:${t.color}` }, img(TOPPING_ART[id], '', 'big-icon'), t.name);
       btn.dataset.topping = id;
       this.tap(btn, () => this.game.tapTopping(id));
       toppings.append(btn);
@@ -149,7 +147,7 @@ export class GameView {
       const cooler = el('div', { class: 'cooler' }, el('div', { class: 'station-title' }, 'Bebidas'));
       for (const id of level.drinks) {
         const d = DRINKS[id];
-        const btn = el('button', { class: 'drink' }, el('span', { class: 'big-icon' }, d.icon), d.name);
+        const btn = el('button', { class: 'drink' }, img(DRINK_ART[id], '', 'big-icon'), d.name);
         this.tap(btn, () => this.game.tapDrink(id));
         cooler.append(btn);
       }
@@ -191,7 +189,7 @@ export class GameView {
         'button',
         { class: 'slot empty', 'aria-label': `${label.title} ${i + 1}` },
         el('div', { class: station === 'olla' ? 'item vienesa' : 'item pan' }),
-        el('div', { class: 'steam' }, '♨️'),
+        el('div', { class: 'steam' }, el('i'), el('i'), el('i')),
         el('div', { class: 'progress' })
       );
       slot.dataset.empty = label.empty;
@@ -203,17 +201,16 @@ export class GameView {
   }
 
   private createSeat(seat: number): SeatView {
-    const face = el('div', { class: 'face' });
-    const extra = el('div', { class: 'extra' });
+    const face = img(CUSTOMER_ART[0], '', 'face');
     const bubbleTitle = el('div', { class: 'bubble-title' });
     const bubbleItems = el('div', { class: 'bubble-items' });
     const bubble = el('div', { class: 'bubble' }, bubbleTitle, bubbleItems);
     const patienceFill = el('div', { class: 'patience-fill' });
     const patience = el('div', { class: 'patience' }, patienceFill);
-    const person = el('div', { class: 'person' }, face, extra);
+    const person = el('div', { class: 'person' }, face);
     const root = el('button', { class: 'seat empty', 'aria-label': `Cliente ${seat + 1}` }, bubble, person, patience, el('div', { class: 'stool' }));
     this.tap(root, () => this.game.serve(seat));
-    return { root, person, face, extra, bubble, bubbleTitle, bubbleItems, patience, patienceFill, shownId: null, key: '' };
+    return { root, person, face, bubble, bubbleTitle, bubbleItems, patience, patienceFill, shownId: null, key: '' };
   }
 
   private createRain(): HTMLElement {
@@ -300,7 +297,7 @@ export class GameView {
         break;
       case 'angry':
         play('angry');
-        if (ev.seat !== null) this.floatAt(ev.seat, '😤 ¡Me voy!', 'reject-pop');
+        if (ev.seat !== null) this.floatAt(ev.seat, '¡Me voy!', 'reject-pop');
         else this.toast('Un cliente se aburrió en la fila');
         break;
       case 'hint':
@@ -309,7 +306,7 @@ export class GameView {
         break;
       case 'end':
         play(ev.won ? 'win' : 'lose');
-        this.toast(ev.won ? '¡Se acabó el turno! 🎉' : 'Se acabó el turno');
+        this.toast(ev.won ? '¡Se acabó el turno! Llegaste a la meta' : 'Se acabó el turno');
         break;
       default:
         break;
@@ -345,10 +342,10 @@ export class GameView {
     const left = Math.ceil(g.timeLeft);
     this.timeEl.textContent = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
     this.timeEl.parentElement!.classList.toggle('hurry', left <= 15);
-    this.comboEl.textContent = g.combo >= 2 ? `🔥 Combo ×${g.combo}` : '';
+    this.comboEl.textContent = g.combo >= 2 ? `Combo ×${g.combo}` : '';
 
     const q = g.queue.length;
-    this.queueEl.textContent = q > 0 ? `En la fila: ${'🧍'.repeat(q)}` : '';
+    this.queueEl.textContent = q > 0 ? `En la fila: ${q}` : '';
 
     this.renderSeats();
     this.renderStations();
@@ -375,18 +372,17 @@ export class GameView {
         view.key = key;
         if (view.shownId !== c.id) {
           view.shownId = c.id;
-          view.face.textContent = FACES[c.face % FACES.length];
-          view.extra.textContent = this.rainy ? RAIN_EXTRAS[c.face % RAIN_EXTRAS.length] : '';
+          view.face.src = CUSTOMER_ART[c.face % CUSTOMER_ART.length];
+          // Variación de tono para que no se vean todos iguales.
+          view.face.style.filter = `hue-rotate(${((c.face * 47) % 90) - 45}deg)`;
         }
         view.root.className = `seat ${c.state}${c.mood ? ' ' + c.mood : ''}`;
-        if (c.mood === 'angry') view.face.textContent = '😠';
-        if (c.mood === 'happy') view.face.textContent = '😋';
 
         const recipe = RECIPES[c.recipe];
         view.bubbleTitle.textContent = recipe.name;
         view.bubbleItems.replaceChildren(
-          el('span', { class: `want completo${c.gotCompleto ? ' done' : ''}` }, '🌭', ...recipe.toppings.map((t) => el('small', {}, TOPPINGS[t].icon))),
-          ...(c.drink ? [el('span', { class: `want want-drink${c.gotDrink ? ' done' : ''}` }, DRINKS[c.drink].icon)] : [])
+          el('span', { class: `want completo${c.gotCompleto ? ' done' : ''}` }, ...recipe.toppings.map((t) => img(TOPPING_ART[t], TOPPINGS[t].name))),
+          ...(c.drink ? [el('span', { class: `want want-drink${c.gotDrink ? ' done' : ''}` }, img(DRINK_ART[c.drink], DRINKS[c.drink].name))] : [])
         );
       }
 
@@ -429,10 +425,10 @@ export class GameView {
         el('div', { class: 'hotdog' }, el('div', { class: 'bun-back' }), tray.vienesa ? el('div', { class: 'sausage' }) : el('div', {}), el('div', { class: 'layers' }, ...layers), el('div', { class: 'bun-front' }))
       );
       const recipe = g.trayRecipe();
-      this.trayLabel.textContent = recipe ? `✓ ${RECIPES[recipe].name}` : tray.vienesa ? tray.toppings.map((t) => TOPPINGS[t].icon).join(' ') || 'Agrega ingredientes' : 'Falta vienesa';
+      this.trayLabel.textContent = recipe ? `Listo: ${RECIPES[recipe].name}` : tray.vienesa ? (tray.toppings.length ? tray.toppings.map((t) => TOPPINGS[t].name).join(' + ') : 'Agrega ingredientes') : 'Falta la vienesa';
       this.trayLabel.classList.toggle('ok', !!recipe);
     }
-    this.heldDrinkEl.textContent = g.heldDrink ? DRINKS[g.heldDrink].icon : '';
+    this.heldDrinkEl.replaceChildren(...(g.heldDrink ? [img(DRINK_ART[g.heldDrink], DRINKS[g.heldDrink].name)] : []));
     this.heldDrinkEl.hidden = !g.heldDrink;
   }
 
