@@ -4,7 +4,7 @@ import { Game } from '../src/engine/game';
 import { simulate } from '../src/engine/bot';
 
 /** Ritmo (segundos por acción) con el que cada nivel debe poder ganarse. */
-const TARGET_REACTION = [1.35, 1.25, 1.15, 1.05, 1.0, 0.95, 0.9, 0.85, 0.8, 0.75];
+const TARGET_REACTION = [1.35, 1.25, 1.15, 1.05, 1.0, 0.95, 0.9, 0.9, 0.85, 0.75];
 
 function runUntil(game: Game, cond: () => boolean, max = 60) {
   for (let t = 0; t < max && !cond(); t += 0.05) game.step(0.05);
