@@ -1,0 +1,75 @@
+name: iOS · TestFlight
+
+on:
+  push:
+    branches: [main, 'claude/**']
+    paths: ['v3/**', '.github/workflows/ios-testflight.yml']
+  workflow_dispatch:
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: v3
+
+jobs:
+  test:
+    name: Tests y build web
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: v3/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+
+  ios:
+    name: Build iOS (y subida a TestFlight si hay credenciales)
+    needs: test
+    runs-on: macos-15
+    env:
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      IOS_BUNDLE_ID: ${{ vars.IOS_BUNDLE_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: v3/package-lock.json
+      - run: npm ci
+      - name: Build web y sync con Xcode
+        run: npm run ios:sync
+
+      - name: Compilar para simulador (sin firma)
+        if: env.ASC_KEY_ID == ''
+        run: |
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO build | tail -n 40
+          echo "::warning::Faltan los secretos ASC_KEY_ID / ASC_ISSUER_ID / ASC_KEY_P8 / APPLE_TEAM_ID: se compiló pero no se subió a TestFlight."
+
+      - name: Compilar, firmar y subir a TestFlight
+        if: env.ASC_KEY_ID != ''
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}${{ github.run_attempt }}
+        run: fastlane ios beta
+
+      - uses: actions/upload-artifact@v4
+        if: always() && env.ASC_KEY_ID != ''
+        with:
+          name: ipa
+          path: v3/build/*.ipa
+          if-no-files-found: ignore

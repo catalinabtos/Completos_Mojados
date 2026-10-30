@@ -1,3 +1,10 @@
+# Completos Mojados
+
+> **Versión actual: [`v3/`](v3/README.md)**: juego para iPhone con 3 niveles en Talca, empaquetado con Capacitor y publicado en TestFlight vía GitHub Actions.
+> `v1/` (Unity) y `v2/` (web con Pixi) son prototipos anteriores.
+
+---
+
 # Completos Rush - Prototipo M1
 
 Un juego de gestión de tiempo (time-management) en el que atiendes un carrito de completos talquino. Prepara pedidos rápidamente para evitar que los clientes se enojen y se vayan.

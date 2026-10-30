@@ -1,0 +1,51 @@
+# Compila la app iOS y la sube a TestFlight usando una API key de App Store Connect.
+# Variables de entorno (secretos de GitHub):
+#   ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8   API key de App Store Connect (rol Admin o App Manager)
+#   APPLE_TEAM_ID                            Team ID de la cuenta Apple Developer
+#   IOS_BUNDLE_ID                            (opcional) bundle id; por defecto cl.completosmojados.app
+#   BUILD_NUMBER                             número de build único
+
+default_platform(:ios)
+
+platform :ios do
+  desc 'Compila y sube un build a TestFlight'
+  lane :beta do
+    key_path = File.expand_path('AuthKey.p8', __dir__)
+    File.write(key_path, ENV.fetch('ASC_KEY_P8'))
+
+    api_key = app_store_connect_api_key(
+      key_id: ENV.fetch('ASC_KEY_ID'),
+      issuer_id: ENV.fetch('ASC_ISSUER_ID'),
+      key_filepath: key_path
+    )
+
+    bundle_id = ENV['IOS_BUNDLE_ID'].to_s.empty? ? 'cl.completosmojados.app' : ENV['IOS_BUNDLE_ID']
+    team_id = ENV.fetch('APPLE_TEAM_ID')
+    auth = "-allowProvisioningUpdates -authenticationKeyPath #{key_path} " \
+           "-authenticationKeyID #{ENV['ASC_KEY_ID']} -authenticationKeyIssuerID #{ENV['ASC_ISSUER_ID']}"
+
+    build_app(
+      project: 'ios/App/App.xcodeproj',
+      scheme: 'App',
+      configuration: 'Release',
+      export_method: 'app-store',
+      output_directory: 'build',
+      output_name: 'CompletosMojados.ipa',
+      clean: true,
+      xcargs: "#{auth} DEVELOPMENT_TEAM=#{team_id} PRODUCT_BUNDLE_IDENTIFIER=#{bundle_id} " \
+              "CODE_SIGN_STYLE=Automatic CURRENT_PROJECT_VERSION=#{ENV.fetch('BUILD_NUMBER', '1')}",
+      export_xcargs: auth,
+      export_options: {
+        signingStyle: 'automatic',
+        teamID: team_id,
+        manageAppVersionAndBuildNumber: false
+      }
+    )
+
+    upload_to_testflight(
+      api_key: api_key,
+      app_identifier: bundle_id,
+      skip_waiting_for_build_processing: true
+    )
+  end
+end

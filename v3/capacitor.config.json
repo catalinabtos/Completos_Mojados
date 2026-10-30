@@ -1,0 +1,10 @@
+{
+  "appId": "cl.completosmojados.app",
+  "appName": "Completos Mojados",
+  "webDir": "dist",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#2b1a12",
+    "scrollEnabled": false
+  }
+}
