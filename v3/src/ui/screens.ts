@@ -1,8 +1,9 @@
-// Pantallas de menú: portada, cómo jugar, la ruta de niveles, introducción, recetas, pausa y resultados.
+// Pantallas de menú: portada, cómo jugar, la ruta de niveles, Mi carrito, introducción, recetas, pausa y resultados.
 
 import { DRINKS, LEVELS, RECIPES, TOPPINGS, formatCLP, starsFor, type LevelConfig, type RecipeId } from '../engine/data';
 import type { Game } from '../engine/game';
-import { DRINK_ART, MASCOT, TOPPING_ART, img } from './art';
+import { DECOR, UPGRADES, nextUpgradePrice, upgradeLevel, type DecorId, type UpgradeId } from '../engine/upgrades';
+import { DECOR_ART, DRINK_ART, MASCOT, TOPPING_ART, UPGRADE_ART, img } from './art';
 import { button, el, svgIcon } from './dom';
 import type { SaveData } from './storage';
 
@@ -65,7 +66,7 @@ function header(title: string, onBack: () => void): HTMLElement {
   return el('header', { class: 'screen-header' }, back, el('h2', {}, title));
 }
 
-export function levelSelectScreen(save: SaveData, onPick: (level: LevelConfig) => void, onBack: () => void): HTMLElement {
+export function levelSelectScreen(save: SaveData, onPick: (level: LevelConfig) => void, onBack: () => void, onCart: () => void): HTMLElement {
   const stops = LEVELS.map((level) => {
     const locked = level.id > save.unlocked;
     const current = level.id === save.unlocked;
@@ -84,7 +85,74 @@ export function levelSelectScreen(save: SaveData, onPick: (level: LevelConfig) =
       `stop ${state}`
     );
   });
-  return el('div', { class: 'screen panel-screen route-screen' }, header('La ruta del carrito', onBack), el('div', { class: 'route' }, ...stops));
+  const cart = button([el('span', {}, 'Mi carrito'), el('span', { class: 'cart-link-money' }, formatCLP(save.wallet))], onCart, 'btn secondary cart-link');
+  return el(
+    'div',
+    { class: 'screen panel-screen route-screen' },
+    header('La ruta del carrito', onBack),
+    el('div', { class: 'route' }, ...stops),
+    el('div', { class: 'route-footer' }, cart)
+  );
+}
+
+const SHOP_UPGRADES: UpgradeId[] = ['olla', 'toalla', 'fuego', 'banquitos', 'radio', 'tabla'];
+
+export interface CartActions {
+  onBuyUpgrade: (id: UpgradeId) => void;
+  onBuyDecor: (id: DecorId) => void;
+  onToggleDecor: (id: DecorId) => void;
+  onReset: () => void;
+  onBack: () => void;
+}
+
+function upgradeRow(save: SaveData, id: UpgradeId, onBuy: () => void): HTMLElement {
+  const info = UPGRADES[id];
+  const level = upgradeLevel(save.upgrades, id);
+  const price = nextUpgradePrice(save.upgrades, id);
+  const pips = info.prices.map((_, i) => el('i', { class: i < level ? 'on' : '' }));
+  const buy = button(price === null ? 'Al máximo' : formatCLP(price), onBuy, 'btn primary buy-btn');
+  buy.disabled = price === null || save.wallet < price;
+  return el(
+    'div',
+    { class: 'shop-row' },
+    UPGRADE_ART[id] ? img(UPGRADE_ART[id], '', 'shop-art') : null,
+    el('div', { class: 'shop-info' }, el('strong', {}, info.name), el('span', {}, info.effect), el('div', { class: 'pips', 'aria-label': `Nivel ${level} de ${info.prices.length}` }, ...pips)),
+    buy
+  );
+}
+
+function decorRow(save: SaveData, id: DecorId, art: string, actions: CartActions): HTMLElement {
+  const info = DECOR[id];
+  const owned = save.decorOwned.includes(id);
+  const on = save.decorOn.includes(id);
+  const action = owned
+    ? button(on ? 'Puesto' : 'Poner', () => actions.onToggleDecor(id), `btn ${on ? 'secondary' : 'primary'} buy-btn`)
+    : button(formatCLP(info.price), () => actions.onBuyDecor(id), 'btn primary buy-btn');
+  action.disabled = !owned && save.wallet < info.price;
+  return el('div', { class: 'shop-row' }, img(art, '', 'shop-art'), el('div', { class: 'shop-info' }, el('strong', {}, info.name)), action);
+}
+
+export function cartScreen(save: SaveData, actions: CartActions): HTMLElement {
+  const decor = (Object.entries(DECOR_ART) as [DecorId, string][]).map(([id, art]) => decorRow(save, id, art, actions));
+  return el(
+    'div',
+    { class: 'screen panel-screen cart-screen' },
+    header('Mi carrito', actions.onBack),
+    el(
+      'div',
+      { class: 'panel-body' },
+      el('div', { class: 'piggy' }, el('small', {}, 'En la alcancía'), el('span', { class: 'money-big' }, formatCLP(save.wallet))),
+      el('h3', { class: 'shop-title' }, 'Mejoras'),
+      ...SHOP_UPGRADES.map((id) => upgradeRow(save, id, () => actions.onBuyUpgrade(id))),
+      el('h3', { class: 'shop-title' }, 'Decoración'),
+      ...decor,
+      button('Empezar de cero', actions.onReset, 'btn ghost')
+    )
+  );
+}
+
+export function resetBody(): HTMLElement {
+  return el('p', { class: 'reset-text' }, 'Se borran las esquinas ganadas, los récords, la alcancía y las mejoras. No se puede deshacer.');
 }
 
 function recipeCard(id: RecipeId, isNew = false): HTMLElement {
@@ -146,7 +214,7 @@ export function overlay(title: string, body: HTMLElement | null, actions: HTMLBu
   );
 }
 
-export function resultsScreen(game: Game, isRecord: boolean, hasNext: boolean, onNext: () => void, onRetry: () => void, onLevels: () => void): HTMLElement {
+export function resultsScreen(game: Game, isRecord: boolean, hasNext: boolean, wallet: number, onNext: () => void, onRetry: () => void, onLevels: () => void): HTMLElement {
   const level = game.level;
   const stars = starsFor(level, game.money);
   const won = game.won;
@@ -168,6 +236,7 @@ export function resultsScreen(game: Game, isRecord: boolean, hasNext: boolean, o
       { class: 'result-card' },
       el('div', { class: 'result-money' }, el('span', { class: 'money-big' }, formatCLP(game.money)), el('span', {}, `meta ${formatCLP(level.goal)}`)),
       isRecord ? el('div', { class: 'record' }, '¡Nuevo récord!') : null,
+      el('div', { class: 'result-piggy' }, `A la alcancía: +${formatCLP(game.money)} · Total ${formatCLP(wallet)}`),
       el(
         'div',
         { class: 'result-stats' },

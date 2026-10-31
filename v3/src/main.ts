@@ -6,17 +6,19 @@ import './ui/styles.css';
 
 import { LEVELS, starsFor, type LevelConfig } from './engine/data';
 import type { Game } from './engine/game';
+import { applyUpgrades, buyDecor, buyUpgrade, gameOptions, toggleDecor } from './engine/upgrades';
 import { MASCOT } from './ui/art';
 import { play, setSoundEnabled, unlockAudio } from './ui/audio';
 import { button } from './ui/dom';
 import { GameView } from './ui/gameView';
-import { howToScreen, introScreen, levelSelectScreen, overlay, recipesPanel, resultsScreen, titleScreen } from './ui/screens';
-import { loadSave, writeSave } from './ui/storage';
+import { cartScreen, howToScreen, introScreen, levelSelectScreen, overlay, recipesPanel, resetBody, resultsScreen, titleScreen } from './ui/screens';
+import { loadSave, resetSave, writeSave } from './ui/storage';
 
 const app = document.getElementById('app')!;
 let save = loadSave();
 setSoundEnabled(save.sound);
 let current: GameView | null = null;
+let currentLevel: LevelConfig | null = null;
 let currentOverlay: HTMLElement | null = null;
 
 function show(screen: HTMLElement) {
@@ -48,32 +50,72 @@ function goTitle() {
 }
 
 function goLevels() {
-  show(levelSelectScreen(save, goIntro, goTitle));
+  show(levelSelectScreen(save, goIntro, goTitle, goCart));
+}
+
+function goCart() {
+  const buy = (done: boolean) => {
+    if (!done) return;
+    play('cash');
+    writeSave(save);
+    goCart();
+  };
+  show(
+    cartScreen(save, {
+      onBuyUpgrade: (id) => buy(buyUpgrade(save, id)),
+      onBuyDecor: (id) => buy(buyDecor(save, id)),
+      onToggleDecor: (id) => {
+        toggleDecor(save, id);
+        writeSave(save);
+        goCart();
+      },
+      onReset: confirmReset,
+      onBack: goLevels
+    })
+  );
+}
+
+function confirmReset() {
+  if (currentOverlay) return;
+  currentOverlay = overlay('¿Empezar de cero?', resetBody(), [
+    button('Sí, borrar mi progreso', () => {
+      save = resetSave(save);
+      writeSave(save);
+      goCart();
+    }, 'btn primary big'),
+    button('Mejor no', closeOverlay, 'btn secondary')
+  ], MASCOT.preocupada);
+  app.append(currentOverlay);
 }
 
 function goIntro(level: LevelConfig) {
   show(introScreen(level, () => startLevel(level), goLevels));
 }
 
+/** Parte un turno. `level` es siempre la esquina base: las mejoras se aplican solo aquí. */
 function startLevel(level: LevelConfig) {
   const view = new GameView({
-    level,
+    level: applyUpgrades(level, save.upgrades),
+    options: gameOptions(save.upgrades),
+    decor: save.decorOn,
+    radio: save.upgrades.radio !== undefined,
     tutorial: level.id === 1 && !save.tutorialDone,
-    onPause: () => pause(view),
+    onPause: () => pause(view, level),
     onRecipes: () => showRecipes(view),
-    onFinish: (game) => finish(game)
+    onFinish: (game) => finish(level, game)
   });
   show(view.root);
   current = view;
+  currentLevel = level;
   view.start();
 }
 
-function pause(view: GameView) {
+function pause(view: GameView, level: LevelConfig) {
   if (currentOverlay) return;
   view.setPaused(true);
   currentOverlay = overlay('Pausa', null, [
     button('Continuar', () => resume(view), 'btn primary big'),
-    button('Reiniciar turno', () => startLevel(view.game.level), 'btn secondary'),
+    button('Reiniciar turno', () => startLevel(level), 'btn secondary'),
     button('Salir a la ruta', goLevels, 'btn ghost')
   ], MASCOT.feliz);
   view.root.append(currentOverlay);
@@ -91,14 +133,15 @@ function resume(view: GameView) {
   view.setPaused(false);
 }
 
-function finish(game: Game) {
-  const level = game.level;
+function finish(level: LevelConfig, game: Game) {
   const prevBest = save.best[level.id] ?? 0;
   const isRecord = game.money > prevBest && prevBest > 0;
   save.best[level.id] = Math.max(prevBest, game.money);
   save.stars[level.id] = Math.max(save.stars[level.id] ?? 0, starsFor(level, game.money));
   if (game.won) save.unlocked = Math.max(save.unlocked, Math.min(LEVELS.length, level.id + 1));
   if (level.id === 1 && game.stats.served > 0) save.tutorialDone = true;
+  // Toda la plata del turno va a la alcancía, se gane o se pierda, también al repetir una esquina.
+  save.wallet += game.money;
   writeSave(save);
 
   const next = LEVELS.find((l) => l.id === level.id + 1);
@@ -107,6 +150,7 @@ function finish(game: Game) {
       game,
       isRecord,
       !!next,
+      save.wallet,
       () => next && goIntro(next),
       () => startLevel(level),
       goLevels
@@ -122,7 +166,7 @@ document.addEventListener('click', (e) => {
 
 // Pausa automática al salir de la app.
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden && current && !currentOverlay) pause(current);
+  if (document.hidden && current && currentLevel && !currentOverlay) pause(current, currentLevel);
 });
 
 // Evita el zoom por doble toque y gestos de pellizco en iOS.

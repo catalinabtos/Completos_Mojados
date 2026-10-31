@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { LEVELS, RECIPES, starsFor } from '../src/engine/data';
 import { Game } from '../src/engine/game';
 import { simulate } from '../src/engine/bot';
+import { DECOR, UPGRADES, applyUpgrades, buyDecor, buyUpgrade, gameOptions, sanitizeCart, toggleDecor, type CartState, type UpgradeLevels } from '../src/engine/upgrades';
+import { parseSave, resetSave } from '../src/ui/storage';
 
 /** Ritmo (segundos por acción) con el que cada nivel debe poder ganarse. */
 const TARGET_REACTION = [1.35, 1.25, 1.15, 1.05, 1.0, 0.95, 0.9, 0.9, 0.85, 0.75];
@@ -122,6 +124,154 @@ describe('levels are playable', () => {
       for (const recipe of Object.keys(level.recipes) as (keyof typeof RECIPES)[]) {
         for (const t of RECIPES[recipe].toppings) expect(level.toppings).toContain(t);
       }
+    });
+  }
+});
+
+describe('el carrito crece', () => {
+  const cart = (wallet: number): CartState => ({ wallet, upgrades: {}, decorOwned: [], decorOn: [] });
+  const maxed = Object.fromEntries(Object.values(UPGRADES).map((u) => [u.id, u.prices.length])) as UpgradeLevels;
+
+  it('applies upgrades without touching the original level', () => {
+    const base = structuredClone(LEVELS[0]);
+    const up = applyUpgrades(LEVELS[0], { olla: 2, toalla: 1, fuego: 2, banquitos: 3 });
+    expect(LEVELS[0]).toEqual(base);
+    expect(up.olla.slots).toBe(base.olla.slots + 2);
+    expect(up.vapor.hold).toBe(base.vapor.hold + 1.5);
+    expect(up.olla.hold).toBe(base.olla.hold + 3);
+    expect(up.patience).toBe(base.patience + 6);
+    expect(up.goal).toBe(base.goal);
+  });
+
+  it('charges each level once and stops at the maximum', () => {
+    const c = cart(UPGRADES.olla.prices[0] + UPGRADES.olla.prices[1] + 1000);
+    expect(buyUpgrade(c, 'olla')).toBe(true);
+    expect(buyUpgrade(c, 'olla')).toBe(true);
+    expect(c.wallet).toBe(1000);
+    expect(c.upgrades.olla).toBe(2);
+    c.wallet = 1e7;
+    expect(buyUpgrade(c, 'olla')).toBe(false);
+    expect(c.wallet).toBe(1e7);
+  });
+
+  it('does not sell what the wallet cannot pay', () => {
+    const c = cart(UPGRADES.toalla.prices[0] - 1);
+    expect(buyUpgrade(c, 'toalla')).toBe(false);
+    expect(buyDecor(c, 'luces')).toBe(false);
+    expect(c).toEqual(cart(UPGRADES.toalla.prices[0] - 1));
+  });
+
+  it('keeps one awning at a time and never charges twice for decor', () => {
+    const c = cart(DECOR.toldo_verde.price + DECOR.toldo_azul.price);
+    buyDecor(c, 'toldo_verde');
+    buyDecor(c, 'toldo_azul');
+    expect(c.decorOn).toEqual(['toldo_azul']);
+    expect(c.wallet).toBe(0);
+    toggleDecor(c, 'toldo_verde');
+    expect(c.decorOn).toEqual(['toldo_verde']);
+    expect(buyDecor(c, 'toldo_verde')).toBe(false);
+    toggleDecor(c, 'toldo_verde');
+    expect(c.decorOn).toEqual([]);
+  });
+
+  it('migrates a save from before the wallet', () => {
+    const save = parseSave(JSON.stringify({ unlocked: 4, best: { 1: 30000 }, stars: { 1: 2 }, sound: false, tutorialDone: true }));
+    expect(save).toMatchObject({ unlocked: 4, sound: false, wallet: 0, upgrades: {}, decorOwned: [], decorOn: [] });
+    expect(save.best[1]).toBe(30000);
+  });
+
+  it('survives a damaged save', () => {
+    expect(parseSave('{no es json').wallet).toBe(0);
+    const c = sanitizeCart({ wallet: Number.NaN, upgrades: { olla: 99, radio: -1, toalla: 'x' as never }, decorOwned: ['macetero', 'toldo_rosado' as never], decorOn: ['macetero', 'luces'] });
+    expect(c).toEqual({ wallet: 0, upgrades: { olla: 2 }, decorOwned: ['macetero'], decorOn: ['macetero'] });
+  });
+
+  it('resets progress but keeps the preferences', () => {
+    const save = { ...parseSave(null), unlocked: 9, wallet: 5000, upgrades: { radio: 1 }, sound: false, tutorialDone: true };
+    expect(resetSave(save)).toEqual({ ...parseSave(null), sound: false, tutorialDone: true });
+  });
+
+  it('pays more tip with the radio', () => {
+    const tips = (upgrades: UpgradeLevels) => {
+      const game = new Game(LEVELS[0], 7, gameOptions(upgrades));
+      const c = seatedCustomer(game);
+      prepareBase(game);
+      for (const t of RECIPES.completo.toppings) game.tapTopping(t);
+      game.serve(c.seat!);
+      return game.stats.tips;
+    };
+    expect(tips({ radio: 3 })).toBeGreaterThan(tips({}));
+  });
+
+  /** Saca dos panes con vienesa a la tabla más grande. */
+  function prepareTwo(game: Game) {
+    for (const station of ['vapor', 'olla'] as const) {
+      game.tapSlot(station, 0);
+      game.tapSlot(station, 1);
+    }
+    runUntil(game, () => game.vapor[1].state === 'ready' && game.olla[1].state === 'ready');
+    game.tapSlot('vapor', 0);
+    game.tapSlot('olla', 0);
+    game.tapSlot('vapor', 1);
+    game.tapSlot('olla', 1);
+  }
+
+  it('the small board holds a single bread', () => {
+    const game = new Game(LEVELS[0], 7);
+    prepareTwo(game);
+    expect(game.trays.filter(Boolean)).toHaveLength(1);
+    expect(game.vapor[1].state).toBe('ready');
+  });
+
+  it('the big board builds two completos at once', () => {
+    const game = new Game(LEVELS[0], 7, { bigBoard: true });
+    prepareTwo(game);
+    expect(game.trays).toEqual([{ vienesa: true, toppings: [] }, { vienesa: true, toppings: [] }]);
+    expect(game.activeTray).toBe(1);
+    game.tapTopping('tomate');
+    game.tapTray(0);
+    game.tapTopping('palta');
+    expect(game.trays[0]!.toppings).toEqual(['palta']);
+    expect(game.trays[1]!.toppings).toEqual(['tomate']);
+  });
+
+  it('serves the completo that fits from either side and keeps the other', () => {
+    const game = new Game(LEVELS[0], 7, { bigBoard: true });
+    const c = seatedCustomer(game);
+    prepareTwo(game);
+    game.tapTopping('palta');
+    game.tapTray(0);
+    for (const t of RECIPES[c.recipe].toppings) game.tapTopping(t);
+    game.tapTray(1);
+    game.serve(c.seat!);
+    expect(game.stats.served).toBe(1);
+    expect(game.trays[0]).toBeNull();
+    expect(game.tray!.toppings).toEqual(['palta']);
+    game.trashTray();
+    expect(game.trays).toEqual([null, null]);
+  });
+
+  it('moves on to the waiting completo after serving the active one', () => {
+    const game = new Game(LEVELS[0], 7, { bigBoard: true });
+    const c = seatedCustomer(game);
+    prepareTwo(game);
+    for (const t of RECIPES[c.recipe].toppings) game.tapTopping(t);
+    game.serve(c.seat!);
+    expect(game.tray).toEqual({ vienesa: true, toppings: [] });
+  });
+
+  it('the small board ignores taps on a second side', () => {
+    const game = new Game(LEVELS[0], 7);
+    game.tapTray(1);
+    expect(game.activeTray).toBe(0);
+  });
+
+  for (const level of LEVELS) {
+    it(`level ${level.id} never gets harder with every upgrade`, () => {
+      const reaction = TARGET_REACTION[level.id - 1];
+      const up = applyUpgrades(level, maxed);
+      const wins = Array.from({ length: 20 }, (_, i) => simulate(up, i + 1, reaction)).filter((r) => r.won).length;
+      expect(wins).toBeGreaterThanOrEqual(18);
     });
   }
 });

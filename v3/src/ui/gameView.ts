@@ -1,9 +1,10 @@
 // Pantalla de juego: dibuja el estado del motor en el DOM y traduce toques en acciones.
 
 import { DRINKS, RECIPES, TOPPINGS, formatCLP, type LevelConfig } from '../engine/data';
-import { Game, type Customer, type GameEvent, type StationId } from '../engine/game';
+import { Game, type Customer, type GameEvent, type StationId, type Tray } from '../engine/game';
+import type { DecorId, GameOptions } from '../engine/upgrades';
 import { play } from './audio';
-import { CUSTOMER_ART, DRINK_ART, LEVEL_BG, STATION_ART, TOPPING_ART, img } from './art';
+import { CUSTOMER_ART, DECOR_ART, DRINK_ART, LEVEL_BG, STATION_ART, TOPPING_ART, UPGRADE_ART, img } from './art';
 import { el, svgIcon } from './dom';
 
 const SCENERY: Record<LevelConfig['scene'], string[]> = {
@@ -22,7 +23,13 @@ const STATION_LABEL: Record<StationId, { title: string; empty: string; item: str
 };
 
 export interface GameViewOptions {
+  /** Esquina con las mejoras ya aplicadas. */
   level: LevelConfig;
+  options: Partial<GameOptions>;
+  /** Decoraciones puestas en el carrito. */
+  decor: DecorId[];
+  /** La radio comprada se ve sobre el mostrador. */
+  radio: boolean;
   tutorial: boolean;
   onPause: () => void;
   onRecipes: () => void;
@@ -59,7 +66,7 @@ export class GameView {
   private readonly queueEl: HTMLElement;
   private readonly seatViews: SeatView[] = [];
   private readonly slotEls: Record<StationId, HTMLElement[]> = { olla: [], vapor: [] };
-  private readonly trayEl: HTMLElement;
+  private readonly trayEls: HTMLElement[];
   private readonly trayLabel: HTMLElement;
   private readonly heldDrinkEl: HTMLElement;
   private readonly toastEl: HTMLElement;
@@ -71,7 +78,7 @@ export class GameView {
   constructor(opts: GameViewOptions, seed = Date.now()) {
     this.opts = opts;
     const level = opts.level;
-    this.game = new Game(level, seed);
+    this.game = new Game(level, seed, opts.options);
 
     // ── HUD
     const pauseBtn = el('button', { class: 'icon-btn', 'aria-label': 'Pausa' }, svgIcon('pause'));
@@ -112,8 +119,9 @@ export class GameView {
     }
     const street = el(
       'section',
-      { class: `street scene-${level.scene} weather-${level.weather}${LEVEL_BG[level.id] ? ' has-bg' : ''}` },
+      { class: `street scene-${level.scene} weather-${level.weather}${LEVEL_BG[level.id] ? ' has-bg' : ''}${this.toldoClass}` },
       el('div', { class: 'awning' }),
+      ...this.createDecor(),
       LEVEL_BG[level.id] ? null : el('div', { class: 'scenery' }, ...SCENERY[level.scene].map((icon) => el('span', {}, icon))),
       this.comboEl,
       this.queueEl,
@@ -124,12 +132,25 @@ export class GameView {
     if (this.rainy) street.append(this.createRain());
 
     // ── Cocina: olla (vienesas en agua), tabla y vaporera (panes sobre la toalla)
-    this.trayEl = el('div', { class: 'tray-food' });
+    const big = !!opts.options.bigBoard;
+    const sides = big ? [0, 1] : [0];
+    this.trayEls = sides.map(() => el('div', { class: 'tray-food' }));
+    const trayArea = big
+      ? el(
+          'div',
+          { class: 'tray-sides' },
+          ...this.trayEls.map((food, i) => {
+            const side = el('button', { class: 'tray-side', 'aria-label': `Lado ${i + 1} de la tabla` }, food);
+            this.tap(side, () => this.game.tapTray(i));
+            return side;
+          })
+        )
+      : this.trayEls[0];
     this.trayLabel = el('div', { class: 'tray-label' }, '');
     this.heldDrinkEl = el('div', { class: 'held-drink' });
     const trashBtn = el('button', { class: 'trash-btn', 'aria-label': 'Botar lo que hay en la tabla' }, 'Botar');
     this.tap(trashBtn, () => this.game.trashTray());
-    const board = el('div', { class: 'board' }, el('div', { class: 'station-title' }, 'Tabla'), this.trayEl, this.trayLabel, this.heldDrinkEl, trashBtn);
+    const board = el('div', { class: `board${big ? ' big' : ''}` }, el('div', { class: 'station-title' }, 'Tabla'), trayArea, this.trayLabel, this.heldDrinkEl, trashBtn);
     const toppings = el('div', { class: 'toppings' });
     for (const id of level.toppings) {
       const t = TOPPINGS[id];
@@ -214,6 +235,22 @@ export class GameView {
     return { root, person, face, bubble, bubbleTitle, bubbleItems, patience, patienceFill, shownId: null, key: '' };
   }
 
+  private get toldoClass(): string {
+    const toldo = this.opts.decor.find((d) => d.startsWith('toldo_'));
+    return toldo ? ` ${toldo.replace('_', '-')}` : '';
+  }
+
+  /** Lo que se compró en Mi carrito y se ve durante el turno. */
+  private createDecor(): HTMLElement[] {
+    const has = (id: DecorId) => this.opts.decor.includes(id) && DECOR_ART[id];
+    const strip = (id: DecorId) => (has(id) ? [el('div', { class: `decor decor-strip decor-${id}`, style: `background-image:url("${DECOR_ART[id]}")` })] : []);
+    const piece = (id: DecorId) => (has(id) ? [img(DECOR_ART[id]!, '', `decor decor-${id}`)] : []);
+    const radio = this.opts.radio && UPGRADE_ART.radio ? [img(UPGRADE_ART.radio, '', 'decor decor-radio')] : [];
+    const sign = has('letrero') ? [el('div', { class: 'decor decor-letrero' }, img(DECOR_ART.letrero!), el('span', {}, 'Completos Mojados'))] : [];
+    const photo = has('foto') ? [el('div', { class: 'decor decor-foto' }, img(DECOR_ART.foto!))] : [];
+    return [...strip('luces'), ...strip('banderitas'), ...sign, ...piece('macetero'), ...photo, ...radio];
+  }
+
   private createRain(): HTMLElement {
     const rain = el('div', { class: 'rain' });
     for (let i = 0; i < 40; i += 1) {
@@ -278,6 +315,7 @@ export class GameView {
       case 'pickup':
       case 'topping':
       case 'drink':
+      case 'switchTray':
         play('tap');
         break;
       case 'trash':
@@ -412,24 +450,26 @@ export class GameView {
   private renderTray() {
     const g = this.game;
     const tray = g.tray;
-    const key = tray ? `${tray.vienesa}|${tray.toppings.join(',')}|${g.heldDrink}` : `none|${g.heldDrink}`;
+    const key = `${JSON.stringify(g.trays)}|${g.activeTray}|${g.heldDrink}`;
     if (key === this.lastTrayKey) return;
     this.lastTrayKey = key;
 
-    if (!tray) {
-      this.trayEl.replaceChildren(el('div', { class: 'tray-empty' }, 'Saca un pan de la vaporera'));
-      this.trayLabel.textContent = '';
-    } else {
-      const layers = tray.toppings.map((t) => el('div', { class: `layer layer-${t}`, style: `--c:${TOPPINGS[t].color}` }));
-      this.trayEl.replaceChildren(
-        el('div', { class: 'hotdog' }, el('div', { class: 'bun-back' }), tray.vienesa ? el('div', { class: 'sausage' }) : el('div', {}), el('div', { class: 'layers' }, ...layers), el('div', { class: 'bun-front' }))
-      );
-      const recipe = g.trayRecipe();
-      this.trayLabel.textContent = recipe ? `Listo: ${RECIPES[recipe].name}` : tray.vienesa ? (tray.toppings.length ? tray.toppings.map((t) => TOPPINGS[t].name).join(' + ') : 'Agrega ingredientes') : 'Falta la vienesa';
-      this.trayLabel.classList.toggle('ok', !!recipe);
-    }
+    this.trayEls.forEach((food, i) => {
+      const t = g.trays[i];
+      food.parentElement!.classList.toggle('active', i === g.activeTray);
+      food.replaceChildren(t ? this.hotdog(t) : el('div', { class: 'tray-empty' }, this.trayEls.length > 1 ? '+ pan' : 'Saca un pan de la vaporera'));
+    });
+    const recipe = g.trayRecipe();
+    if (!tray) this.trayLabel.textContent = '';
+    else this.trayLabel.textContent = recipe ? `Listo: ${RECIPES[recipe].name}` : tray.vienesa ? (tray.toppings.length ? tray.toppings.map((t) => TOPPINGS[t].name).join(' + ') : 'Agrega ingredientes') : 'Falta la vienesa';
+    this.trayLabel.classList.toggle('ok', !!recipe);
     this.heldDrinkEl.replaceChildren(...(g.heldDrink ? [img(DRINK_ART[g.heldDrink], DRINKS[g.heldDrink].name)] : []));
     this.heldDrinkEl.hidden = !g.heldDrink;
+  }
+
+  private hotdog(tray: Tray): HTMLElement {
+    const layers = tray.toppings.map((t) => el('div', { class: `layer layer-${t}`, style: `--c:${TOPPINGS[t].color}` }));
+    return el('div', { class: 'hotdog' }, el('div', { class: 'bun-back' }), tray.vienesa ? el('div', { class: 'sausage' }) : el('div', {}), el('div', { class: 'layers' }, ...layers), el('div', { class: 'bun-front' }));
   }
 
   private renderTutorial() {

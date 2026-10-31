@@ -1,6 +1,6 @@
 # Propuesta: meta-progresión "El carrito crece"
 
-> Estado: **propuesta para aprobación de Catalina**. No se implementa hasta que la apruebe.
+> Estado: **aprobada por Catalina e implementada** (30-10-2026).
 
 ## El problema
 Hoy, al ganar una esquina se desbloquea la siguiente y nada más. No hay una razón para volver a jugar una esquina ya ganada ni algo que se acumule entre partidas.
@@ -18,9 +18,10 @@ Tres niveles cada una, con precio creciente.
 | **Fuego parejo** | La vienesa aguanta +1,5 s antes de reventarse | $10.000 / $25.000 / $50.000 |
 | **Banquitos** | Los clientes tienen +2 s de paciencia | $12.000 / $30.000 / $60.000 |
 | **Radio del carrito** | +5 % de propina | $20.000 / $45.000 / $80.000 |
+| **Tabla más grande** | Deja dos panes y arma dos completos a la vez (reemplaza a la repisa) | $30.000 |
 
 ## Decoración (no afecta el juego, solo cariño)
-Toldo de otro color, letrero con el nombre del carrito, macetero con cardenales, banderitas para el 18, foto de la abuela Teresa. Precios de $5.000 a $30.000.
+Toldo verde o azul, letrero con el nombre del carrito, macetero con cardenales, banderitas para el 18, guirnalda de luces y foto de la abuela Teresa. Precios de $5.000 a $30.000.
 
 ## Reglas para que siga siendo justo
 - **Cada esquina se puede ganar sin ninguna mejora.** La calibración actual del bot se mantiene igual sin mejoras; las mejoras solo hacen el juego más cómodo y ayudan a sacar tres estrellas.

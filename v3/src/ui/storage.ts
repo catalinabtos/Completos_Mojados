@@ -1,6 +1,8 @@
 // Progreso guardado en el dispositivo (localStorage del WebView).
 
-export interface SaveData {
+import { sanitizeCart, type CartState } from '../engine/upgrades';
+
+export interface SaveData extends CartState {
   unlocked: number;
   best: Record<number, number>;
   stars: Record<number, number>;
@@ -10,15 +12,26 @@ export interface SaveData {
 
 const KEY = 'completos-mojados-save-v1';
 
-const DEFAULTS: SaveData = { unlocked: 1, best: {}, stars: {}, sound: true, tutorialDone: false };
+function defaults(): SaveData {
+  return { unlocked: 1, best: {}, stars: {}, sound: true, tutorialDone: false, wallet: 0, upgrades: {}, decorOwned: [], decorOn: [] };
+}
+
+/** Lee un guardado; los de versiones anteriores, sin alcancía, parten con ella vacía. */
+export function parseSave(raw: string | null): SaveData {
+  if (!raw) return defaults();
+  try {
+    const data = JSON.parse(raw) as Partial<SaveData>;
+    return { ...defaults(), ...data, ...sanitizeCart(data) };
+  } catch {
+    return defaults();
+  }
+}
 
 export function loadSave(): SaveData {
   try {
-    const raw = localStorage.getItem(KEY);
-    if (!raw) return structuredClone(DEFAULTS);
-    return { ...structuredClone(DEFAULTS), ...(JSON.parse(raw) as Partial<SaveData>) };
+    return parseSave(localStorage.getItem(KEY));
   } catch {
-    return structuredClone(DEFAULTS);
+    return defaults();
   }
 }
 
@@ -28,4 +41,9 @@ export function writeSave(save: SaveData): void {
   } catch {
     // Sin almacenamiento disponible: el juego sigue funcionando sin guardar.
   }
+}
+
+/** Progreso de cero: se conservan solo las preferencias del jugador. */
+export function resetSave(save: SaveData): SaveData {
+  return { ...defaults(), sound: save.sound, tutorialDone: save.tutorialDone };
 }

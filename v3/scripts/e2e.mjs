@@ -113,6 +113,15 @@ for (const level of LEVEL_IDS) {
 }
 
 await page.screenshot({ path: `${shots}/40-niveles-final.png` });
+
+// La plata de los turnos queda en la alcancía, también después de cerrar la app.
+await page.reload();
+await page.getByText('¡Jugar!').click();
+await page.getByText('Mi carrito').click();
+await page.screenshot({ path: `${shots}/41-mi-carrito.png` });
+const wallet = await page.locator('.piggy .money-big').innerText();
+console.log('Alcancía:', wallet);
+if (wallet === '$0') errors.push('La alcancía quedó vacía');
 console.log('Errores de consola:', errors.length ? errors : 'ninguno');
 await browser.close();
 if (errors.length || results.some((r) => !r.won)) process.exit(1);

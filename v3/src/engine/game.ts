@@ -53,7 +53,7 @@ export type GameEvent =
   | { type: 'topping'; topping: ToppingId }
   | { type: 'drink'; drink: DrinkId }
   | { type: 'trash' }
-  | { type: 'shelf' }
+  | { type: 'switchTray' }
   | { type: 'serve'; customer: number; seat: number }
   | { type: 'paid'; customer: number; seat: number; amount: number; tip: number; combo: number }
   | { type: 'reject'; customer: number; seat: number; reason: string }
@@ -111,9 +111,9 @@ export class Game {
 
   olla: Slot[];
   vapor: Slot[];
-  tray: Tray | null = null;
-  /** Completo guardado en la repisa (mejora del carrito). */
-  shelf: Tray | null = null;
+  /** Los dos lados de la tabla; el segundo solo se usa con la tabla más grande. */
+  trays: (Tray | null)[] = [null, null];
+  activeTray = 0;
   readonly options: GameOptions;
   heldDrink: DrinkId | null = null;
   customers: Customer[] = [];
@@ -128,13 +128,33 @@ export class Game {
 
   constructor(level: LevelConfig, seed = Date.now(), options: Partial<GameOptions> = {}) {
     this.level = level;
-    this.options = { shelf: false, tipBonus: 0, ...options };
+    this.options = { bigBoard: false, tipBonus: 0, ...options };
     this.rng = createRng(seed);
     this.olla = emptySlots(level.olla.slots);
     this.vapor = emptySlots(level.vapor.slots);
     this.seats = Array.from({ length: level.seats }, () => null);
     this.seatTimers = Array.from({ length: level.seats }, () => 0);
     this.nextArrival = 1.2;
+  }
+
+  /** Lo que se está armando: el lado activo de la tabla. */
+  get tray(): Tray | null {
+    return this.trays[this.activeTray];
+  }
+
+  set tray(value: Tray | null) {
+    this.trays[this.activeTray] = value;
+  }
+
+  private get otherTray(): Tray | null {
+    return this.trays[1 - this.activeTray];
+  }
+
+  /** Con la tabla más grande, pasa al otro lado si cumple la condición. */
+  private focusOther(fits: (tray: Tray | null) => boolean): boolean {
+    if (!this.options.bigBoard || !fits(this.otherTray)) return false;
+    this.activeTray = 1 - this.activeTray;
+    return true;
   }
 
   get timeLeft(): number {
@@ -306,7 +326,7 @@ export class Game {
         break;
       case 'ready':
         if (station === 'vapor') {
-          if (this.tray) {
+          if (this.tray && !this.focusOther((t) => t === null)) {
             this.hint('Ya tienes un pan en la tabla');
             return;
           }
@@ -316,11 +336,11 @@ export class Game {
             this.hint('Primero saca un pan de la vaporera');
             return;
           }
-          if (this.tray.vienesa) {
+          if (this.tray.vienesa && !this.focusOther((t) => t !== null && !t.vienesa)) {
             this.hint('Este pan ya tiene vienesa');
             return;
           }
-          this.tray.vienesa = true;
+          this.tray!.vienesa = true;
         }
         slot.state = 'empty';
         slot.t = 0;
@@ -352,15 +372,11 @@ export class Game {
     this.events.push({ type: 'topping', topping });
   }
 
-  /** Toque en la repisa: guarda el completo de la tabla, lo devuelve o los intercambia. */
-  tapShelf(): void {
-    if (this.finished || !this.options.shelf) return;
-    if (!this.tray && !this.shelf) {
-      this.hint('Arma un completo y guárdalo en la repisa');
-      return;
-    }
-    [this.tray, this.shelf] = [this.shelf, this.tray];
-    this.events.push({ type: 'shelf' });
+  /** Toque en un lado de la tabla más grande: sigue armando ese completo. */
+  tapTray(index: number): void {
+    if (this.finished || !this.options.bigBoard || !this.trays[index]) return;
+    this.activeTray = index;
+    this.events.push({ type: 'switchTray' });
   }
 
   tapDrink(drink: DrinkId): void {
@@ -374,16 +390,13 @@ export class Game {
     if (!this.tray && !this.heldDrink) return;
     this.tray = null;
     this.heldDrink = null;
+    this.focusOther((t) => t !== null);
     this.events.push({ type: 'trash' });
   }
 
   /** Receta que coincide exactamente con lo que hay en la tabla, si existe. */
   trayRecipe(): RecipeId | null {
     return recipeOf(this.tray);
-  }
-
-  shelfRecipe(): RecipeId | null {
-    return recipeOf(this.shelf);
   }
 
   serve(seatIndex: number): void {
@@ -393,11 +406,10 @@ export class Game {
 
     let delivered = false;
 
-    // Si el completo de la tabla no es el que pidió, se le entrega el de la repisa cuando sí coincide.
-    const fromShelf = !c.gotCompleto && this.shelf && recipeOf(this.shelf) === c.recipe && recipeOf(this.tray) !== c.recipe;
-    if (fromShelf) {
+    // Si el completo activo no es el que pidió, se le entrega el del otro lado de la tabla cuando sí coincide.
+    if (!c.gotCompleto && recipeOf(this.tray) !== c.recipe && recipeOf(this.otherTray) === c.recipe) {
       c.gotCompleto = true;
-      this.shelf = null;
+      this.trays[1 - this.activeTray] = null;
       delivered = true;
     } else if (this.tray && !c.gotCompleto) {
       if (!this.tray.vienesa) {
@@ -410,6 +422,7 @@ export class Game {
       }
       c.gotCompleto = true;
       this.tray = null;
+      this.focusOther((t) => t !== null);
       delivered = true;
     }
 

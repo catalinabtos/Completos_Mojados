@@ -3,8 +3,8 @@
 
 import type { LevelConfig } from './data';
 
-export type UpgradeId = 'olla' | 'toalla' | 'fuego' | 'banquitos' | 'radio' | 'repisa';
-export type DecorId = 'toldo_verde' | 'toldo_azul' | 'banderitas' | 'macetero' | 'luces';
+export type UpgradeId = 'olla' | 'toalla' | 'fuego' | 'banquitos' | 'radio' | 'tabla';
+export type DecorId = 'toldo_verde' | 'toldo_azul' | 'banderitas' | 'macetero' | 'luces' | 'letrero' | 'foto';
 
 export interface UpgradeInfo {
   id: UpgradeId;
@@ -29,7 +29,7 @@ export const UPGRADES: Record<UpgradeId, UpgradeInfo> = {
   fuego: { id: 'fuego', name: 'Fuego parejo', effect: 'La vienesa aguanta 1,5 s más antes de reventarse', prices: [10000, 25000, 50000] },
   banquitos: { id: 'banquitos', name: 'Banquitos', effect: 'Los clientes esperan 2 s más', prices: [12000, 30000, 60000] },
   radio: { id: 'radio', name: 'Radio del carrito', effect: '+5 % de propina', prices: [20000, 45000, 80000] },
-  repisa: { id: 'repisa', name: 'Repisa', effect: 'Guarda un completo armado mientras preparas otro', prices: [30000] }
+  tabla: { id: 'tabla', name: 'Tabla más grande', effect: 'Arma dos completos a la vez', prices: [30000] }
 };
 
 export const DECOR: Record<DecorId, DecorInfo> = {
@@ -37,14 +37,16 @@ export const DECOR: Record<DecorId, DecorInfo> = {
   toldo_azul: { id: 'toldo_azul', name: 'Toldo azul', price: 8000, group: 'toldo' },
   banderitas: { id: 'banderitas', name: 'Banderitas', price: 5000 },
   macetero: { id: 'macetero', name: 'Macetero con cardenales', price: 12000 },
-  luces: { id: 'luces', name: 'Guirnalda de luces', price: 20000 }
+  luces: { id: 'luces', name: 'Guirnalda de luces', price: 20000 },
+  letrero: { id: 'letrero', name: 'Letrero del carrito', price: 15000 },
+  foto: { id: 'foto', name: 'Foto de la abuela Teresa', price: 30000 }
 };
 
 export type UpgradeLevels = Partial<Record<UpgradeId, number>>;
 
 export interface GameOptions {
-  /** Repisa para guardar un completo armado. */
-  shelf: boolean;
+  /** Tabla con espacio para dos panes y dos completos a la vez. */
+  bigBoard: boolean;
   /** Fracción extra de propina (0,05 = +5 %). */
   tipBonus: number;
 }
@@ -70,5 +72,61 @@ export function applyUpgrades(level: LevelConfig, levels: UpgradeLevels): LevelC
 }
 
 export function gameOptions(levels: UpgradeLevels): GameOptions {
-  return { shelf: upgradeLevel(levels, 'repisa') > 0, tipBonus: 0.05 * upgradeLevel(levels, 'radio') };
+  return { bigBoard: upgradeLevel(levels, 'tabla') > 0, tipBonus: 0.05 * upgradeLevel(levels, 'radio') };
+}
+
+// ───────────────────────── Alcancía ─────────────────────────
+
+/** Lo que el jugador tiene en su carrito; es parte del guardado. */
+export interface CartState {
+  /** Plata acumulada en la alcancía. */
+  wallet: number;
+  upgrades: UpgradeLevels;
+  /** Decoraciones compradas. */
+  decorOwned: DecorId[];
+  /** Decoraciones compradas que están puestas en el carrito. */
+  decorOn: DecorId[];
+}
+
+/** Compra el siguiente nivel de una mejora. Devuelve false si no alcanza o ya está al máximo. */
+export function buyUpgrade(cart: CartState, id: UpgradeId): boolean {
+  const price = nextUpgradePrice(cart.upgrades, id);
+  if (price === null || cart.wallet < price) return false;
+  cart.wallet -= price;
+  cart.upgrades[id] = upgradeLevel(cart.upgrades, id) + 1;
+  return true;
+}
+
+/** Pone o saca una decoración comprada; al ponerla saca las de su mismo grupo. */
+export function toggleDecor(cart: CartState, id: DecorId): void {
+  if (!cart.decorOwned.includes(id)) return;
+  if (cart.decorOn.includes(id)) {
+    cart.decorOn = cart.decorOn.filter((d) => d !== id);
+    return;
+  }
+  const group = DECOR[id].group;
+  cart.decorOn = [...cart.decorOn.filter((d) => !group || DECOR[d].group !== group), id];
+}
+
+/** Compra una decoración y la deja puesta. Devuelve false si no alcanza o ya es tuya. */
+export function buyDecor(cart: CartState, id: DecorId): boolean {
+  if (cart.decorOwned.includes(id) || cart.wallet < DECOR[id].price) return false;
+  cart.wallet -= DECOR[id].price;
+  cart.decorOwned = [...cart.decorOwned, id];
+  toggleDecor(cart, id);
+  return true;
+}
+
+/** Corrige un carrito leído del guardado: datos ausentes, viejos o dañados nunca rompen el juego. */
+export function sanitizeCart(raw: Partial<CartState>): CartState {
+  const wallet = typeof raw.wallet === 'number' && Number.isFinite(raw.wallet) ? Math.max(0, Math.floor(raw.wallet)) : 0;
+  const upgrades: UpgradeLevels = {};
+  for (const id of Object.keys(UPGRADES) as UpgradeId[]) {
+    const level = Math.floor(Number(raw.upgrades?.[id]));
+    if (level > 0) upgrades[id] = upgradeLevel({ [id]: level }, id);
+  }
+  const known = (list: unknown): DecorId[] => (Array.isArray(list) ? [...new Set(list)].filter((d): d is DecorId => d in DECOR) : []);
+  const cart: CartState = { wallet, upgrades, decorOwned: known(raw.decorOwned), decorOn: [] };
+  for (const id of known(raw.decorOn)) toggleDecor(cart, id);
+  return cart;
 }
