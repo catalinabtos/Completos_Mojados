@@ -24,7 +24,7 @@ Atiendes un carrito de completos talquino: vienesas en la olla, pan en la vapore
 - **Pago y propina:** más rápido = más propina; combos por atender seguido sin perder clientes.
 - **Meta de plata** por turno; 1–3 estrellas según cuánto la superes.
 
-Recetas actuales: Completo (tomate, chucrut, mayo), Italiano (tomate, palta, mayo), Dinámico (+ americana), Chacarero (tomate, poroto verde, ají, mayo). Bebidas: bebida, jugo, mote con huesillo.
+Recetas actuales: Completo (tomate, palta, chucrut, mayo), Italiano (tomate, palta, mayo), Dinámico (tomate, palta, americana, mayo), Chacarero (tomate, poroto verde, ají verde, mayo). Bebidas: bebida, jugo, mote con huesillo.
 
 ## Reglas de diseño
 - Una novedad por esquina como máximo, presentada en la pantalla de introducción.

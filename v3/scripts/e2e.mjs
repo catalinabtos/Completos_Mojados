@@ -28,7 +28,7 @@ function decide() {
   if (!g || g.finished) return null;
   const RECIPES = {
     italiano: ['tomate', 'palta', 'mayo'],
-    completo: ['tomate', 'chucrut', 'mayo'],
+    completo: ['tomate', 'palta', 'chucrut', 'mayo'],
     dinamico: ['tomate', 'palta', 'americana', 'mayo'],
     chacarero: ['tomate', 'poroto_verde', 'aji', 'mayo']
   };

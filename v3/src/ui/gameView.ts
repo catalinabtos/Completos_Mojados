@@ -1,10 +1,11 @@
 // Pantalla de juego: dibuja el estado del motor en el DOM y traduce toques en acciones.
 
 import { DRINKS, RECIPES, TOPPINGS, formatCLP, type LevelConfig } from '../engine/data';
-import { Game, type Customer, type GameEvent, type StationId, type Tray } from '../engine/game';
+import { Game, type Customer, type GameEvent, type StationId } from '../engine/game';
 import type { DecorId, GameOptions } from '../engine/upgrades';
 import { play } from './audio';
 import { CUSTOMER_ART, DECOR_ART, DRINK_ART, LEVEL_BG, STATION_ART, TOPPING_ART, UPGRADE_ART, img } from './art';
+import { completoEl } from './completo';
 import { el, svgIcon } from './dom';
 
 const SCENERY: Record<LevelConfig['scene'], string[]> = {
@@ -457,7 +458,7 @@ export class GameView {
     this.trayEls.forEach((food, i) => {
       const t = g.trays[i];
       food.parentElement!.classList.toggle('active', i === g.activeTray);
-      food.replaceChildren(t ? this.hotdog(t) : el('div', { class: 'tray-empty' }, this.trayEls.length > 1 ? '+ pan' : 'Saca un pan de la vaporera'));
+      food.replaceChildren(t ? completoEl(t) : el('div', { class: 'tray-empty' }, this.trayEls.length > 1 ? '+ pan' : 'Saca un pan de la vaporera'));
     });
     const recipe = g.trayRecipe();
     if (!tray) this.trayLabel.textContent = '';
@@ -465,11 +466,6 @@ export class GameView {
     this.trayLabel.classList.toggle('ok', !!recipe);
     this.heldDrinkEl.replaceChildren(...(g.heldDrink ? [img(DRINK_ART[g.heldDrink], DRINKS[g.heldDrink].name)] : []));
     this.heldDrinkEl.hidden = !g.heldDrink;
-  }
-
-  private hotdog(tray: Tray): HTMLElement {
-    const layers = tray.toppings.map((t) => el('div', { class: `layer layer-${t}`, style: `--c:${TOPPINGS[t].color}` }));
-    return el('div', { class: 'hotdog' }, el('div', { class: 'bun-back' }), tray.vienesa ? el('div', { class: 'sausage' }) : el('div', {}), el('div', { class: 'layers' }, ...layers), el('div', { class: 'bun-front' }));
   }
 
   private renderTutorial() {

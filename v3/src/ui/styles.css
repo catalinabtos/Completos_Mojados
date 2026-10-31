@@ -1528,7 +1528,6 @@ img {
   background: rgba(255, 244, 220, 0.45);
 }
 .tray-side .hotdog {
-  zoom: 0.46;
   align-self: center;
   justify-self: center;
 }
@@ -1568,65 +1567,15 @@ img {
 }
 .hotdog {
   position: relative;
-  width: 104px;
-  height: 52px;
+  width: min(124px, 100%);
+  aspect-ratio: 292 / 132;
   animation: pop-in 0.18s ease-out;
 }
-.bun-back,
-.bun-front {
+.hotdog img {
   position: absolute;
-  left: 0;
-  right: 0;
-  border-radius: 999px;
-  border: var(--borde-fino);
-}
-.bun-back {
-  top: 10px;
-  height: 28px;
-  background: #e9a95b;
-}
-.bun-front {
-  bottom: 0;
-  height: 22px;
-  background: #f6c983;
-}
-.sausage {
-  position: absolute;
-  left: -6px;
-  right: -6px;
-  top: 17px;
-  height: 14px;
-  border-radius: 999px;
-  background: var(--vienesa);
-  border: var(--borde-fino);
-}
-.layers {
-  position: absolute;
-  left: 10px;
-  right: 10px;
-  bottom: 18px;
-  display: flex;
-  flex-direction: column-reverse;
-}
-.layer {
-  height: 6px;
-  margin-top: -1px;
-  border-radius: 999px;
-  background: var(--c);
-  animation: pop-in 0.15s ease-out;
-}
-.layer-tomate {
-  background: radial-gradient(circle, #ff7a66 35%, var(--c) 36%) 0 0 / 12px 6px;
-}
-.layer-mayo {
-  height: 7px;
-  background: repeating-radial-gradient(circle at 50% 100%, #fffbea 0 4px, #f3e8c0 4px 5px);
-}
-@keyframes pop-in {
-  from {
-    transform: scale(0.6);
-    opacity: 0;
-  }
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 .trash-btn {
   margin-top: 4px;
