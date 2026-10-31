@@ -19,6 +19,9 @@
   --sombra: 0 6px 0 var(--cafe);
   --sombra-chica: 0 4px 0 var(--cafe);
   --toalla: linear-gradient(90deg, transparent 8px, #f6cfc7 8px 12px, transparent 12px calc(100% - 12px), #f6cfc7 calc(100% - 12px) calc(100% - 8px), transparent calc(100% - 8px)), var(--papel);
+  /* Contorno común para el arte de ingredientes y clientes */
+  --contorno: drop-shadow(1px 0 0 var(--cafe)) drop-shadow(-1px 0 0 var(--cafe)) drop-shadow(0 1px 0 var(--cafe)) drop-shadow(0 -1px 0 var(--cafe));
+  --contorno-grueso: drop-shadow(1.5px 0 0 var(--cafe)) drop-shadow(-1.5px 0 0 var(--cafe)) drop-shadow(0 1.5px 0 var(--cafe)) drop-shadow(0 -1.5px 0 var(--cafe));
   --madera: #d9a465;
   --madera-luz: #efc891;
   --madera-sombra: #b9823f;
@@ -978,8 +981,24 @@ img {
   background-repeat: no-repeat;
 }
 /* Los fondos ilustrados ya traen su clima: sólo se oscurece un poco el cielo de día nublado */
-.street.has-bg::before {
-  display: none;
+/* Suaviza el fondo para que clientes y pedidos queden en primer plano */
+.street.has-bg.has-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: rgba(255, 227, 168, 0.14);
+  -webkit-backdrop-filter: saturate(0.72) blur(0.8px);
+  backdrop-filter: saturate(0.72) blur(0.8px);
+}
+.face,
+.chip img,
+.station-art {
+  filter: var(--contorno-grueso);
+}
+.want img,
+.big-icon {
+  filter: var(--contorno);
 }
 .street.weather-nublado::before,
 .street.weather-lluvia::before,
@@ -1307,7 +1326,8 @@ img {
 
 .rain {
   position: absolute;
-  inset: 0;
+  inset: 0 0 44px;
+  overflow: hidden;
   pointer-events: none;
   z-index: 4;
 }
