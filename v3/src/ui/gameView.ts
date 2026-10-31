@@ -422,7 +422,7 @@ export class GameView {
 
       const ratio = c.patience / c.patienceMax;
       view.patienceFill.style.width = `${Math.max(0, ratio * 100)}%`;
-      view.patienceFill.style.background = ratio > 0.6 ? '#3fb950' : ratio > 0.3 ? '#f2a516' : '#e5484d';
+      view.patienceFill.style.background = `var(--${ratio > 0.6 ? 'palta' : ratio > 0.3 ? 'mostaza' : 'tomate'})`;
       const impatient = c.state === 'seated' && ratio < 0.35;
       view.root.classList.toggle('impatient', impatient);
       const art = CUSTOMER_ART[c.face % CUSTOMER_ART.length];

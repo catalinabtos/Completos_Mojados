@@ -7,8 +7,13 @@ import { DECOR_ART, DRINK_ART, MASCOT, TOPPING_ART, UPGRADE_ART, img } from './a
 import { button, el, svgIcon } from './dom';
 import type { SaveData } from './storage';
 
-function starsEl(n: number, cls = 'stars'): HTMLElement {
-  return el('span', { class: cls, 'aria-label': `${n} de 3 estrellas` }, '★'.repeat(n) + '☆'.repeat(3 - n));
+function starsEl(n: number, cls = 'stars', size = 20): HTMLElement {
+  const stars = [1, 2, 3].map((i) => {
+    const star = svgIcon('star', size);
+    if (i <= n) star.classList.add('star-on');
+    return star;
+  });
+  return el('span', { class: cls, role: 'img', 'aria-label': `${n} de 3 estrellas` }, ...stars);
 }
 
 function awning(): HTMLElement {
@@ -228,26 +233,29 @@ export function resultsScreen(game: Game, isRecord: boolean, hasNext: boolean, w
   return el(
     'div',
     { class: `screen results ${won ? 'won' : 'lost'}` },
-    img(won ? MASCOT.celebra : MASCOT.preocupada, '', 'result-art'),
-    el('h2', {}, won ? (level.id === LEVELS.length ? '¡Rey del completo talquino!' : '¡Turno superado!') : 'No llegaste a la meta'),
-    starsEl(stars, 'stars result-stars'),
     el(
       'div',
-      { class: 'result-card' },
-      el('div', { class: 'result-money' }, el('span', { class: 'money-big' }, formatCLP(game.money)), el('span', {}, `meta ${formatCLP(level.goal)}`)),
-      isRecord ? el('div', { class: 'record' }, '¡Nuevo récord!') : null,
-      el('div', { class: 'result-piggy' }, `A la alcancía: +${formatCLP(game.money)} · Total ${formatCLP(wallet)}`),
+      { class: 'results-body' },
+      img(won ? MASCOT.celebra : MASCOT.preocupada, '', 'result-art'),
+      el('h2', {}, won ? (level.id === LEVELS.length ? '¡Rey del completo talquino!' : '¡Turno superado!') : 'No llegaste a la meta'),
+      starsEl(stars, 'stars result-stars', 44),
       el(
         'div',
-        { class: 'result-stats' },
-        ...row('Atendidos', String(s.served)),
-        ...row('Se fueron enojados', String(s.lost)),
-        ...row('Propinas', formatCLP(s.tips)),
-        ...row('Mejor combo', `×${s.maxCombo}`),
-        ...row('Reventadas y aguados', String(s.ruined))
+        { class: 'result-card' },
+        el('div', { class: 'result-money' }, el('span', { class: 'money-big' }, formatCLP(game.money)), el('span', {}, `meta ${formatCLP(level.goal)}`)),
+        isRecord ? el('div', { class: 'record' }, '¡Nuevo récord!') : null,
+        el('div', { class: 'result-piggy' }, `A la alcancía: +${formatCLP(game.money)} · Total ${formatCLP(wallet)}`),
+        el(
+          'div',
+          { class: 'result-stats' },
+          ...row('Atendidos', String(s.served)),
+          ...row('Se fueron enojados', String(s.lost)),
+          ...row('Propinas', formatCLP(s.tips)),
+          ...row('Mejor combo', `×${s.maxCombo}`),
+          ...row('Reventadas y aguados', String(s.ruined))
+        )
       )
     ),
-    el('div', { class: 'spacer' }),
     el('div', { class: 'menu' }, primary, secondary.length > 1 ? el('div', { class: 'menu-row' }, ...secondary) : secondary[0])
   );
 }
