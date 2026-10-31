@@ -4,7 +4,7 @@ import { DRINKS, RECIPES, TOPPINGS, formatCLP, type LevelConfig } from '../engin
 import { Game, type Customer, type GameEvent, type StationId } from '../engine/game';
 import type { DecorId, GameOptions } from '../engine/upgrades';
 import { play } from './audio';
-import { CUSTOMER_ART, DECOR_ART, DRINK_ART, LEVEL_BG, STATION_ART, TOPPING_ART, UPGRADE_ART, img } from './art';
+import { CUSTOMER_ART, DECOR_ART, DRINK_ART, LEVEL_BG, PHOTO_BG, STATION_ART, TOPPING_ART, UPGRADE_ART, img } from './art';
 import { completoEl } from './completo';
 import { el, svgIcon } from './dom';
 
@@ -120,7 +120,7 @@ export class GameView {
     }
     const street = el(
       'section',
-      { class: `street scene-${level.scene} weather-${level.weather}${LEVEL_BG[level.id] ? ' has-bg' : ''}${this.toldoClass}` },
+      { class: `street scene-${level.scene} weather-${level.weather}${LEVEL_BG[level.id] ? ' has-bg' : ''}${PHOTO_BG.has(level.id) ? ' has-foto' : ''}${this.toldoClass}` },
       el('div', { class: 'awning' }),
       el('div', { class: 'cart-post left' }),
       el('div', { class: 'cart-post right' }),

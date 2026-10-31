@@ -3,7 +3,7 @@
 > Documento vivo. Las secciones marcadas **[propuesta]** esperan la aprobación de Catalina.
 
 ## El escenario
-Talca, capital del Maule. Calles con número y orientación (1 Sur, 5 Oriente), la Plaza de Armas, el Mercado Central, la Universidad de Talca, la Estación y el ramal a Constitución, el Estadio Fiscal y Rangers, la Costanera del Río Claro, las ramadas del 18.
+Talca, capital del Maule. Calles con número y orientación (1 Sur, 5 Oriente), la Plaza de Armas, el CREA, la Universidad de Talca, la Estación y el ramal a Constitución, el Estadio Fiscal y Rangers, la Costanera del Río Claro, las ramadas del 18.
 
 ## El completo talquino (la regla de oro)
 - La **vienesa va al agua**, en una olla caliente: por eso son "completos mojados".
@@ -13,7 +13,7 @@ Talca, capital del Maule. Calles con número y orientación (1 Sur, 5 Oriente), 
 ## Las esquinas actuales
 1. 5 Oriente con 2 Sur — el primer día.
 2. Plaza de Armas — oficinistas a la hora de almuerzo.
-3. Mercado Central — caseros con sed.
+3. CREA — caseros con sed.
 4. Universidad de Talca — semana de pruebas.
 5. Estación de Talca — antes del ramal a Constitución.
 6. Estadio Fiscal — partido de Rangers con lluvia.

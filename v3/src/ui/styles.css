@@ -466,6 +466,11 @@ img {
   padding: 12px 14px;
   box-shadow: var(--sombra-chica);
 }
+.howto-credit {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+  opacity: 0.8;
+}
 .howto-num {
   flex: none;
   width: 34px;
@@ -990,6 +995,12 @@ img {
   background: rgba(255, 227, 168, 0.14);
   -webkit-backdrop-filter: saturate(0.72) blur(0.8px);
   backdrop-filter: saturate(0.72) blur(0.8px);
+}
+/* Las fotos reales mantienen sus colores vivos */
+.street.has-foto.has-foto.has-foto::before {
+  background: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 .face,
 .chip img,
@@ -1887,5 +1898,14 @@ img {
   .result-stats {
     gap: 2px 12px;
     font-size: 13px;
+  }
+}
+/* Teléfonos muy bajos: la calle cede espacio para que la hielera quepa completa */
+@media (max-height: 600px) {
+  .street {
+    min-height: 176px;
+  }
+  .seat {
+    height: 136px;
   }
 }

@@ -113,8 +113,11 @@ export const DECOR_ART: Partial<Record<DecorId, string>> = {
   foto: decoFoto
 };
 
-/** Fondo ilustrado de cada nivel (generados con Canva), por id de nivel. */
+/** Fondo de cada nivel (ilustraciones de Canva o fotos reales), por id de nivel. */
 export const LEVEL_BG: Record<number, string> = { 1: bg1, 2: bg2, 3: bg3, 4: bg4, 5: bg5, 6: bg6, 7: bg7, 8: bg8, 9: bg9, 10: bg10 };
+
+/** Niveles cuyo fondo es una foto real: conserva sus colores, sin el velo de los ilustrados. */
+export const PHOTO_BG = new Set([3]);
 
 export const MASCOT = { feliz: mascotaFeliz, celebra: mascotaCelebra, preocupada: mascotaPreocupada };
 

@@ -39,11 +39,17 @@ El completo sonriente (`v3/src/ui/art/mascota-*.svg`): italiano con tomate en cu
 
 ## Formatos
 - **SVG** para mascota, íconos, ingredientes, estaciones e interfaz (nítido a cualquier tamaño).
-- **JPG** solo para fondos de esquinas (1080 px de ancho mínimo).
+- **JPG** solo para fondos de esquinas (1080 px de ancho mínimo; para fotos, 1500 px).
 - **WebP** de Canva solo como transición: la meta es migrar personajes e ingredientes a SVG.
 - Nada que se muestre a más del tamaño de su archivo (debe ser ≥ 3× su tamaño en pantalla si es imagen de mapa de bits).
 
+## Fondos con fotografía real
+Los fondos de esquinas pueden ser fotos reales de Talca y sus alrededores. El contraste entre personajes dibujados y lugar real es intencional: no se disimula con filtros de "pintura". Es la única excepción a la regla contra el estilo realista; personajes, objetos e interfaz siguen siendo ilustración.
+- Preferir fotos propias de Catalina. Si son de terceros, usar licencias libres y guardar autor y licencia.
+- Formato vertical, con el lugar centrado y el suelo despejado abajo: ahí se paran los clientes.
+- Sin logos ni marcas visibles, sin caras reconocibles y sin patentes legibles.
+
 ## Lo que no se hace
 - Nada sugerente: formas, gotas o salsas que puedan leerse con doble sentido (por eso la mayo es frasco con cuchara, no pomo).
-- Estilo realista, 3D, brillos de IA, manos con dedos raros, texto inventado dentro de las imágenes.
+- Estilo realista (salvo fotos reales en fondos de esquinas), 3D, brillos de IA, manos con dedos raros, texto inventado dentro de las imágenes.
 - Logos o marcas reales (bebidas, equipos de fútbol): se usan colores, no escudos.

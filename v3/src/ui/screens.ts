@@ -60,6 +60,7 @@ export function howToScreen(onBack: () => void): HTMLElement {
       'div',
       { class: 'panel-body' },
       el('ol', { class: 'howto' }, ...steps.map(([title, text], i) => el('li', {}, el('span', { class: 'howto-num' }, String(i + 1)), el('div', {}, el('strong', {}, title), el('p', {}, text))))),
+      el('p', { class: 'howto-credit' }, 'Foto de la esquina 3: «CREA Talca», de ElPabloRN (Wikimedia Commons), recortada y retocada. Licencia CC BY 4.0: creativecommons.org/licenses/by/4.0'),
       button('¡Entendido!', onBack, 'btn primary big')
     )
   );

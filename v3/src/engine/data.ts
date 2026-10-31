@@ -151,9 +151,9 @@ export const LEVELS: LevelConfig[] = [
   },
   {
     id: 3,
-    name: 'Mercado Central',
-    place: 'Calle 1 Sur, sábado en la mañana',
-    intro: 'Los caseros del mercado llegan con sed. Ahora también se venden bebidas y jugos.',
+    name: 'CREA',
+    place: '11 Oriente con la Alameda, sábado en la mañana',
+    intro: 'Los caseros del CREA llegan con sed. Ahora también se venden bebidas y jugos.',
     duration: 130,
     goal: 35000,
     seats: 3,
