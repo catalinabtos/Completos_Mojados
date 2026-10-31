@@ -19,6 +19,9 @@
   --sombra: 0 6px 0 var(--cafe);
   --sombra-chica: 0 4px 0 var(--cafe);
   --toalla: linear-gradient(90deg, transparent 8px, #f6cfc7 8px 12px, transparent 12px calc(100% - 12px), #f6cfc7 calc(100% - 12px) calc(100% - 8px), transparent calc(100% - 8px)), var(--papel);
+  --madera: #d9a465;
+  --madera-luz: #efc891;
+  --madera-sombra: #b9823f;
   --radio-chico: 10px;
   --radio: 14px;
   --radio-grande: 18px;
@@ -196,7 +199,7 @@ img {
 }
 .decor-macetero,
 .decor-radio {
-  bottom: 4px;
+  bottom: 30px;
   width: 38px;
   height: 38px;
   z-index: 3;
@@ -232,7 +235,7 @@ img {
 }
 .decor-foto {
   right: 44px;
-  bottom: 4px;
+  bottom: 30px;
   width: 34px;
   height: 38px;
   padding: 2px;
@@ -1071,7 +1074,7 @@ img {
   grid-template-columns: repeat(var(--seats), minmax(0, 1fr));
   gap: 4px;
   padding: 0 6px;
-  z-index: 2;
+  z-index: 3;
 }
 .seat {
   position: relative;
@@ -1115,8 +1118,20 @@ img {
     padding: 2px 3px 3px;
     margin-bottom: 5px;
   }
-  .stool {
-    display: none;
+}
+/* Calle alta: los clientes se acercan al mesón */
+@container (min-height: 340px) {
+  .seat {
+    max-height: 300px;
+  }
+  .person {
+    width: 124px;
+  }
+  .seats[style*='--seats:4'] .person {
+    width: 88px;
+  }
+  .seats[style*='--seats:5'] .person {
+    width: 70px;
   }
 }
 .seat .bubble,
@@ -1204,6 +1219,7 @@ img {
 .person {
   position: relative;
   width: 76px;
+  margin-bottom: -3px;
 }
 .face {
   display: block;
@@ -1221,35 +1237,59 @@ img {
     transform: translateX(2px) rotate(3deg);
   }
 }
+/* La paciencia se lee sobre la madera del mesón */
 .patience {
+  position: absolute;
+  left: 13%;
+  bottom: -13px;
+  z-index: 5;
   width: 74%;
   height: 10px;
   background: #e0d4bc;
   border: 2px solid var(--cafe);
   border-radius: 99px;
   overflow: hidden;
-  margin-top: 3px;
 }
 .patience-fill {
   height: 100%;
 }
-.stool {
-  width: 34px;
-  height: 10px;
-  margin-top: 3px;
-  background: #5b6470;
-  border-radius: 6px 6px 2px 2px;
-}
-
 .counter {
   position: relative;
   z-index: 2;
-  height: 30px;
+  height: 48px;
+  padding-top: 16px;
   display: grid;
   place-items: center;
   background: repeating-linear-gradient(90deg, var(--tomate) 0 26px, var(--mayo) 26px 52px);
-  border-top: 5px solid var(--mostaza);
   border-bottom: var(--borde);
+}
+/* Cubierta de madera del mesón */
+.counter::before {
+  content: '';
+  position: absolute;
+  left: -4px;
+  right: -4px;
+  top: 0;
+  height: 17px;
+  background: linear-gradient(var(--madera-luz) 0 5px, var(--madera) 5px);
+  border-top: var(--borde-fino);
+  border-bottom: var(--borde-fino);
+}
+/* Postes del carrito, que enmarcan la calle */
+.cart-post {
+  position: absolute;
+  top: 14px;
+  bottom: 44px;
+  width: 15px;
+  background: linear-gradient(90deg, var(--madera-luz) 0 4px, var(--madera) 4px 11px, var(--madera-sombra) 11px);
+  border: var(--borde-fino);
+  z-index: 2;
+}
+.cart-post.left {
+  left: -3px;
+}
+.cart-post.right {
+  right: -3px;
 }
 .counter span {
   max-width: 90%;

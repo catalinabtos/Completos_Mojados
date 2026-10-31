@@ -122,6 +122,8 @@ export class GameView {
       'section',
       { class: `street scene-${level.scene} weather-${level.weather}${LEVEL_BG[level.id] ? ' has-bg' : ''}${this.toldoClass}` },
       el('div', { class: 'awning' }),
+      el('div', { class: 'cart-post left' }),
+      el('div', { class: 'cart-post right' }),
       ...this.createDecor(),
       LEVEL_BG[level.id] ? null : el('div', { class: 'scenery' }, ...SCENERY[level.scene].map((icon) => el('span', {}, icon))),
       this.comboEl,
@@ -231,7 +233,7 @@ export class GameView {
     const patienceFill = el('div', { class: 'patience-fill' });
     const patience = el('div', { class: 'patience' }, patienceFill);
     const person = el('div', { class: 'person' }, face);
-    const root = el('button', { class: 'seat empty', 'aria-label': `Cliente ${seat + 1}` }, bubble, person, patience, el('div', { class: 'stool' }));
+    const root = el('button', { class: 'seat empty', 'aria-label': `Cliente ${seat + 1}` }, bubble, person, patience);
     this.tap(root, () => this.game.serve(seat));
     return { root, person, face, bubble, bubbleTitle, bubbleItems, patience, patienceFill, shownId: null, key: '' };
   }
