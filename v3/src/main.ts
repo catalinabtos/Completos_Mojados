@@ -6,12 +6,13 @@ import './ui/styles.css';
 
 import { LEVELS, starsFor, type LevelConfig } from './engine/data';
 import type { Game } from './engine/game';
+import { STORY, STORY_ENDING } from './engine/story';
 import { applyUpgrades, buyDecor, buyUpgrade, gameOptions, toggleDecor } from './engine/upgrades';
 import { MASCOT } from './ui/art';
 import { play, setSoundEnabled, unlockAudio } from './ui/audio';
 import { button } from './ui/dom';
 import { GameView } from './ui/gameView';
-import { cartScreen, howToScreen, introScreen, levelSelectScreen, overlay, recipesPanel, resetBody, resultsScreen, titleScreen } from './ui/screens';
+import { cartScreen, howToScreen, introScreen, levelSelectScreen, overlay, recipesPanel, resetBody, resultsScreen, storyScreen, titleScreen } from './ui/screens';
 import { loadSave, resetSave, writeSave } from './ui/storage';
 
 const app = document.getElementById('app')!;
@@ -88,8 +89,16 @@ function confirmReset() {
   app.append(currentOverlay);
 }
 
+/** Cada tarjeta de historia sale una sola vez; después sigue directo a `next`. */
+function withStory(id: number, next: () => void) {
+  if (save.storySeen.includes(id)) return next();
+  save.storySeen.push(id);
+  writeSave(save);
+  show(storyScreen(STORY[id], next));
+}
+
 function goIntro(level: LevelConfig) {
-  show(introScreen(level, () => startLevel(level), goLevels));
+  withStory(level.id, () => show(introScreen(level, () => startLevel(level), goLevels)));
 }
 
 /** Parte un turno. `level` es siempre la esquina base: las mejoras se aplican solo aquí. */
@@ -145,17 +154,20 @@ function finish(level: LevelConfig, game: Game) {
   writeSave(save);
 
   const next = LEVELS.find((l) => l.id === level.id + 1);
-  show(
-    resultsScreen(
-      game,
-      isRecord,
-      !!next,
-      save.wallet,
-      () => next && goIntro(next),
-      () => startLevel(level),
-      goLevels
-    )
-  );
+  const results = () =>
+    show(
+      resultsScreen(
+        game,
+        isRecord,
+        !!next,
+        save.wallet,
+        () => next && goIntro(next),
+        () => startLevel(level),
+        goLevels
+      )
+    );
+  if (game.won && !next) withStory(STORY_ENDING, results);
+  else results();
 }
 
 // El primer toque habilita el audio en iOS.

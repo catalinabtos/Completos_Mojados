@@ -2,8 +2,9 @@
 
 import { DRINKS, LEVELS, RECIPES, TOPPINGS, formatCLP, starsFor, type LevelConfig, type RecipeId } from '../engine/data';
 import type { Game } from '../engine/game';
+import { SPEAKERS, type StoryCard } from '../engine/story';
 import { DECOR, UPGRADES, nextUpgradePrice, upgradeLevel, type DecorId, type UpgradeId } from '../engine/upgrades';
-import { DECOR_ART, DRINK_ART, MASCOT, TOPPING_ART, UPGRADE_ART, img } from './art';
+import { DECOR_ART, DRINK_ART, MASCOT, SPEAKER_ART, TOPPING_ART, UPGRADE_ART, img } from './art';
 import { button, el, svgIcon } from './dom';
 import type { SaveData } from './storage';
 
@@ -185,6 +186,21 @@ export function recipesPanel(level: LevelConfig): HTMLElement {
           el('div', { class: 'recipe-items' }, ...level.drinks.map((d) => el('span', { class: 'chip' }, img(DRINK_ART[d]), `${DRINKS[d].name} ${formatCLP(DRINKS[d].price)}`)))
         )
       : null
+  );
+}
+
+export function storyScreen(card: StoryCard, onContinue: () => void): HTMLElement {
+  return el(
+    'div',
+    { class: 'screen story-screen' },
+    awning(),
+    el(
+      'div',
+      { class: 'story-body' },
+      el('div', { class: 'story-bubble' }, el('strong', {}, SPEAKERS[card.speaker]), el('p', {}, card.text)),
+      img(SPEAKER_ART[card.speaker], '', `story-art${card.speaker === 'teresa' ? ' mascota' : ''}`),
+      button('Seguir', onContinue, 'btn primary big')
+    )
   );
 }
 

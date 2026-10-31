@@ -2,6 +2,7 @@
 // Fondos, ingredientes, bebidas, clientes y estaciones se generaron con Canva; la mascota está dibujada en vector para que se vea nítida en grande.
 
 import type { DrinkId, ToppingId } from '../engine/data';
+import type { Speaker } from '../engine/story';
 import type { DecorId, UpgradeId } from '../engine/upgrades';
 import bebida from './art/canva/bebida.webp';
 import jugo from './art/canva/jugo.webp';
@@ -120,6 +121,19 @@ export const LEVEL_BG: Record<number, string> = { 1: bg1, 2: bg2, 3: bg3, 4: bg4
 export const PHOTO_BG = new Set([3]);
 
 export const MASCOT = { feliz: mascotaFeliz, celebra: mascotaCelebra, preocupada: mascotaPreocupada };
+
+/** Quién acompaña cada tarjeta de historia. La abuela Teresa aún no tiene dibujo: sus recados los trae la mascota. */
+export const SPEAKER_ART: Record<Speaker, string> = {
+  teresa: mascotaFeliz,
+  rosa: abuelita,
+  marta: casera,
+  javi: estudiante,
+  lucho: hincha,
+  fuenzalida: oficinista,
+  pato: trabajador,
+  hernan: huaso,
+  benja: nino
+};
 
 export function img(src: string, alt = '', cls = ''): HTMLImageElement {
   const image = document.createElement('img');

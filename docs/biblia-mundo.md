@@ -25,23 +25,24 @@ Talca, capital del Maule. Calles con número y orientación (1 Sur, 5 Oriente), 
 ## Los clientes
 Los ocho tipos actuales: estudiante, abuelita, hincha, trabajador, oficinista, casera, niño y huaso.
 
-### Nombres y personalidades [propuesta]
+### Nombres y personalidades
 | Tipo | Nombre | Personalidad | Frase típica |
 |---|---|---|---|
-| Abuelita | Doña Rosa | Conoce a todos, cuenta chismes del barrio, siempre deja propina. | "¿Y tu mamá, mijito?" |
+| Abuelita | Doña Rosa | Conoce a todos, cuenta chismes del barrio, siempre deja propina. | "¿Y cómo está tu mamá?" |
 | Estudiante | Javi | Siempre atrasada a una prueba, paga con monedas. | "¡Rápido que tengo control!" |
 | Hincha | Don Lucho | Rojinegro de toda la vida, optimista sin razón. | "Este año sí subimos." |
 | Trabajador | Pato | Sale de turno con hambre de verdad, pide doble. | "Bien cargadito, por fa." |
 | Oficinista | Sr. Fuenzalida | Formal, mira el reloj, pero es buena persona. | "Tengo reunión en diez." |
-| Casera | Señora Marta | Vende verduras en el mercado y opina de la palta. | "Esa palta está buena, ¿de dónde es?" |
-| Niño | Benja | Viene con su abuela o solo con monedas contadas. | "¿Me alcanza para uno?" |
+| Casera | Señora Marta | Vende verduras en el CREA y opina de la palta. | "Esa palta está buena, ¿de dónde es?" |
+| Niño | Benja | Nieto de Doña Rosa. Viene con ella o solo, con monedas contadas. | "¿Me alcanza para uno?" |
 | Huaso | Don Hernán | Viene del campo al pueblo, tranquilo y ceremonioso. | "Buenas tardes, joven." |
 
-## La historia ligera [propuesta]
+## La historia ligera
 **La familia del carrito.** La abuela Teresa tuvo el carrito por 30 años en 5 Oriente con 2 Sur. Ahora tú (la nieta o nieto, sin género definido, para que cualquiera se identifique) lo heredas. Tu meta es que el carrito vuelva a ser "el mejor de Talca" y llegar a la Feria del Completo.
 - La historia se cuenta en tarjetas cortas entre esquinas (2–3 líneas, con la mascota o un cliente).
 - Los clientes recurrentes reaparecen y sus pequeñas tramas avanzan (Don Lucho y Rangers, Javi y sus pruebas).
-- La abuela Teresa aparece de vez en cuando con consejos que son, en realidad, el tutorial.
+- La abuela Teresa aparece de vez en cuando con consejos que son, en realidad, el tutorial. Aún no tiene dibujo: sus tarjetas son recados que trae la mascota.
+- Los textos de las tarjetas están en `v3/src/engine/story.ts`.
 
 ## Tono de los textos
 - Español de Chile cercano: "mijito", "al tiro", "harto", "cachai" con moderación. Que lo entienda alguien de fuera.

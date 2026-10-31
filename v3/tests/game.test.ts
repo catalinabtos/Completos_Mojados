@@ -3,6 +3,7 @@ import { LEVELS, RECIPES, starsFor } from '../src/engine/data';
 import { Game } from '../src/engine/game';
 import { simulate } from '../src/engine/bot';
 import { DECOR, UPGRADES, applyUpgrades, buyDecor, buyUpgrade, gameOptions, sanitizeCart, toggleDecor, type CartState, type UpgradeLevels } from '../src/engine/upgrades';
+import { STORY, STORY_ENDING } from '../src/engine/story';
 import { parseSave, resetSave } from '../src/ui/storage';
 
 /** Ritmo (segundos por acción) con el que cada nivel debe poder ganarse. */
@@ -133,6 +134,21 @@ describe('levels are playable', () => {
       }
     });
   }
+});
+
+describe('la historia', () => {
+  it('has a short card for every level and for the ending', () => {
+    for (const id of [...LEVELS.map((l) => l.id), STORY_ENDING]) {
+      expect(STORY[id].text.length).toBeGreaterThan(0);
+      expect(STORY[id].text.length).toBeLessThanOrEqual(130);
+    }
+  });
+
+  it('starts unseen in an old save and comes back after a reset', () => {
+    expect(parseSave(JSON.stringify({ unlocked: 4 })).storySeen).toEqual([]);
+    expect(parseSave(JSON.stringify({ storySeen: 'x' })).storySeen).toEqual([]);
+    expect(resetSave({ ...parseSave(null), storySeen: [1, 2] }).storySeen).toEqual([]);
+  });
 });
 
 describe('el carrito crece', () => {

@@ -88,6 +88,7 @@ const LEVEL_IDS = (process.env.LEVELS ?? '1,2,3,4,5,6,7,8,9,10').split(',').map(
 const results = [];
 for (const level of LEVEL_IDS) {
   await page.locator('.stop').nth(level - 1).click();
+  await page.locator('.story-screen .btn').click({ timeout: 500 }).catch(() => {});
   await page.screenshot({ path: `${shots}/1${level}-intro-nivel-${level}.png` });
   await page.getByText('¡A trabajar!').click();
   await page.waitForFunction(() => !!window.__cmGame);
@@ -95,6 +96,7 @@ for (const level of LEVEL_IDS) {
   let shot = false;
   const start = Date.now();
   while (!(await page.locator('.results').count())) {
+    if (await page.locator('.story-screen').count()) await page.locator('.story-screen .btn').click();
     const action = await page.evaluate(decide);
     if (action) await page.locator(action.sel).nth(action.idx).click({ timeout: 2000, force: true }).catch(() => {});
     await page.waitForTimeout(300);

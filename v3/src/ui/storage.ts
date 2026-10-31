@@ -8,12 +8,13 @@ export interface SaveData extends CartState {
   stars: Record<number, number>;
   sound: boolean;
   tutorialDone: boolean;
+  storySeen: number[];
 }
 
 const KEY = 'completos-mojados-save-v1';
 
 function defaults(): SaveData {
-  return { unlocked: 1, best: {}, stars: {}, sound: true, tutorialDone: false, wallet: 0, upgrades: {}, decorOwned: [], decorOn: [] };
+  return { unlocked: 1, best: {}, stars: {}, sound: true, tutorialDone: false, storySeen: [], wallet: 0, upgrades: {}, decorOwned: [], decorOn: [] };
 }
 
 /** Lee un guardado; los de versiones anteriores, sin alcancía, parten con ella vacía. */
@@ -21,7 +22,7 @@ export function parseSave(raw: string | null): SaveData {
   if (!raw) return defaults();
   try {
     const data = JSON.parse(raw) as Partial<SaveData>;
-    return { ...defaults(), ...data, ...sanitizeCart(data) };
+    return { ...defaults(), ...data, ...sanitizeCart(data), storySeen: Array.isArray(data.storySeen) ? data.storySeen : [] };
   } catch {
     return defaults();
   }
