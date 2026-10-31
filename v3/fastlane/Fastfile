@@ -34,7 +34,8 @@ platform :ios do
       clean: true,
       xcargs: "#{auth} DEVELOPMENT_TEAM=#{team_id} PRODUCT_BUNDLE_IDENTIFIER=#{bundle_id} " \
               "CODE_SIGN_STYLE=Automatic CURRENT_PROJECT_VERSION=#{ENV.fetch('BUILD_NUMBER', '1')}",
-      export_xcargs: auth,
+      # fastlane agrega la API key al exportar; repetirla hace fallar a xcodebuild.
+      export_xcargs: '-allowProvisioningUpdates',
       export_options: {
         signingStyle: 'automatic',
         teamID: team_id,
