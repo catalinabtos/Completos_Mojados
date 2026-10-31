@@ -125,6 +125,13 @@ describe('levels are playable', () => {
         for (const t of RECIPES[recipe].toppings) expect(level.toppings).toContain(t);
       }
     });
+
+    it(`level ${level.id} shows the counter in the same order as the orders`, () => {
+      for (const recipe of Object.keys(level.recipes) as (keyof typeof RECIPES)[]) {
+        const asked = RECIPES[recipe].toppings;
+        expect(level.toppings.filter((t) => asked.includes(t))).toEqual(asked);
+      }
+    });
   }
 });
 

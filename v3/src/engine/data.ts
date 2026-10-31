@@ -144,7 +144,7 @@ export const LEVELS: LevelConfig[] = [
     recipes: { completo: 3, italiano: 2 },
     drinks: [],
     drinkChance: 0,
-    toppings: ['tomate', 'chucrut', 'palta', 'mayo'],
+    toppings: ['tomate', 'palta', 'chucrut', 'mayo'],
     scene: 'plaza',
     weather: 'sol',
     newThings: ['Italiano']
@@ -165,7 +165,7 @@ export const LEVELS: LevelConfig[] = [
     recipes: { completo: 3, italiano: 2 },
     drinks: ['bebida', 'jugo'],
     drinkChance: 0.35,
-    toppings: ['tomate', 'chucrut', 'palta', 'mayo'],
+    toppings: ['tomate', 'palta', 'chucrut', 'mayo'],
     scene: 'mercado',
     weather: 'nublado',
     newThings: ['Bebidas']
@@ -186,7 +186,7 @@ export const LEVELS: LevelConfig[] = [
     recipes: { completo: 3, italiano: 2, dinamico: 2 },
     drinks: ['bebida', 'jugo'],
     drinkChance: 0.3,
-    toppings: ['tomate', 'chucrut', 'palta', 'americana', 'mayo'],
+    toppings: ['tomate', 'palta', 'chucrut', 'americana', 'mayo'],
     scene: 'universidad',
     weather: 'sol',
     newThings: ['Dinámico', '4 puestos']
@@ -207,7 +207,7 @@ export const LEVELS: LevelConfig[] = [
     recipes: { completo: 3, italiano: 2, dinamico: 2 },
     drinks: ['bebida', 'jugo'],
     drinkChance: 0.35,
-    toppings: ['tomate', 'chucrut', 'palta', 'americana', 'mayo'],
+    toppings: ['tomate', 'palta', 'chucrut', 'americana', 'mayo'],
     scene: 'estacion',
     weather: 'nublado',
     newThings: ['Clientes apurados']
@@ -228,7 +228,7 @@ export const LEVELS: LevelConfig[] = [
     recipes: { completo: 3, italiano: 2, dinamico: 1, chacarero: 2 },
     drinks: ['bebida', 'jugo'],
     drinkChance: 0.35,
-    toppings: ['tomate', 'chucrut', 'palta', 'americana', 'poroto_verde', 'aji', 'mayo'],
+    toppings: ['tomate', 'palta', 'chucrut', 'americana', 'poroto_verde', 'aji', 'mayo'],
     scene: 'estadio',
     weather: 'lluvia',
     newThings: ['Chacarero', 'Lluvia']
@@ -249,7 +249,7 @@ export const LEVELS: LevelConfig[] = [
     recipes: { completo: 3, italiano: 3, dinamico: 2, chacarero: 1 },
     drinks: ['bebida', 'jugo', 'mote'],
     drinkChance: 0.6,
-    toppings: ['tomate', 'chucrut', 'palta', 'americana', 'poroto_verde', 'aji', 'mayo'],
+    toppings: ['tomate', 'palta', 'chucrut', 'americana', 'poroto_verde', 'aji', 'mayo'],
     scene: 'rio',
     weather: 'sol',
     newThings: ['Mote con huesillo', '5 puestos']
@@ -270,7 +270,7 @@ export const LEVELS: LevelConfig[] = [
     recipes: { completo: 4, italiano: 2, dinamico: 2, chacarero: 2 },
     drinks: ['bebida', 'jugo'],
     drinkChance: 0.3,
-    toppings: ['tomate', 'chucrut', 'palta', 'americana', 'poroto_verde', 'aji', 'mayo'],
+    toppings: ['tomate', 'palta', 'chucrut', 'americana', 'poroto_verde', 'aji', 'mayo'],
     scene: 'calle',
     weather: 'tormenta',
     newThings: ['Panes que se aguan más rápido']
@@ -291,7 +291,7 @@ export const LEVELS: LevelConfig[] = [
     recipes: { completo: 3, italiano: 3, dinamico: 2, chacarero: 2 },
     drinks: ['bebida', 'jugo', 'mote'],
     drinkChance: 0.45,
-    toppings: ['tomate', 'chucrut', 'palta', 'americana', 'poroto_verde', 'aji', 'mayo'],
+    toppings: ['tomate', 'palta', 'chucrut', 'americana', 'poroto_verde', 'aji', 'mayo'],
     scene: 'feria',
     weather: 'sol',
     newThings: ['4 puestos en olla y vaporera']
@@ -312,7 +312,7 @@ export const LEVELS: LevelConfig[] = [
     recipes: { completo: 3, italiano: 3, dinamico: 2, chacarero: 2 },
     drinks: ['bebida', 'jugo', 'mote'],
     drinkChance: 0.45,
-    toppings: ['tomate', 'chucrut', 'palta', 'americana', 'poroto_verde', 'aji', 'mayo'],
+    toppings: ['tomate', 'palta', 'chucrut', 'americana', 'poroto_verde', 'aji', 'mayo'],
     scene: 'feria',
     weather: 'noche',
     newThings: ['Turno final']
