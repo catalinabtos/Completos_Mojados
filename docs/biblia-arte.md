@@ -54,7 +54,7 @@ El completo sonriente se redibuja en pixel art sin perder lo que lo identifica: 
 ## Formatos
 - **PNG** sin suavizado para todo el arte, en su tamaño real de píxeles. El juego lo amplía.
 - Los tamaños de cada pieza están en la guía de estilo.
-- SVG, WebP de Canva y JPG actuales quedan como transición hasta tener el arte nuevo.
+- El arte del juego, el ícono y la pantalla de inicio son todos PNG.
 
 ## Fondos con fotografía real (en pausa)
 Catalina reevaluará las fotos más adelante. Si se retoman, deben convertirse a la grilla y paleta del juego o contrastar de forma intencional. Preferir fotos propias; si son de terceros, usar licencias libres y guardar autor y licencia. Sin logos, caras reconocibles ni patentes legibles.

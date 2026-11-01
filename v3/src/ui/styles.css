@@ -11,8 +11,8 @@
   --cafe: #4a2511;
   --mayo: #fff4dc;
   --mostaza: #f4a62a;
-  --tomate: #e2412f;
-  --palta: #5fa83a;
+  --tomate: #c8321f;
+  --palta: #3f7f22;
   --palta-oscura: #3f7d22;
   --vienesa: #e0664c;
   --agua: #6ec3ee;
@@ -226,6 +226,7 @@ img {
 }
 .decor-macetero {
   left: 2px;
+  z-index: 5;
 }
 .decor-radio {
   right: 2px;
@@ -233,6 +234,7 @@ img {
 .decor-letrero {
   top: 14px;
   left: 50%;
+  z-index: 1;
   width: 99px;
   transform: translateX(-50%);
 }
@@ -1003,7 +1005,6 @@ img.ingrediente.ingrediente {
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 66.6%;
   width: 3px;
   background: var(--mayo);
 }
@@ -1073,35 +1074,9 @@ img.ingrediente.ingrediente {
   background-repeat: no-repeat;
   image-rendering: pixelated;
 }
-/* El pixel art trae su clima y se ve nítido: sin velos encima */
-.street.has-bg.has-bg::before {
-  content: none;
-}
 .want img,
 .big-icon {
   filter: var(--contorno);
-}
-.street.weather-nublado::before,
-.street.weather-lluvia::before,
-.street.weather-noche::before,
-.street.weather-tormenta::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-}
-.street.weather-nublado::before {
-  background: linear-gradient(180deg, rgba(120, 130, 145, 0.45), transparent 55%);
-}
-.street.weather-lluvia::before {
-  background: linear-gradient(180deg, rgba(70, 80, 100, 0.6), rgba(70, 80, 100, 0.25));
-}
-.street.weather-noche::before {
-  background: radial-gradient(circle at 82% 22%, #fff7d1 0 16px, transparent 17px), linear-gradient(180deg, rgba(15, 20, 50, 0.8), rgba(15, 20, 50, 0.4));
-}
-.street.weather-tormenta::before {
-  background: linear-gradient(180deg, rgba(10, 15, 35, 0.85), rgba(10, 15, 35, 0.5));
 }
 .place,
 .combo,
@@ -2247,5 +2222,15 @@ img.ingrediente.ingrediente {
   .toalla-gruesa {
     width: calc(var(--cocina-xs) * 70);
     height: calc(var(--cocina-xs) * 16);
+  }
+}
+
+/* Pantallas bajas: con cinco o más ingredientes van en una fila, para que la hielera quepa */
+@media (max-height: 760px) {
+  .toppings:has(.topping:nth-child(5)) {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: 4px;
   }
 }

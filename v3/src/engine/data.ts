@@ -47,6 +47,8 @@ export interface LevelConfig {
   /** Duración del turno en segundos. */
   duration: number;
   goal: number;
+  /** Plata para la segunda y la tercera estrella, medida con el bot. */
+  stars: [number, number];
   seats: number;
   queueSize: number;
   /** Olla con agua caliente para las vienesas. */
@@ -110,6 +112,7 @@ export const LEVELS: LevelConfig[] = [
     intro: 'Tu primer día en el carrito. Pon un pan en la vaporera y una vienesa en la olla, arma el completo y sírvelo antes de que el cliente se aburra.',
     duration: 100,
     goal: 23000,
+    stars: [26000, 29000],
     seats: 2,
     queueSize: 3,
     olla: { slots: 2, cook: 3, hold: 12.5 },
@@ -131,6 +134,7 @@ export const LEVELS: LevelConfig[] = [
     intro: 'La plaza se llena de oficinistas. Algunos piden Italiano: tomate, palta y mayo.',
     duration: 120,
     goal: 31000,
+    stars: [36500, 42000],
     seats: 3,
     queueSize: 3,
     olla: { slots: 2, cook: 3, hold: 11 },
@@ -152,6 +156,7 @@ export const LEVELS: LevelConfig[] = [
     intro: 'Los caseros del CREA llegan con sed. Ahora también se venden bebidas y jugos.',
     duration: 130,
     goal: 35000,
+    stars: [43500, 52000],
     seats: 3,
     queueSize: 3,
     olla: { slots: 3, cook: 3.5, hold: 11 },
@@ -173,6 +178,7 @@ export const LEVELS: LevelConfig[] = [
     intro: 'Estudiantes con hambre y poco tiempo entre prueba y prueba. Llega el Dinámico, con americana.',
     duration: 140,
     goal: 38000,
+    stars: [51000, 64000],
     seats: 4,
     queueSize: 3,
     olla: { slots: 3, cook: 3.5, hold: 10.5 },
@@ -194,6 +200,7 @@ export const LEVELS: LevelConfig[] = [
     intro: 'Los pasajeros llegan todos juntos antes de que parta el tren. Atiende rápido y aprovecha las pausas para adelantar panes.',
     duration: 140,
     goal: 35000,
+    stars: [50500, 66500],
     seats: 4,
     queueSize: 4,
     olla: { slots: 3, cook: 3.5, hold: 10 },
@@ -215,6 +222,7 @@ export const LEVELS: LevelConfig[] = [
     intro: 'Se llena el estadio y llueve. Los hinchas piden Chacarero: tomate, poroto verde, ají y mayo.',
     duration: 150,
     goal: 50000,
+    stars: [64500, 79000],
     seats: 4,
     queueSize: 4,
     olla: { slots: 3, cook: 3, hold: 10 },
@@ -236,6 +244,7 @@ export const LEVELS: LevelConfig[] = [
     intro: 'Hace calor y todos quieren algo helado. Llega el mote con huesillo.',
     duration: 150,
     goal: 53000,
+    stars: [69500, 86000],
     seats: 5,
     queueSize: 4,
     olla: { slots: 3, cook: 3, hold: 9 },
@@ -257,6 +266,7 @@ export const LEVELS: LevelConfig[] = [
     intro: 'Llueve fuerte y nadie quiere esperar. Los panes se ponen aguados más rápido con tanta humedad.',
     duration: 150,
     goal: 38000,
+    stars: [60000, 82500],
     seats: 5,
     queueSize: 4,
     olla: { slots: 3, cook: 3, hold: 10.5 },
@@ -278,6 +288,7 @@ export const LEVELS: LevelConfig[] = [
     intro: 'Cueca, empanadas y una fila que no se acaba. Llegan pedidos de todo tipo.',
     duration: 165,
     goal: 54000,
+    stars: [75500, 97000],
     seats: 5,
     queueSize: 5,
     olla: { slots: 4, cook: 3, hold: 10.5 },
@@ -299,6 +310,7 @@ export const LEVELS: LevelConfig[] = [
     intro: 'Talca quiere batir el récord y toda la ciudad viene a tu carrito. Es el turno más largo y la meta más alta.',
     duration: 180,
     goal: 68000,
+    stars: [87500, 107500],
     seats: 5,
     queueSize: 5,
     olla: { slots: 4, cook: 3, hold: 7.5 },
@@ -317,8 +329,8 @@ export const LEVELS: LevelConfig[] = [
 
 /** Umbrales de estrellas: meta, meta×1.25, meta×1.5. */
 export function starsFor(level: LevelConfig, money: number): number {
-  if (money >= level.goal * 1.5) return 3;
-  if (money >= level.goal * 1.25) return 2;
+  if (money >= level.stars[1]) return 3;
+  if (money >= level.stars[0]) return 2;
   if (money >= level.goal) return 1;
   return 0;
 }

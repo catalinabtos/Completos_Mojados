@@ -44,7 +44,6 @@ npm run build
 - `src/ui/` — pantallas, vista del juego, sonido (WebAudio) y guardado.
 - `scripts/balance.ts` — `npx vite-node scripts/balance.ts` muestra cuánto gana el bot en cada nivel según su velocidad de reacción. Sirve para ajustar la dificultad.
 - `scripts/e2e.mjs` — juega los 10 niveles en Chromium con viewport de iPhone, tocando la interfaz real.
-- `scripts/make-icons.mjs` — regenera el ícono y la pantalla de carga a partir de la mascota (`src/ui/mascot.svg`).
 - `docs/arte-prompts.md` — prompts para generar ilustraciones con un modelo de imágenes.
 
 ## iOS

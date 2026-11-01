@@ -13,7 +13,7 @@ Si un pedido contradice una biblia, avisa a Catalina antes de hacerlo; no cambie
 ## Estructura
 - `v3/`: el juego actual (Vite + TypeScript + Capacitor iOS). `v1/` y `v2/` son versiones antiguas: no tocarlas.
 - `v3/src/engine/`: motor puro y testeable (`data.ts` niveles y recetas, `game.ts` reglas, `bot.ts` jugador automático).
-- `v3/src/ui/`: interfaz DOM/CSS; arte en `v3/src/ui/art/` (hoy SVG y WebP de Canva, en transición a pixel art).
+- `v3/src/ui/`: interfaz DOM/CSS; arte en `v3/src/ui/art/`, todo en pixel art.
 - `v3/tests/`: tests con vitest. `v3/scripts/e2e.mjs` juega los niveles en un navegador real.
 - `docs/`: biblias y propuestas de diseño.
 - `.claude/agents/`: agentes por rol (diseño, balance, narrativa, arte, QA).

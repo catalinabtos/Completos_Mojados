@@ -95,7 +95,7 @@ export class GameView {
         'div',
         { class: 'hud-money' },
         el('div', { class: 'hud-money-row' }, this.moneyEl, el('span', { class: 'goal' }, `meta ${formatCLP(level.goal)}`)),
-        el('div', { class: 'goal-bar' }, this.goalFill, el('div', { class: 'goal-mark' }))
+        el('div', { class: 'goal-bar' }, this.goalFill, el('div', { class: 'goal-mark', style: `left:${(level.goal / level.stars[1]) * 100}%` }))
       ),
       el('div', { class: 'hud-time' }, this.timeEl),
       recipesBtn
@@ -372,7 +372,7 @@ export class GameView {
   private render() {
     const g = this.game;
     this.moneyEl.textContent = formatCLP(g.money);
-    this.goalFill.style.width = `${Math.min(100, (g.money / (g.level.goal * 1.5)) * 100)}%`;
+    this.goalFill.style.width = `${Math.min(100, (g.money / g.level.stars[1]) * 100)}%`;
     this.goalFill.classList.toggle('reached', g.money >= g.level.goal);
     const left = Math.ceil(g.timeLeft);
     this.timeEl.textContent = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;

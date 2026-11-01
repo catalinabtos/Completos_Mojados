@@ -1,0 +1,38 @@
+name: E2E
+
+# Juega las diez esquinas en un navegador real; tarda unos 25 minutos.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['v3/**']
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: v3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: v3/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - run: npm install -g playwright
+      - run: npx playwright install --with-deps chromium
+      - run: mkdir -p e2e-capturas
+      - name: Jugar las esquinas
+        run: |
+          npx vite preview --port 4173 &
+          sleep 3
+          NODE_PATH=$(npm root -g) node scripts/e2e.mjs http://localhost:4173 e2e-capturas
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-capturas
+          path: v3/e2e-capturas

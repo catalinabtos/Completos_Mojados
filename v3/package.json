@@ -8,8 +8,7 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "ios:sync": "npm run build && cap sync ios",
-    "icons": "node scripts/make-icons.mjs"
+    "ios:sync": "npm run build && cap sync ios"
   },
   "dependencies": {
     "@capacitor/core": "^8.6.0",

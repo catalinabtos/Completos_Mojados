@@ -257,7 +257,7 @@ export function resultsScreen(game: Game, isRecord: boolean, hasNext: boolean, w
       'div',
       { class: 'results-body' },
       img(won ? MASCOT.celebra : MASCOT.preocupada, '', 'result-art'),
-      el('h2', {}, won ? (level.id === LEVELS.length ? '¡Rey del completo talquino!' : '¡Turno superado!') : 'No llegaste a la meta'),
+      el('h2', {}, won ? (level.id === LEVELS.length ? '¡Leyenda del completo talquino!' : '¡Turno superado!') : 'No llegaste a la meta'),
       starsEl(stars, 'stars result-stars', 44),
       el(
         'div',

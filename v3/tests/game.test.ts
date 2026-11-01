@@ -110,6 +110,15 @@ describe('Game', () => {
 });
 
 describe('levels are playable', () => {
+  for (const level of LEVELS) {
+    it(`level ${level.id} (${level.name}) has reachable star goals`, () => {
+      expect(level.goal).toBeLessThan(level.stars[0]);
+      expect(level.stars[0]).toBeLessThan(level.stars[1]);
+      const three = Array.from({ length: 40 }, (_, i) => simulate(level, i + 1, 0.7)).filter((r) => starsFor(level, r.money) === 3).length;
+      expect(three).toBeGreaterThanOrEqual(16);
+    });
+  }
+
   it('has 10 levels with rising goals for the first ones', () => {
     expect(LEVELS).toHaveLength(10);
     expect(LEVELS.map((l) => l.id)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);

@@ -29,7 +29,7 @@ export const STORY: Record<number, StoryCard> = {
   4: { speaker: 'javi', text: '¡Tengo control en diez minutos! Dame un completo rápido y te prometo que paso el ramo.' },
   5: { speaker: 'teresa', text: 'Cuando llega el tren, llegan todos juntos. Adelanta panes en las pausas, que después no hay tiempo.' },
   6: { speaker: 'lucho', text: 'Llueva o truene, Rangers juega y yo voy. Hoy ganamos, te lo firmo. ¿Un chacarero para la suerte?' },
-  7: { speaker: 'fuenzalida', text: 'Hoy no tengo reunión. Vine al río, y sin corbata. ¿A que no me reconocía? Un mote con huesillo, por favor.' },
+  7: { speaker: 'fuenzalida', text: 'Hoy no tengo reunión, pero la corbata no me la saco ni en el río. Un mote con huesillo, por favor.' },
   8: { speaker: 'pato', text: 'Salí de turno y con este temporal no queda nada abierto. Menos mal que el carrito sigue aquí.' },
   9: { speaker: 'hernan', text: 'Buenas tardes, joven. Su abuela me atendió en estas mismas fiestas, hace muchos años. Vengo a ver si la receta sigue igual.' },
   10: { speaker: 'benja', text: 'Mi abuela Rosa dice que hoy viene toda Talca. Junté para uno. ¿Me alcanza?' },
