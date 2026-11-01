@@ -4,7 +4,7 @@ import { DRINKS, RECIPES, TOPPINGS, formatCLP, type LevelConfig } from '../engin
 import { Game, type Customer, type GameEvent, type StationId } from '../engine/game';
 import type { DecorId, GameOptions } from '../engine/upgrades';
 import { play } from './audio';
-import { CUSTOMER_ART, DECOR_ART, DRINK_ART, LEVEL_BG, PHOTO_BG, STATION_ART, TOPPING_ART, UPGRADE_ART, img } from './art';
+import { CUSTOMER_ART, DECOR_ART, DRINK_ART, LEVEL_BG, STATION_ART, TOPPING_ART, UPGRADE_ART, img } from './art';
 import { completoEl } from './completo';
 import { el, svgIcon } from './dom';
 
@@ -69,6 +69,7 @@ export class GameView {
   private readonly slotEls: Record<StationId, HTMLElement[]> = { olla: [], vapor: [] };
   private readonly trayEls: HTMLElement[];
   private readonly trayLabel: HTMLElement;
+  private trayLabelKey = '';
   private readonly heldDrinkEl: HTMLElement;
   private readonly toastEl: HTMLElement;
   private readonly tutorialEl: HTMLElement;
@@ -120,7 +121,7 @@ export class GameView {
     }
     const street = el(
       'section',
-      { class: `street scene-${level.scene} weather-${level.weather}${LEVEL_BG[level.id] ? ' has-bg' : ''}${PHOTO_BG.has(level.id) ? ' has-foto' : ''}${this.toldoClass}` },
+      { class: `street scene-${level.scene} weather-${level.weather}${LEVEL_BG[level.id] ? ' has-bg' : ''}${this.toldoClass}` },
       el('div', { class: 'awning' }),
       el('div', { class: 'cart-post left' }),
       el('div', { class: 'cart-post right' }),
@@ -157,7 +158,7 @@ export class GameView {
     const toppings = el('div', { class: 'toppings' });
     for (const id of level.toppings) {
       const t = TOPPINGS[id];
-      const btn = el('button', { class: 'topping', style: `--c:${t.color}` }, img(TOPPING_ART[id], '', 'big-icon'), t.name);
+      const btn = el('button', { class: 'topping', style: `--c:${t.color}`, 'aria-label': t.name }, img(TOPPING_ART[id], '', 'big-icon'));
       btn.dataset.topping = id;
       this.tap(btn, () => this.game.tapTopping(id));
       toppings.append(btn);
@@ -168,10 +169,9 @@ export class GameView {
       toppings
     ];
     if (level.drinks.length > 0) {
-      const cooler = el('div', { class: 'cooler' }, el('div', { class: 'station-title' }, 'Bebidas'));
+      const cooler = el('div', { class: 'cooler' });
       for (const id of level.drinks) {
-        const d = DRINKS[id];
-        const btn = el('button', { class: 'drink' }, img(DRINK_ART[id], '', 'big-icon'), d.name);
+        const btn = el('button', { class: 'drink', 'aria-label': DRINKS[id].name }, img(DRINK_ART[id], '', 'big-icon'));
         this.tap(btn, () => this.game.tapDrink(id));
         cooler.append(btn);
       }
@@ -430,7 +430,10 @@ export class GameView {
       view.root.classList.toggle('impatient', impatient);
       const art = CUSTOMER_ART[c.face % CUSTOMER_ART.length];
       const src = c.mood === 'angry' ? art.enojado : impatient ? art.impaciente : art.normal;
-      if (view.face.getAttribute('src') !== src) view.face.src = src;
+      if (view.face.getAttribute('src') !== src) {
+        view.face.src = src;
+        view.face.style.setProperty('--w', String(art.width));
+      }
     });
   }
 
@@ -463,8 +466,13 @@ export class GameView {
       food.replaceChildren(t ? completoEl(t) : el('div', { class: 'tray-empty' }, this.trayEls.length > 1 ? '+ pan' : 'Saca un pan de la vaporera'));
     });
     const recipe = g.trayRecipe();
-    if (!tray) this.trayLabel.textContent = '';
-    else this.trayLabel.textContent = recipe ? `Listo: ${RECIPES[recipe].name}` : tray.vienesa ? (tray.toppings.length ? tray.toppings.map((t) => TOPPINGS[t].name).join(' + ') : 'Agrega ingredientes') : 'Falta la vienesa';
+    const added = tray?.vienesa && !recipe ? tray.toppings : [];
+    const label = !tray || added.length ? '' : recipe ? `Listo: ${RECIPES[recipe].name}` : tray.vienesa ? 'Agrega ingredientes' : 'Falta la vienesa';
+    const labelKey = `${label}|${added.join()}`;
+    if (labelKey !== this.trayLabelKey) {
+      this.trayLabelKey = labelKey;
+      this.trayLabel.replaceChildren(label, ...added.map((t) => img(TOPPING_ART[t], TOPPINGS[t].name)));
+    }
     this.trayLabel.classList.toggle('ok', !!recipe);
     this.heldDrinkEl.replaceChildren(...(g.heldDrink ? [img(DRINK_ART[g.heldDrink], DRINKS[g.heldDrink].name)] : []));
     this.heldDrinkEl.hidden = !g.heldDrink;

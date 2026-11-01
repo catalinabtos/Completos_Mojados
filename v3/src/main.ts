@@ -9,24 +9,29 @@ import type { Game } from './engine/game';
 import { STORY, STORY_ENDING } from './engine/story';
 import { applyUpgrades, buyDecor, buyUpgrade, gameOptions, toggleDecor } from './engine/upgrades';
 import { MASCOT } from './ui/art';
-import { play, setSoundEnabled, unlockAudio } from './ui/audio';
+import { play, setAudioSuspended, setMusic, setSoundEnabled, unlockAudio } from './ui/audio';
 import { button } from './ui/dom';
 import { GameView } from './ui/gameView';
+import type { MusicMode } from './ui/music';
+import { applyPixelGrid } from './ui/pixelGrid';
 import { cartScreen, howToScreen, introScreen, levelSelectScreen, overlay, recipesPanel, resetBody, resultsScreen, storyScreen, titleScreen } from './ui/screens';
 import { loadSave, resetSave, writeSave } from './ui/storage';
 
 const app = document.getElementById('app')!;
+applyPixelGrid(app);
+window.addEventListener('resize', () => applyPixelGrid(app));
 let save = loadSave();
 setSoundEnabled(save.sound);
 let current: GameView | null = null;
 let currentLevel: LevelConfig | null = null;
 let currentOverlay: HTMLElement | null = null;
 
-function show(screen: HTMLElement) {
+function show(screen: HTMLElement, music: MusicMode = 'menu') {
   current?.destroy();
   current = null;
   closeOverlay();
   app.replaceChildren(screen);
+  setMusic(music);
 }
 
 function closeOverlay() {
@@ -113,7 +118,7 @@ function startLevel(level: LevelConfig) {
     onRecipes: () => showRecipes(view),
     onFinish: (game) => finish(level, game)
   });
-  show(view.root);
+  show(view.root, 'turno');
   current = view;
   currentLevel = level;
   view.start();
@@ -122,6 +127,7 @@ function startLevel(level: LevelConfig) {
 function pause(view: GameView, level: LevelConfig) {
   if (currentOverlay) return;
   view.setPaused(true);
+  setMusic(null);
   currentOverlay = overlay('Pausa', null, [
     button('Continuar', () => resume(view), 'btn primary big'),
     button('Reiniciar turno', () => startLevel(level), 'btn secondary'),
@@ -140,6 +146,7 @@ function showRecipes(view: GameView) {
 function resume(view: GameView) {
   closeOverlay();
   view.setPaused(false);
+  setMusic('turno');
 }
 
 function finish(level: LevelConfig, game: Game) {
@@ -178,6 +185,7 @@ document.addEventListener('click', (e) => {
 
 // Pausa automática al salir de la app.
 document.addEventListener('visibilitychange', () => {
+  setAudioSuspended(document.hidden);
   if (document.hidden && current && currentLevel && !currentOverlay) pause(current, currentLevel);
 });
 

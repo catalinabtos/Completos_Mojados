@@ -355,16 +355,16 @@ img {
   line-height: 1.32;
 }
 .story-art {
-  width: 132px;
-  height: 132px;
-  margin-top: 14px;
-  object-fit: contain;
-  filter: var(--contorno);
+  margin-top: 4px;
+  zoom: var(--zoom-historia);
+  image-rendering: pixelated;
 }
 .story-art.mascota {
   width: min(52vw, 190px);
   height: auto;
-  filter: none;
+  margin-top: 14px;
+  zoom: 1;
+  image-rendering: auto;
   animation: bob 2.4s ease-in-out infinite;
 }
 .story-body .btn {
@@ -548,11 +548,6 @@ img {
   border-radius: var(--radio-grande);
   padding: 12px 14px;
   box-shadow: var(--sombra-chica);
-}
-.howto-credit {
-  font-size: 12px;
-  overflow-wrap: anywhere;
-  opacity: 0.8;
 }
 .howto-num {
   flex: none;
@@ -1064,28 +1059,15 @@ img {
     linear-gradient(180deg, #ffcf6e, #ffeec4 55%);
 }
 .street.has-bg {
-  background-size: cover;
+  background-size: var(--fondo-ancho) auto;
   background-position: center bottom;
   background-repeat: no-repeat;
+  image-rendering: pixelated;
 }
-/* Los fondos ilustrados ya traen su clima: sólo se oscurece un poco el cielo de día nublado */
-/* Suaviza el fondo para que clientes y pedidos queden en primer plano */
+/* El pixel art trae su clima y se ve nítido: sin velos encima */
 .street.has-bg.has-bg::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background: rgba(255, 227, 168, 0.14);
-  -webkit-backdrop-filter: saturate(0.72) blur(0.8px);
-  backdrop-filter: saturate(0.72) blur(0.8px);
+  content: none;
 }
-/* Las fotos reales mantienen sus colores vivos */
-.street.has-foto.has-foto.has-foto::before {
-  background: none;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-}
-.face,
 .chip img,
 .station-art {
   filter: var(--contorno-grueso);
@@ -1199,12 +1181,6 @@ img {
   height: 100%;
   max-height: 210px;
 }
-/* Puestos angostos (4 o 5 clientes): íconos más chicos para que quepan de a tres */
-.seats[style*='--seats:4'] .want img,
-.seats[style*='--seats:5'] .want img {
-  width: 18px !important;
-  height: 18px !important;
-}
 .seats[style*='--seats:5'] .bubble-title {
   font-size: 11px !important;
   letter-spacing: -0.2px;
@@ -1212,13 +1188,20 @@ img {
 .seats[style*='--seats:5'] .bubble {
   padding: 2px 2px 3px !important;
 }
+.seats[style*='--seats:4'] .person {
+  --px: var(--px-m);
+}
 .seats[style*='--seats:5'] .person {
-  width: 52px;
+  --px: var(--px-s);
 }
 /* Calle baja (niveles con muchos ingredientes): clientes y globos más chicos */
 @container (max-height: 250px) {
-  .person {
-    width: 54px;
+  .seats .person {
+    --px: var(--px-s);
+  }
+  .seats[style*='--seats:4'] .person,
+  .seats[style*='--seats:5'] .person {
+    --px: var(--px-xs);
   }
   .bubble-title {
     font-size: 12px;
@@ -1232,19 +1215,49 @@ img {
     margin-bottom: 5px;
   }
 }
+/* Puestos angostos (4 o 5 clientes) en calle baja: íconos más chicos para que quepan de a tres */
+@container (max-height: 259px) {
+  .seats[style*='--seats:4'] .want img,
+  .seats[style*='--seats:5'] .want img {
+    width: 18px;
+    height: 18px;
+  }
+  .seats[style*='--seats:5'] .bubble-title {
+    font-size: 10px !important;
+    letter-spacing: -0.3px;
+    text-overflow: clip;
+  }
+}
+/* Calle con altura de sobra: el pedido se ordena en vertical, sobre el cliente */
+@container (min-height: 260px) {
+  .seats .seat {
+    height: 100%;
+    max-height: none;
+  }
+  .seats .bubble {
+    width: auto;
+    min-width: min(100%, 68px);
+  }
+  .bubble-items,
+  .want {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+  .bubble-items {
+    gap: 0;
+  }
+}
+@container (min-height: 320px) {
+  .seats .want img {
+    width: 27px;
+    height: 27px;
+  }
+}
 /* Calle alta: los clientes se acercan al mesón */
 @container (min-height: 340px) {
   .seat {
     max-height: 300px;
-  }
-  .person {
-    width: 124px;
-  }
-  .seats[style*='--seats:4'] .person {
-    width: 88px;
-  }
-  .seats[style*='--seats:5'] .person {
-    width: 70px;
   }
 }
 .seat .bubble,
@@ -1268,7 +1281,7 @@ img {
   transition: opacity 0.8s ease-in, transform 0.9s ease-in;
 }
 .seat.leaving.happy .person {
-  transform: translateY(-24px) scale(1.12);
+  transform: translateY(-24px);
 }
 .bubble {
   position: relative;
@@ -1330,24 +1343,27 @@ img {
   filter: grayscale(1);
 }
 .person {
+  --px: var(--px-l);
   position: relative;
-  width: 76px;
   margin-bottom: -3px;
 }
+/* --w es el ancho real del dibujo: cada píxel mide exactamente --px */
 .face {
   display: block;
-  width: 100%;
+  width: calc(var(--w, 30) * var(--px));
   height: auto;
+  image-rendering: pixelated;
 }
 .seat.impatient .person {
-  animation: shake 0.35s linear infinite;
+  animation: shake 0.35s step-end infinite;
 }
+/* Solo se mueve de lado, un píxel a la vez: girarlo torcería la grilla */
 @keyframes shake {
-  25% {
-    transform: translateX(-2px) rotate(-3deg);
+  0% {
+    transform: translateX(calc(var(--px) * -1));
   }
-  75% {
-    transform: translateX(2px) rotate(3deg);
+  50% {
+    transform: translateX(var(--px));
   }
 }
 /* La paciencia se lee sobre la madera del mesón */
@@ -1700,12 +1716,21 @@ img {
   text-align: center;
   opacity: 0.75;
 }
+/* Alto fijo: el aviso cambia durante el turno y nada de la tabla debe moverse */
 .tray-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  height: 30px;
   font-size: 12px;
   font-weight: 900;
-  min-height: 16px;
   text-align: center;
   line-height: 1.2;
+}
+.tray-label img {
+  width: 20px;
+  height: 20px;
 }
 .tray-label.ok {
   color: #1f4d10;
@@ -1755,10 +1780,7 @@ img {
   background: var(--papel);
   border: var(--borde-fino);
   border-radius: var(--radio);
-  font-size: 12px;
-  font-weight: 900;
-  line-height: 1.1;
-  padding: 3px 2px 5px;
+  padding: 3px 2px;
 }
 .topping {
   min-width: 0;
@@ -1766,16 +1788,15 @@ img {
   box-shadow: var(--sombra-chica);
 }
 .big-icon {
-  width: 34px;
-  height: 34px;
+  width: 38px;
+  height: 38px;
 }
 .toppings:has(.topping:nth-child(5)) .topping {
   padding: 2px;
-  font-size: 10.5px;
 }
 .toppings:has(.topping:nth-child(5)) .big-icon {
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
 }
 .cooler {
   display: flex;
@@ -1786,29 +1807,18 @@ img {
   border-radius: var(--radio);
   padding: 6px;
 }
-.cooler .station-title {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  margin: 0;
-  text-align: center;
-}
 .drink {
   flex: 1 1 0;
   min-width: 0;
   min-height: 44px;
-  flex-direction: row;
-  gap: 3px;
-  font-size: 12px;
   border-radius: var(--radio-chico);
   box-shadow: var(--sombra-chica);
+  padding: 2px;
 }
 .drink .big-icon {
   flex: none;
-  width: 26px;
-  height: 26px;
-}
-.drink {
-  padding: 2px;
+  width: 32px;
+  height: 32px;
 }
 .topping:active,
 .drink:active,
@@ -1924,8 +1934,12 @@ img {
   .seat {
     height: 160px;
   }
-  .person {
-    width: 60px;
+  .seats .person {
+    --px: var(--px-s);
+  }
+  .seats[style*='--seats:4'] .person,
+  .seats[style*='--seats:5'] .person {
+    --px: var(--px-xs);
   }
   .big-icon {
     width: 30px;
@@ -1990,5 +2004,16 @@ img {
   }
   .seat {
     height: 136px;
+  }
+  .toppings {
+    gap: 4px;
+  }
+  .cooler {
+    padding: 2px;
+    border-width: 2px;
+  }
+  /* Esquinas con todo a la vista: los puestos ya dicen qué son, y el título deja lugar a la hielera */
+  .kitchen:has(.cooler):has(.topping:nth-child(5)) .station:not(.wide) .station-title {
+    display: none;
   }
 }

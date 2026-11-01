@@ -61,7 +61,10 @@ export function howToScreen(onBack: () => void): HTMLElement {
       'div',
       { class: 'panel-body' },
       el('ol', { class: 'howto' }, ...steps.map(([title, text], i) => el('li', {}, el('span', { class: 'howto-num' }, String(i + 1)), el('div', {}, el('strong', {}, title), el('p', {}, text))))),
-      el('p', { class: 'howto-credit' }, 'Foto de la esquina 3: «CREA Talca», de ElPabloRN (Wikimedia Commons), recortada y retocada. Licencia CC BY 4.0: creativecommons.org/licenses/by/4.0'),
+      el('h3', { class: 'shop-title' }, 'Ingredientes'),
+      el('div', { class: 'recipe-items' }, ...LEVELS[LEVELS.length - 1].toppings.map((t) => el('span', { class: 'chip' }, img(TOPPING_ART[t]), TOPPINGS[t].name))),
+      el('h3', { class: 'shop-title' }, 'Bebidas'),
+      el('div', { class: 'recipe-items' }, ...Object.values(DRINKS).map((d) => el('span', { class: 'chip' }, img(DRINK_ART[d.id]), d.name))),
       button('¡Entendido!', onBack, 'btn primary big')
     )
   );

@@ -13,7 +13,7 @@ Si un pedido contradice una biblia, avisa a Catalina antes de hacerlo; no cambie
 ## Estructura
 - `v3/`: el juego actual (Vite + TypeScript + Capacitor iOS). `v1/` y `v2/` son versiones antiguas: no tocarlas.
 - `v3/src/engine/`: motor puro y testeable (`data.ts` niveles y recetas, `game.ts` reglas, `bot.ts` jugador automático).
-- `v3/src/ui/`: interfaz DOM/CSS; arte en `v3/src/ui/art/` (SVG vectorial y WebP de Canva).
+- `v3/src/ui/`: interfaz DOM/CSS; arte en `v3/src/ui/art/` (hoy SVG y WebP de Canva, en transición a pixel art).
 - `v3/tests/`: tests con vitest. `v3/scripts/e2e.mjs` juega los niveles en un navegador real.
 - `docs/`: biblias y propuestas de diseño.
 - `.claude/agents/`: agentes por rol (diseño, balance, narrativa, arte, QA).
@@ -41,4 +41,4 @@ Los cambios técnicos (errores, rendimiento, tests, refactor) no necesitan aprob
 - Nada sugerente ni de doble sentido en arte o textos (pasó con un logo anterior; hay que evitarlo siempre).
 - Gratis y sin recolectar datos: sin cuentas, sin analítica de terceros, sin anuncios. El progreso se guarda solo en el dispositivo.
 - La dificultad se calibra con el bot (`TARGET_REACTION` en `v3/tests/game.test.ts`): si cambias un nivel, el test debe seguir pasando.
-- Preferir arte vectorial (SVG) para todo lo que se vea grande; nada de imágenes que se pixelen.
+- Todo el arte es pixel art con grilla real (`docs/biblia-arte.md`): una sola medida de píxel, sin suavizado ni imágenes borrosas.

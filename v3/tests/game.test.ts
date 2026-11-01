@@ -4,6 +4,7 @@ import { Game } from '../src/engine/game';
 import { simulate } from '../src/engine/bot';
 import { DECOR, UPGRADES, applyUpgrades, buyDecor, buyUpgrade, gameOptions, sanitizeCart, toggleDecor, type CartState, type UpgradeLevels } from '../src/engine/upgrades';
 import { STORY, STORY_ENDING } from '../src/engine/story';
+import { SONG } from '../src/ui/music';
 import { parseSave, resetSave } from '../src/ui/storage';
 
 /** Ritmo (segundos por acción) con el que cada nivel debe poder ganarse. */
@@ -134,6 +135,12 @@ describe('levels are playable', () => {
       }
     });
   }
+});
+
+describe('la música', () => {
+  it('keeps every bar of the theme in 6/8', () => {
+    for (const [, phrase] of SONG) expect(phrase.reduce((sum, [, length]) => sum + length, 0)).toBe(6);
+  });
 });
 
 describe('la historia', () => {

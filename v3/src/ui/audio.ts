@@ -1,12 +1,73 @@
-// Efectos de sonido sintetizados con WebAudio (sin archivos de audio).
+// Efectos de sonido y música sintetizados con WebAudio (sin archivos de audio).
+
+import { SONG_BARS, barSeconds, scheduleBar, type MusicMode } from './music';
 
 type Sfx = 'tap' | 'sizzle' | 'splash' | 'ready' | 'burnt' | 'cash' | 'angry' | 'error' | 'win' | 'lose' | 'trash';
 
 let ctx: AudioContext | null = null;
 let enabled = true;
 
+/** Más bajo que los efectos, para no taparlos. */
+const MUSIC_GAIN = 0.4;
+/** Cuánto antes se programa cada compás, en segundos. */
+const LOOKAHEAD = 0.5;
+
+let wantedMusic: MusicMode | null = null;
+let music: { mode: MusicMode; out: GainNode; timer: number; bar: number; nextTime: number } | null = null;
+
 export function setSoundEnabled(value: boolean) {
   enabled = value;
+  syncMusic();
+}
+
+/** Elige qué versión del tema suena; `null` la detiene. */
+export function setMusic(mode: MusicMode | null) {
+  wantedMusic = mode;
+  syncMusic();
+}
+
+function syncMusic() {
+  const mode = enabled ? wantedMusic : null;
+  if (music?.mode === mode) return;
+  stopMusic();
+  if (mode && ctx) startMusic(ctx, mode);
+}
+
+function startMusic(context: AudioContext, mode: MusicMode) {
+  const out = context.createGain();
+  out.gain.setValueAtTime(0.0001, context.currentTime);
+  out.gain.exponentialRampToValueAtTime(MUSIC_GAIN, context.currentTime + 1.5);
+  out.connect(context.destination);
+  const state = { mode, out, timer: 0, bar: 0, nextTime: context.currentTime + 0.05 };
+  const tick = () => {
+    // Si el reloj se atrasó (la app estuvo en segundo plano), retoma sin amontonar compases.
+    if (state.nextTime < context.currentTime) state.nextTime = context.currentTime + 0.05;
+    while (state.nextTime < context.currentTime + LOOKAHEAD) {
+      scheduleBar(context, out, state.bar, state.nextTime, mode);
+      state.bar = (state.bar + 1) % SONG_BARS;
+      state.nextTime += barSeconds(mode);
+    }
+  };
+  state.timer = window.setInterval(tick, 200);
+  tick();
+  music = state;
+}
+
+function stopMusic() {
+  if (!music || !ctx) return;
+  const { out, timer } = music;
+  music = null;
+  window.clearInterval(timer);
+  out.gain.cancelScheduledValues(ctx.currentTime);
+  out.gain.setValueAtTime(Math.max(out.gain.value, 0.0001), ctx.currentTime);
+  out.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.25);
+  window.setTimeout(() => out.disconnect(), 400);
+}
+
+/** Calla todo el audio mientras la app está en segundo plano. */
+export function setAudioSuspended(suspended: boolean) {
+  if (!ctx) return;
+  void (suspended ? ctx.suspend() : ctx.resume());
 }
 
 /** iOS sólo permite crear/reanudar el audio dentro de un gesto del usuario. */
@@ -16,7 +77,8 @@ export function unlockAudio() {
     if (!AC) return;
     ctx = new AC();
   }
-  if (ctx.state === 'suspended') void ctx.resume();
+  if (ctx.state !== 'running') void ctx.resume();
+  syncMusic();
 }
 
 function tone(freq: number, start: number, duration: number, type: OscillatorType = 'sine', gain = 0.15, slideTo?: number) {
