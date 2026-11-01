@@ -62,7 +62,7 @@ export function howToScreen(onBack: () => void): HTMLElement {
       { class: 'panel-body' },
       el('ol', { class: 'howto' }, ...steps.map(([title, text], i) => el('li', {}, el('span', { class: 'howto-num' }, String(i + 1)), el('div', {}, el('strong', {}, title), el('p', {}, text))))),
       el('h3', { class: 'shop-title' }, 'Ingredientes'),
-      el('div', { class: 'recipe-items' }, ...LEVELS[LEVELS.length - 1].toppings.map((t) => el('span', { class: 'chip' }, img(TOPPING_ART[t]), TOPPINGS[t].name))),
+      el('div', { class: 'recipe-items' }, ...LEVELS[LEVELS.length - 1].toppings.map((t) => el('span', { class: 'chip' }, img(TOPPING_ART[t], '', 'ingrediente'), TOPPINGS[t].name))),
       el('h3', { class: 'shop-title' }, 'Bebidas'),
       el('div', { class: 'recipe-items' }, ...Object.values(DRINKS).map((d) => el('span', { class: 'chip' }, img(DRINK_ART[d.id]), d.name))),
       button('¡Entendido!', onBack, 'btn primary big')
@@ -171,7 +171,7 @@ function recipeCard(id: RecipeId, isNew = false): HTMLElement {
     'div',
     { class: `recipe-card${isNew ? ' new' : ''}` },
     el('div', { class: 'recipe-head' }, el('strong', {}, r.name), isNew ? el('span', { class: 'new-badge' }, 'Nuevo') : null, el('span', { class: 'price' }, formatCLP(r.price))),
-    el('div', { class: 'recipe-items' }, ...r.toppings.map((t) => el('span', { class: 'chip' }, img(TOPPING_ART[t]), TOPPINGS[t].name)))
+    el('div', { class: 'recipe-items' }, ...r.toppings.map((t) => el('span', { class: 'chip' }, img(TOPPING_ART[t], '', 'ingrediente'), TOPPINGS[t].name)))
   );
 }
 

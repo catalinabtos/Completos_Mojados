@@ -1,5 +1,5 @@
-// Ilustraciones del juego (estilo "Carrito de esquina": trazo café grueso, relleno plano).
-// Fondos, ingredientes, bebidas, clientes y estaciones se generaron con Canva; la mascota está dibujada en vector para que se vea nítida en grande.
+// Arte del juego. Fondos, clientes, mascota, ingredientes y cocina son pixel art generado con Canva;
+// bebidas, mejoras y decoración todavía son ilustraciones antiguas.
 
 import type { DrinkId, ToppingId } from '../engine/data';
 import type { Speaker } from '../engine/story';
@@ -7,16 +7,16 @@ import type { DecorId, UpgradeId } from '../engine/upgrades';
 import bebida from './art/canva/bebida.webp';
 import jugo from './art/canva/jugo.webp';
 import mote from './art/canva/mote.webp';
-import aji from './art/canva/aji.webp';
-import americana from './art/canva/americana.webp';
-import chucrut from './art/canva/chucrut.webp';
-import mayo from './art/canva/mayo.webp';
-import palta from './art/canva/palta.webp';
-import poroto from './art/canva/poroto.webp';
-import tomate from './art/canva/tomate.webp';
-import mascotaCelebra from './art/mascota-celebra.svg';
-import mascotaFeliz from './art/mascota-feliz.svg';
-import mascotaPreocupada from './art/mascota-preocupada.svg';
+import aji from './art/ingredientes/aji.png';
+import americana from './art/ingredientes/americana.png';
+import chucrut from './art/ingredientes/chucrut.png';
+import mayo from './art/ingredientes/mayo.png';
+import palta from './art/ingredientes/palta.png';
+import poroto from './art/ingredientes/poroto.png';
+import tomate from './art/ingredientes/tomate.png';
+import mascotaCelebra from './art/mascota/celebra.png';
+import mascotaFeliz from './art/mascota/feliz.png';
+import mascotaPreocupada from './art/mascota/preocupada.png';
 import decoBanderitas from './art/carrito/deco-banderitas.svg';
 import decoLuces from './art/carrito/deco-luces.svg';
 import decoMacetero from './art/carrito/deco-macetero.svg';
@@ -27,8 +27,8 @@ import mejoraRadio from './art/carrito/mejora-radio.svg';
 import mejoraToalla from './art/carrito/mejora-toalla.svg';
 import toldoAzul from './art/carrito/toldo-azul.svg';
 import toldoVerde from './art/carrito/toldo-verde.svg';
-import olla from './art/canva/olla.webp';
-import vaporera from './art/canva/vaporera.webp';
+import olla from './art/cocina/olla.png';
+import vaporera from './art/cocina/vaporera.png';
 import decoFoto from './art/canva/deco-foto.webp';
 import decoLetrero from './art/canva/deco-letrero.webp';
 import mejoraTabla from './art/canva/mejora-tabla.webp';

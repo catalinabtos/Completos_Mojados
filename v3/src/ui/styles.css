@@ -18,7 +18,6 @@
   --borde-fino: 3px solid var(--cafe);
   --sombra: 0 6px 0 var(--cafe);
   --sombra-chica: 0 4px 0 var(--cafe);
-  --toalla: linear-gradient(90deg, transparent 8px, #f6cfc7 8px 12px, transparent 12px calc(100% - 12px), #f6cfc7 calc(100% - 12px) calc(100% - 8px), transparent calc(100% - 8px)), var(--papel);
   /* Contorno común para el arte de ingredientes y clientes */
   --contorno: drop-shadow(1px 0 0 var(--cafe)) drop-shadow(-1px 0 0 var(--cafe)) drop-shadow(0 1px 0 var(--cafe)) drop-shadow(0 -1px 0 var(--cafe));
   --contorno-grueso: drop-shadow(1.5px 0 0 var(--cafe)) drop-shadow(-1.5px 0 0 var(--cafe)) drop-shadow(0 1.5px 0 var(--cafe)) drop-shadow(0 -1.5px 0 var(--cafe));
@@ -275,9 +274,10 @@ img {
   padding: 0 28px;
 }
 .title-art {
-  width: min(74vw, 290px);
+  width: var(--mascota-portada);
   height: auto;
-  animation: bob 2.4s ease-in-out infinite;
+  image-rendering: pixelated;
+  animation: bob 1.6s step-end infinite;
 }
 .title-screen h1 {
   margin: 6px 0 0;
@@ -360,12 +360,11 @@ img {
   image-rendering: pixelated;
 }
 .story-art.mascota {
-  width: min(52vw, 190px);
+  width: var(--mascota-historia);
   height: auto;
   margin-top: 14px;
   zoom: 1;
-  image-rendering: auto;
-  animation: bob 2.4s ease-in-out infinite;
+  animation: bob 1.6s step-end infinite;
 }
 .story-body .btn {
   width: 100%;
@@ -378,15 +377,19 @@ img {
   .story-bubble p {
     font-size: 17px;
   }
-  .story-art,
-  .story-art.mascota {
+  .story-art {
     width: 96px;
     height: 96px;
   }
+  .story-art.mascota {
+    width: var(--mascota-chica);
+    height: auto;
+  }
 }
+/* Salta de a un paso y sin girar: girarla torcería la grilla */
 @keyframes bob {
   50% {
-    transform: translateY(-8px) rotate(-2deg);
+    transform: translateY(-6px);
   }
 }
 
@@ -772,7 +775,7 @@ img {
   align-items: center;
   gap: 4px;
   padding: 3px 10px 3px 4px;
-  border-radius: 999px;
+  border-radius: 18px;
   background: var(--mayo);
   border: 2px solid var(--cafe);
   font-size: 14px;
@@ -781,6 +784,19 @@ img {
 .chip img {
   width: 26px;
   height: 26px;
+}
+/* Todos en un lienzo común: el tamaño lo da el contexto, en píxeles exactos */
+img.ingrediente.ingrediente {
+  width: var(--icono, var(--icono-xs)) !important;
+  height: var(--icono, var(--icono-xs)) !important;
+  image-rendering: pixelated;
+  filter: none;
+}
+.topping {
+  --icono: var(--icono-l);
+}
+.toppings:has(.topping:nth-child(5)) .topping {
+  --icono: var(--icono-m);
 }
 
 /* ───────────── Resultado ───────────── */
@@ -813,9 +829,10 @@ img {
 }
 .result-art {
   flex: none;
-  width: min(210px, 22vh);
+  width: var(--mascota-resultado);
   height: auto;
-  animation: bob 2s ease-in-out infinite;
+  image-rendering: pixelated;
+  animation: bob 1.6s step-end infinite;
 }
 .results h2 {
   margin: 0;
@@ -1068,10 +1085,6 @@ img {
 .street.has-bg.has-bg::before {
   content: none;
 }
-.chip img,
-.station-art {
-  filter: var(--contorno-grueso);
-}
 .want img,
 .big-icon {
   filter: var(--contorno);
@@ -1196,6 +1209,9 @@ img {
 }
 /* Calle baja (niveles con muchos ingredientes): clientes y globos más chicos */
 @container (max-height: 250px) {
+  .want {
+    --icono: var(--icono-xxs);
+  }
   .seats .person {
     --px: var(--px-s);
   }
@@ -1221,6 +1237,15 @@ img {
   .seats[style*='--seats:5'] .want img {
     width: 18px;
     height: 18px;
+  }
+  .seats[style*='--seats:5'] .bubble {
+    flex: none;
+    width: 59px;
+    padding: 2px 0 3px !important;
+  }
+  .seats[style*='--seats:5'] .bubble-items,
+  .seats[style*='--seats:5'] .want {
+    gap: 0;
   }
   .seats[style*='--seats:5'] .bubble-title {
     font-size: 10px !important;
@@ -1252,6 +1277,9 @@ img {
   .seats .want img {
     width: 27px;
     height: 27px;
+  }
+  .seats .want {
+    --icono: var(--icono-s);
   }
 }
 /* Calle alta: los clientes se acercan al mesón */
@@ -1483,9 +1511,10 @@ img {
   gap: 4px;
 }
 .station-art {
-  width: 30px;
-  height: 30px;
+  width: auto;
+  height: 28px;
   margin: -6px 0 -4px -2px;
+  image-rendering: pixelated;
 }
 .station {
   display: flex;
@@ -1495,7 +1524,8 @@ img {
   padding: 6px;
 }
 .station-olla {
-  background: var(--agua);
+  background: url('./art/cocina/agua.png') 0 0 / 120px;
+  image-rendering: pixelated;
 }
 .station-vapor {
   background: var(--mayo);
@@ -1513,13 +1543,18 @@ img {
   gap: 4px;
 }
 .station.wide .slot {
+  --px-comida: var(--cocina-s);
   height: 100%;
+}
+.kitchen-top:has(.board.big) .station.wide .slot {
+  --px-comida: var(--cocina-xs);
 }
 .station.wide .slot.empty::before {
   content: '+';
   font-size: 16px;
 }
 .slot {
+  --px-comida: var(--cocina-m);
   position: relative;
   flex: 1;
   min-height: 44px;
@@ -1529,7 +1564,8 @@ img {
 }
 .station-vapor .slot {
   /* La toalla de cocina sobre la que reposan los panes */
-  background: var(--toalla);
+  background: url('./art/cocina/toalla.png') 0 0 / 64px;
+  image-rendering: pixelated;
 }
 .slot.empty {
   border: 2px dashed rgba(74, 37, 17, 0.5);
@@ -1544,58 +1580,52 @@ img {
   font-weight: 900;
 }
 .slot.ready {
-  background: var(--mayo);
   border: 3px solid var(--palta);
-}
-.station-vapor .slot.ready {
-  background: var(--toalla);
 }
 .slot.ruined {
   background: var(--cafe);
 }
 .item {
   position: absolute;
-  left: 9%;
-  right: 9%;
+  left: 0;
+  right: 0;
   top: 50%;
-  border-radius: 99px;
-  border: 2px solid var(--cafe);
+  margin-inline: auto;
+  background: center / 100% 100% no-repeat;
+  image-rendering: pixelated;
   opacity: 0;
-  transition: background 0.4s, transform 0.3s;
 }
 .item.vienesa {
-  height: 14px;
-  margin-top: -7px;
-  background: #f0a39a;
+  width: calc(44 * var(--px-comida));
+  height: calc(7 * var(--px-comida));
+  margin-top: calc(-3.5 * var(--px-comida));
+  background-image: url('./art/cocina/vienesa-cruda.png');
 }
 .item.pan {
-  height: 18px;
-  margin-top: -9px;
-  background: #f3d19d;
+  width: calc(46 * var(--px-comida));
+  height: calc(10 * var(--px-comida));
+  margin-top: calc(-5 * var(--px-comida));
+  background-image: url('./art/cocina/pan-frio.png');
 }
 .slot:not(.empty) .item {
   opacity: 1;
 }
 .slot.cooking .item.vienesa {
-  animation: bob-water 0.8s ease-in-out infinite alternate;
+  animation: bob-water 0.8s step-end infinite alternate;
 }
 .slot.ready .item.vienesa {
-  background: var(--vienesa);
+  background-image: url('./art/cocina/vienesa.png');
 }
 .slot.ready .item.pan {
-  background: #f6c983;
-  box-shadow: inset 0 -4px 0 rgba(150, 90, 30, 0.2);
+  background-image: url('./art/cocina/pan.png');
 }
 .slot.ruined .item.vienesa {
-  background: repeating-linear-gradient(90deg, #8d3b2b 0 8px, #f0d5c7 8px 10px);
-  border-color: var(--mayo);
-  transform: scaleY(1.3);
+  background-image: url('./art/cocina/vienesa-reventada.png');
 }
 .slot.ruined .item.pan {
-  background: #c9b48e;
-  border-style: dashed;
-  border-color: var(--mayo);
-  transform: scaleY(0.7);
+  height: calc(8 * var(--px-comida));
+  margin-top: calc(-4 * var(--px-comida));
+  background-image: url('./art/cocina/pan-aguado.png');
 }
 .slot.ruined::after {
   content: 'botar';
@@ -1620,7 +1650,6 @@ img {
 .steam i {
   width: 3px;
   height: 12px;
-  border-radius: 3px;
   background: var(--papel);
   box-shadow: 0 0 0 1px rgba(74, 37, 17, 0.25);
   animation: rise 1s ease-out infinite;
@@ -1664,8 +1693,10 @@ img {
 }
 
 .board {
+  --px-completo: var(--cocina-l);
   position: relative;
-  background: #d9a465;
+  background: url('./art/cocina/madera.png') 0 0 / 120px;
+  image-rendering: pixelated;
   border: var(--borde);
   border-radius: var(--radio);
   padding: 6px;
@@ -1685,6 +1716,7 @@ img {
   gap: 4px;
 }
 .tray-side {
+  --px-completo: var(--cocina-s);
   min-width: 0;
   min-height: 44px;
   padding: 2px;
@@ -1709,12 +1741,13 @@ img {
   display: grid;
   place-items: center;
   width: 100%;
+  /* Espacio reservado para el completo: la cocina no cambia de alto al poner el pan */
+  min-height: calc(27 * var(--px-completo));
 }
 .tray-empty {
   font-weight: 900;
   font-size: 13px;
   text-align: center;
-  opacity: 0.75;
 }
 /* Alto fijo: el aviso cambia durante el turno y nada de la tabla debe moverse */
 .tray-label {
@@ -1727,6 +1760,11 @@ img {
   font-weight: 900;
   text-align: center;
   line-height: 1.2;
+}
+.tray-label:not(:empty) {
+  padding: 0 8px;
+  border-radius: 12px;
+  background: var(--mayo);
 }
 .tray-label img {
   width: 20px;
@@ -1746,8 +1784,8 @@ img {
 }
 .hotdog {
   position: relative;
-  width: min(124px, 100%);
-  aspect-ratio: 292 / 132;
+  width: calc(60 * var(--px-completo));
+  height: calc(27 * var(--px-completo));
   animation: pop-in 0.18s ease-out;
 }
 .hotdog img {
@@ -1755,6 +1793,7 @@ img {
   inset: 0;
   width: 100%;
   height: 100%;
+  image-rendering: pixelated;
 }
 .trash-btn {
   margin-top: 4px;
@@ -1945,6 +1984,9 @@ img {
     width: 30px;
     height: 30px;
   }
+  .toppings .topping {
+    --icono: var(--icono-s);
+  }
   .kitchen {
     gap: 4px;
     padding: 5px 7px calc(var(--safe-bottom) + 5px);
@@ -1970,10 +2012,10 @@ img {
     font-size: 46px;
   }
   .title-art {
-    width: 220px;
+    width: var(--mascota-baja);
   }
   .result-art {
-    width: 96px;
+    width: var(--mascota-chica);
   }
   .results h2 {
     font-size: 32px;
@@ -2015,5 +2057,17 @@ img {
   /* Esquinas con todo a la vista: los puestos ya dicen qué son, y el título deja lugar a la hielera */
   .kitchen:has(.cooler):has(.topping:nth-child(5)) .station:not(.wide) .station-title {
     display: none;
+  }
+}
+
+/* Teléfonos angostos: la comida baja un tamaño para no empujar las estaciones ni salirse del espacio */
+@media (max-width: 400px) {
+  .board {
+    --px-completo: var(--cocina-m);
+  }
+}
+@media (max-width: 340px) {
+  .slot {
+    --px-comida: var(--cocina-s);
   }
 }

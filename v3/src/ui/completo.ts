@@ -1,25 +1,25 @@
-// El completo de la tabla: capas de vector apiladas, que crecen con cada ingrediente.
+// El completo de la tabla: capas de pixel art del mismo lienzo, que crecen con cada ingrediente.
 
 import type { ToppingId } from '../engine/data';
 import type { Tray } from '../engine/game';
 import { img } from './art';
-import americana from './art/completo/americana.svg';
-import aji from './art/completo/aji.svg';
-import back from './art/completo/back.svg';
-import chucrutCentro from './art/completo/chucrut-centro.svg';
-import chucrut from './art/completo/chucrut.svg';
-import front from './art/completo/front.svg';
-import mayo from './art/completo/mayo.svg';
-import palta from './art/completo/palta.svg';
-import poroto from './art/completo/poroto.svg';
-import tomate from './art/completo/tomate.svg';
-import vienesa from './art/completo/vienesa.svg';
+import americana from './art/cocina/completo/americana.png';
+import aji from './art/cocina/completo/aji.png';
+import back from './art/cocina/completo/back.png';
+import chucrut from './art/cocina/completo/chucrut.png';
+import front from './art/cocina/completo/front.png';
+import mayo from './art/cocina/completo/mayo.png';
+import palta from './art/cocina/completo/palta.png';
+import poroto from './art/cocina/completo/poroto.png';
+import tomate from './art/cocina/completo/tomate.png';
+import vienesa from './art/cocina/completo/vienesa.png';
 import { el } from './dom';
 
 /** Capas en orden de atrás hacia adelante; lo que no se pide no se dibuja. */
 const LAYERS: [ToppingId, string][] = [
   ['palta', palta],
   ['poroto_verde', poroto],
+  ['chucrut', chucrut],
   ['americana', americana],
   ['tomate', tomate],
   ['aji', aji],
@@ -29,9 +29,6 @@ const LAYERS: [ToppingId, string][] = [
 export function completoEl(tray: Tray): HTMLElement {
   const has = (t: ToppingId) => tray.toppings.includes(t);
   const sources = [back, ...(tray.vienesa ? [vienesa] : [])];
-  for (const [topping, src] of LAYERS) {
-    if (topping === 'americana' && has('chucrut')) sources.push(has('palta') ? chucrutCentro : chucrut);
-    if (has(topping)) sources.push(src);
-  }
+  for (const [topping, src] of LAYERS) if (has(topping)) sources.push(src);
   return el('div', { class: 'hotdog' }, ...sources.map((src) => img(src)), img(front));
 }
