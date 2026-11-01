@@ -67,7 +67,7 @@ Los fondos usan los tonos claros y apagados; el contorno oscuro y los colores m�
 | Señora Marta | `casera` | Pañoleta verde y delantal |
 | Benja | `nino` | Gorro azul, cara redonda, más bajo dentro del cuadro |
 | Don Hernán | `huaso` | Chupalla y manta, bigote tranquilo |
-| Abuela Teresa (nueva) | `teresa` | Pendiente de diseño; requiere aprobación de Catalina |
+| Abuela Teresa | `deco-foto` | Pelo gris con moño bajo, chaleco verde oscuro y delantal rojo a cuadros, sin lentes. Aparece en la Foto del carrito |
 
 Don Lucho es un error actual a corregir: hoy va de rojo y blanco, y Rangers es rojinegro.
 
@@ -173,5 +173,3 @@ No se nombra a artistas vivos ni a juegos existentes para imitarlos.
 
 - Paleta común: hay que rehacerla a partir del elenco y del fondo aprobados.
 - Regla de una sola medida de píxel en la biblia de arte: los clientes usan la mitad del píxel del fondo.
-- Tipografía pixelada definitiva.
-- Diseño de la abuela Teresa.

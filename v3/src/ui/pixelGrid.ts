@@ -12,7 +12,7 @@ const MASCOTA_ANCHO = 60;
 const PIXEL_ICONO = { l: 2, m: 1.67, s: 1.33, xs: 1, xxs: 0.75 };
 
 /** Tamaños de un píxel de la comida en la cocina, en puntos, de la tabla al espacio más angosto. */
-const PIXEL_COCINA = { l: 2, m: 1.67, s: 1, xs: 0.75 };
+const PIXEL_COCINA = { l: 2, m: 1.67, s: 1, xs: 0.67 };
 
 /**
  * Ajusta el tamaño del pixel art a los píxeles físicos de la pantalla,

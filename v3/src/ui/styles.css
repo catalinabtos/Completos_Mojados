@@ -1,3 +1,10 @@
+@font-face {
+  font-family: 'Jersey 15';
+  src: url('./fonts/jersey-15.woff2') format('woff2');
+  font-weight: 400 900;
+  font-display: swap;
+}
+
 /* Dirección de arte "Carrito de esquina": caricatura cálida, trazo café grueso, sombras duras
    y los colores de los ingredientes. Ver la propuesta gráfica para el detalle. */
 :root {
@@ -28,8 +35,8 @@
   --radio: 14px;
   --radio-grande: 18px;
   --radio-extra: 24px;
-  --display: 'Lilita One', 'Nunito', system-ui, sans-serif;
-  --ui: 'Nunito', -apple-system, system-ui, sans-serif;
+  --display: 'Jersey 15', system-ui, sans-serif;
+  --ui: 'Jersey 15', system-ui, sans-serif;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
@@ -52,6 +59,8 @@ body {
   color: var(--cafe);
   font-family: var(--ui);
   font-weight: 700;
+  font-synthesis: none;
+  letter-spacing: 0.2px;
   touch-action: manipulation;
 }
 
@@ -192,18 +201,21 @@ img {
   left: 0;
   right: 0;
   top: 12px;
-  height: 46px;
+  height: 30px;
   background-size: auto 100%;
   background-repeat: repeat-x;
+  image-rendering: pixelated;
 }
 .decor-banderitas {
   top: 42px;
+  height: 26px;
 }
 .decor-macetero,
 .decor-radio {
   bottom: 30px;
-  width: 38px;
-  height: 38px;
+  width: var(--icono-m);
+  height: var(--icono-m);
+  image-rendering: pixelated;
   z-index: 3;
 }
 .decor-macetero {
@@ -215,19 +227,20 @@ img {
 .decor-letrero {
   top: 14px;
   left: 50%;
-  width: 104px;
+  width: 99px;
   transform: translateX(-50%);
 }
 .decor-letrero img {
   display: block;
   width: 100%;
+  image-rendering: pixelated;
 }
 .decor-letrero span {
   position: absolute;
   left: 8%;
   right: 8%;
-  top: 44%;
-  bottom: 4%;
+  top: 38%;
+  bottom: 6%;
   display: grid;
   place-items: center;
   font-family: var(--display);
@@ -236,10 +249,8 @@ img {
   text-align: center;
 }
 .decor-foto {
-  right: 44px;
+  right: 48px;
   bottom: 30px;
-  width: 34px;
-  height: 38px;
   padding: 2px;
   background: var(--mayo);
   border: var(--borde-fino);
@@ -249,10 +260,9 @@ img {
 }
 .decor-foto img {
   display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top;
+  width: var(--icono-s);
+  height: var(--icono-s);
+  image-rendering: pixelated;
 }
 
 /* ───────────── Portada ───────────── */
@@ -426,9 +436,9 @@ img {
 }
 .shop-art {
   flex: none;
-  width: 48px;
-  height: 48px;
-  object-fit: contain;
+  width: var(--icono-l);
+  height: var(--icono-l);
+  image-rendering: pixelated;
 }
 .shop-info {
   flex: 1;
@@ -1180,6 +1190,7 @@ img.ingrediente.ingrediente {
   align-items: end;
   display: grid;
   grid-template-columns: repeat(var(--seats), minmax(0, 1fr));
+  grid-template-rows: minmax(0, 1fr);
   gap: 4px;
   padding: 0 6px;
   z-index: 3;
@@ -1231,8 +1242,8 @@ img.ingrediente.ingrediente {
     margin-bottom: 5px;
   }
 }
-/* Puestos angostos (4 o 5 clientes) en calle baja: íconos más chicos para que quepan de a tres */
-@container (max-height: 259px) {
+/* Puestos angostos (4 o 5 clientes) en calle baja o mediana: íconos más chicos para que quepan de a tres */
+@container (max-height: 359px) {
   .seats[style*='--seats:4'] .want img,
   .seats[style*='--seats:5'] .want img {
     width: 18px;
@@ -1254,7 +1265,7 @@ img.ingrediente.ingrediente {
   }
 }
 /* Calle con altura de sobra: el pedido se ordena en vertical, sobre el cliente */
-@container (min-height: 260px) {
+@container (min-height: 360px) {
   .seats .seat {
     height: 100%;
     max-height: none;
@@ -1272,8 +1283,15 @@ img.ingrediente.ingrediente {
   .bubble-items {
     gap: 0;
   }
+  /* La bebida va al lado de los ingredientes: una fila menos de alto */
+  .seats .bubble-items:has(.want-drink) {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+    gap: 2px;
+  }
 }
-@container (min-height: 320px) {
+@container (min-height: 360px) {
   .seats .want img {
     width: 27px;
     height: 27px;
@@ -1344,6 +1362,7 @@ img.ingrediente.ingrediente {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1;
 }
 .bubble-items {
   position: relative;
@@ -1494,7 +1513,7 @@ img.ingrediente.ingrediente {
 }
 .kitchen-top {
   display: grid;
-  grid-template-columns: 1fr 1.25fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr) minmax(0, 1fr);
   gap: 8px;
 }
 .station-title {
@@ -1543,11 +1562,22 @@ img.ingrediente.ingrediente {
   gap: 4px;
 }
 .station.wide .slot {
-  --px-comida: var(--cocina-s);
+  --px-comida: var(--cocina-xs);
   height: 100%;
 }
-.kitchen-top:has(.board.big) .station.wide .slot {
-  --px-comida: var(--cocina-xs);
+.kitchen-top:has(.board.big) .station:not(.wide) .slot {
+  --px-comida: var(--cocina-s);
+}
+/* Tabla doble y cuatro puestos: se gana ancho para que quepan los panes */
+/* Con la tabla doble el nombre no cabe: el dibujo ya dice qué es cada estación */
+.kitchen-top:has(.board.big) .station .station-title {
+  font-size: 0;
+}
+.kitchen-top:has(.board.big) .station.wide {
+  padding-inline: 3px;
+}
+.kitchen-top:has(.board.big) .station.wide .slots {
+  gap: 2px;
 }
 .station.wide .slot.empty::before {
   content: '+';
@@ -1622,6 +1652,9 @@ img.ingrediente.ingrediente {
 .slot.ruined .item.vienesa {
   background-image: url('./art/cocina/vienesa-reventada.png');
 }
+.slot.ruined .item {
+  top: 34%;
+}
 .slot.ruined .item.pan {
   height: calc(8 * var(--px-comida));
   margin-top: calc(-4 * var(--px-comida));
@@ -1630,9 +1663,9 @@ img.ingrediente.ingrediente {
 .slot.ruined::after {
   content: 'botar';
   position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
+  inset: auto 0 12%;
+  text-align: center;
+  line-height: 1;
   color: var(--mayo);
   font-size: 12px;
   font-weight: 900;
@@ -1734,7 +1767,7 @@ img.ingrediente.ingrediente {
   justify-self: center;
 }
 .kitchen-top:has(.board.big) {
-  grid-template-columns: 0.9fr 1.5fr 0.9fr;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.5fr) minmax(0, 0.9fr);
 }
 .tray-food {
   flex: 1;
@@ -1755,6 +1788,7 @@ img.ingrediente.ingrediente {
   align-items: center;
   justify-content: center;
   flex: none;
+  max-width: 100%;
   height: 30px;
   font-size: 12px;
   font-weight: 900;
@@ -1762,13 +1796,16 @@ img.ingrediente.ingrediente {
   line-height: 1.2;
 }
 .tray-label:not(:empty) {
-  padding: 0 8px;
+  padding: 0 6px;
   border-radius: 12px;
   background: var(--mayo);
 }
+/* Con ingredientes de más, los íconos se achican en vez de ensanchar la tabla */
 .tray-label img {
-  width: 20px;
+  flex: 0 1 20px;
+  min-width: 0;
   height: 20px;
+  object-fit: contain;
 }
 .tray-label.ok {
   color: #1f4d10;
@@ -1847,6 +1884,7 @@ img.ingrediente.ingrediente {
   padding: 6px;
 }
 .drink {
+  --icono: var(--icono-s);
   flex: 1 1 0;
   min-width: 0;
   min-height: 44px;
@@ -1970,6 +2008,9 @@ img.ingrediente.ingrediente {
 
 /* Pantallas bajas (iPhone SE) */
 @media (max-height: 700px) {
+  .drink {
+    --icono: var(--icono-xs);
+  }
   .seat {
     height: 160px;
   }
@@ -2064,6 +2105,10 @@ img.ingrediente.ingrediente {
 @media (max-width: 400px) {
   .board {
     --px-completo: var(--cocina-m);
+  }
+  .station .station-title {
+    font-size: 10px;
+    letter-spacing: 0;
   }
 }
 @media (max-width: 340px) {

@@ -1,7 +1,3 @@
-import '@fontsource/lilita-one/latin-400.css';
-import '@fontsource/nunito/latin-700.css';
-import '@fontsource/nunito/latin-800.css';
-import '@fontsource/nunito/latin-900.css';
 import './ui/styles.css';
 
 import { LEVELS, starsFor, type LevelConfig } from './engine/data';

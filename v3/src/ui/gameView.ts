@@ -171,7 +171,7 @@ export class GameView {
     if (level.drinks.length > 0) {
       const cooler = el('div', { class: 'cooler' });
       for (const id of level.drinks) {
-        const btn = el('button', { class: 'drink', 'aria-label': DRINKS[id].name }, img(DRINK_ART[id], '', 'big-icon'));
+        const btn = el('button', { class: 'drink', 'aria-label': DRINKS[id].name }, img(DRINK_ART[id], '', 'big-icon ingrediente'));
         this.tap(btn, () => this.game.tapDrink(id));
         cooler.append(btn);
       }
@@ -419,7 +419,7 @@ export class GameView {
         view.bubbleTitle.textContent = recipe.name;
         view.bubbleItems.replaceChildren(
           el('span', { class: `want completo${c.gotCompleto ? ' done' : ''}` }, ...recipe.toppings.map((t) => img(TOPPING_ART[t], TOPPINGS[t].name, 'ingrediente'))),
-          ...(c.drink ? [el('span', { class: `want want-drink${c.gotDrink ? ' done' : ''}` }, img(DRINK_ART[c.drink], DRINKS[c.drink].name))] : [])
+          ...(c.drink ? [el('span', { class: `want want-drink${c.gotDrink ? ' done' : ''}` }, img(DRINK_ART[c.drink], DRINKS[c.drink].name, 'ingrediente'))] : [])
         );
       }
 
@@ -474,7 +474,7 @@ export class GameView {
       this.trayLabel.replaceChildren(label, ...added.map((t) => img(TOPPING_ART[t], TOPPINGS[t].name, 'ingrediente')));
     }
     this.trayLabel.classList.toggle('ok', !!recipe);
-    this.heldDrinkEl.replaceChildren(...(g.heldDrink ? [img(DRINK_ART[g.heldDrink], DRINKS[g.heldDrink].name)] : []));
+    this.heldDrinkEl.replaceChildren(...(g.heldDrink ? [img(DRINK_ART[g.heldDrink], DRINKS[g.heldDrink].name, 'ingrediente')] : []));
     this.heldDrinkEl.hidden = !g.heldDrink;
   }
 

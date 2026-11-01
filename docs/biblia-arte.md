@@ -49,7 +49,7 @@ El completo sonriente se redibuja en pixel art sin perder lo que lo identifica: 
 
 ## Interfaz y tipografías
 - Botones, globos, íconos y barras también son pixel art: esquinas escalonadas y bordes de un solo tamaño de píxel.
-- Tipografía pixelada con tildes, ñ y signos ¿ ¡. Se elige al integrar; debe leerse sin esfuerzo a tamaño de teléfono.
+- Tipografía pixelada: Jersey 15, con tildes, ñ y signos ¿ ¡. Debe leerse sin esfuerzo a tamaño de teléfono.
 
 ## Formatos
 - **PNG** sin suavizado para todo el arte, en su tamaño real de píxeles. El juego lo amplía.

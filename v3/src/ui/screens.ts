@@ -4,7 +4,7 @@ import { DRINKS, LEVELS, RECIPES, TOPPINGS, formatCLP, starsFor, type LevelConfi
 import type { Game } from '../engine/game';
 import { SPEAKERS, type StoryCard } from '../engine/story';
 import { DECOR, UPGRADES, nextUpgradePrice, upgradeLevel, type DecorId, type UpgradeId } from '../engine/upgrades';
-import { DECOR_ART, DRINK_ART, MASCOT, SPEAKER_ART, TOPPING_ART, UPGRADE_ART, img } from './art';
+import { DECOR_ART, DECOR_TIENDA, DRINK_ART, MASCOT, SPEAKER_ART, TOPPING_ART, UPGRADE_ART, img } from './art';
 import { button, el, svgIcon } from './dom';
 import type { SaveData } from './storage';
 
@@ -64,7 +64,7 @@ export function howToScreen(onBack: () => void): HTMLElement {
       el('h3', { class: 'shop-title' }, 'Ingredientes'),
       el('div', { class: 'recipe-items' }, ...LEVELS[LEVELS.length - 1].toppings.map((t) => el('span', { class: 'chip' }, img(TOPPING_ART[t], '', 'ingrediente'), TOPPINGS[t].name))),
       el('h3', { class: 'shop-title' }, 'Bebidas'),
-      el('div', { class: 'recipe-items' }, ...Object.values(DRINKS).map((d) => el('span', { class: 'chip' }, img(DRINK_ART[d.id]), d.name))),
+      el('div', { class: 'recipe-items' }, ...Object.values(DRINKS).map((d) => el('span', { class: 'chip' }, img(DRINK_ART[d.id], '', 'ingrediente'), d.name))),
       button('¡Entendido!', onBack, 'btn primary big')
     )
   );
@@ -143,7 +143,7 @@ function decorRow(save: SaveData, id: DecorId, art: string, actions: CartActions
 }
 
 export function cartScreen(save: SaveData, actions: CartActions): HTMLElement {
-  const decor = (Object.entries(DECOR_ART) as [DecorId, string][]).map(([id, art]) => decorRow(save, id, art, actions));
+  const decor = (Object.entries(DECOR_ART) as [DecorId, string][]).map(([id, art]) => decorRow(save, id, DECOR_TIENDA[id] ?? art, actions));
   return el(
     'div',
     { class: 'screen panel-screen cart-screen' },
@@ -186,7 +186,7 @@ export function recipesPanel(level: LevelConfig): HTMLElement {
           'div',
           { class: 'recipe-card drinks-card' },
           el('div', { class: 'recipe-head' }, el('strong', {}, 'Hielera')),
-          el('div', { class: 'recipe-items' }, ...level.drinks.map((d) => el('span', { class: 'chip' }, img(DRINK_ART[d]), `${DRINKS[d].name} ${formatCLP(DRINKS[d].price)}`)))
+          el('div', { class: 'recipe-items' }, ...level.drinks.map((d) => el('span', { class: 'chip' }, img(DRINK_ART[d], '', 'ingrediente'), `${DRINKS[d].name} ${formatCLP(DRINKS[d].price)}`)))
         )
       : null
   );

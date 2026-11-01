@@ -41,7 +41,7 @@ Los ocho tipos actuales: estudiante, abuelita, hincha, trabajador, oficinista, c
 **La familia del carrito.** La abuela Teresa tuvo el carrito por 30 años en 5 Oriente con 2 Sur. Ahora tú (la nieta o nieto, sin género definido, para que cualquiera se identifique) lo heredas. Tu meta es que el carrito vuelva a ser "el mejor de Talca" y llegar a la Feria del Completo.
 - La historia se cuenta en tarjetas cortas entre esquinas (2–3 líneas, con la mascota o un cliente).
 - Los clientes recurrentes reaparecen y sus pequeñas tramas avanzan (Don Lucho y Rangers, Javi y sus pruebas).
-- La abuela Teresa aparece de vez en cuando con consejos que son, en realidad, el tutorial. Aún no tiene dibujo: sus tarjetas son recados que trae la mascota.
+- La abuela Teresa aparece de vez en cuando con consejos que son, en realidad, el tutorial. Su retrato aparece solo en la Foto del carrito: sus tarjetas son recados que trae la mascota.
 - Los textos de las tarjetas están en `v3/src/engine/story.ts`.
 
 ## Tono de los textos

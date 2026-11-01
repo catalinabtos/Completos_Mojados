@@ -1,12 +1,11 @@
-// Arte del juego. Fondos, clientes, mascota, ingredientes y cocina son pixel art generado con Canva;
-// bebidas, mejoras y decoración todavía son ilustraciones antiguas.
+// Arte del juego: todo es pixel art generado con Canva.
 
 import type { DrinkId, ToppingId } from '../engine/data';
 import type { Speaker } from '../engine/story';
 import type { DecorId, UpgradeId } from '../engine/upgrades';
-import bebida from './art/canva/bebida.webp';
-import jugo from './art/canva/jugo.webp';
-import mote from './art/canva/mote.webp';
+import bebida from './art/bebidas/bebida.png';
+import jugo from './art/bebidas/jugo.png';
+import mote from './art/bebidas/mote.png';
 import aji from './art/ingredientes/aji.png';
 import americana from './art/ingredientes/americana.png';
 import chucrut from './art/ingredientes/chucrut.png';
@@ -17,21 +16,24 @@ import tomate from './art/ingredientes/tomate.png';
 import mascotaCelebra from './art/mascota/celebra.png';
 import mascotaFeliz from './art/mascota/feliz.png';
 import mascotaPreocupada from './art/mascota/preocupada.png';
-import decoBanderitas from './art/carrito/deco-banderitas.svg';
-import decoLuces from './art/carrito/deco-luces.svg';
-import decoMacetero from './art/carrito/deco-macetero.svg';
-import mejoraBanquitos from './art/carrito/mejora-banquitos.svg';
-import mejoraFuego from './art/carrito/mejora-fuego.svg';
-import mejoraOlla from './art/carrito/mejora-olla.svg';
-import mejoraRadio from './art/carrito/mejora-radio.svg';
-import mejoraToalla from './art/carrito/mejora-toalla.svg';
-import toldoAzul from './art/carrito/toldo-azul.svg';
-import toldoVerde from './art/carrito/toldo-verde.svg';
+import decoBanderitas from './art/carrito/deco-banderitas.png';
+import decoBanderitasTienda from './art/carrito/deco-banderitas-tienda.png';
+import decoLuces from './art/carrito/deco-luces.png';
+import decoLucesTienda from './art/carrito/deco-luces-tienda.png';
+import decoMacetero from './art/carrito/deco-macetero.png';
+import mejoraBanquitos from './art/carrito/mejora-banquitos.png';
+import mejoraFuego from './art/carrito/mejora-fuego.png';
+import mejoraOlla from './art/carrito/mejora-olla.png';
+import mejoraRadio from './art/carrito/mejora-radio.png';
+import mejoraToalla from './art/carrito/mejora-toalla.png';
+import toldoAzul from './art/carrito/toldo-azul.png';
+import toldoVerde from './art/carrito/toldo-verde.png';
 import olla from './art/cocina/olla.png';
 import vaporera from './art/cocina/vaporera.png';
-import decoFoto from './art/canva/deco-foto.webp';
-import decoLetrero from './art/canva/deco-letrero.webp';
-import mejoraTabla from './art/canva/mejora-tabla.webp';
+import decoFoto from './art/carrito/deco-foto.png';
+import decoLetrero from './art/carrito/deco-letrero.png';
+import decoLetreroTienda from './art/carrito/deco-letrero-tienda.png';
+import mejoraTabla from './art/carrito/mejora-tabla.png';
 import bg1 from './art/bg/nivel-1.png';
 import bg2 from './art/bg/nivel-2.png';
 import bg3 from './art/bg/nivel-3.png';
@@ -107,6 +109,13 @@ export const DECOR_ART: Partial<Record<DecorId, string>> = {
   luces: decoLuces,
   letrero: decoLetrero,
   foto: decoFoto
+};
+
+/** Las piezas que no caben en el lienzo común de la tienda tienen su propio ícono. */
+export const DECOR_TIENDA: Partial<Record<DecorId, string>> = {
+  banderitas: decoBanderitasTienda,
+  luces: decoLucesTienda,
+  letrero: decoLetreroTienda
 };
 
 /** Fondo de pixel art de cada nivel, por id de nivel. */
