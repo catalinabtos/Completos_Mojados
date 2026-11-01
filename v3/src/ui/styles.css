@@ -31,10 +31,6 @@
   --madera: #d9a465;
   --madera-luz: #efc891;
   --madera-sombra: #b9823f;
-  --radio-chico: 10px;
-  --radio: 14px;
-  --radio-grande: 18px;
-  --radio-extra: 24px;
   --display: 'Jersey 15', system-ui, sans-serif;
   --ui: 'Jersey 15', system-ui, sans-serif;
   --safe-top: env(safe-area-inset-top, 0px);
@@ -106,7 +102,6 @@ img {
   width: 100%;
   padding: 13px 14px;
   border: var(--borde);
-  border-radius: var(--radio-grande);
   background: var(--mayo);
   color: var(--cafe);
   font-weight: 900;
@@ -125,7 +120,6 @@ img {
 .btn.big {
   font-size: 23px;
   padding: 16px;
-  border-radius: var(--radio-grande);
 }
 .btn.ghost {
   background: transparent;
@@ -168,8 +162,14 @@ img {
   right: 0;
   height: 18px;
   background:
-    radial-gradient(circle at 13px 0, var(--toldo, var(--tomate)) 0 13px, transparent 14px) 0 0 / 52px 18px repeat-x,
-    radial-gradient(circle at 39px 0, var(--mayo) 0 13px, transparent 14px) 0 0 / 52px 18px repeat-x;
+    linear-gradient(90deg, transparent 0px, var(--toldo, var(--tomate)) 0px 26px, transparent 26px) 0 0px / 52px 8px repeat-x,
+    linear-gradient(90deg, transparent 26px, var(--mayo) 26px 52px, transparent 52px) 0 0px / 52px 8px repeat-x,
+    linear-gradient(90deg, transparent 3px, var(--toldo, var(--tomate)) 3px 23px, transparent 23px) 0 8px / 52px 4px repeat-x,
+    linear-gradient(90deg, transparent 29px, var(--mayo) 29px 49px, transparent 49px) 0 8px / 52px 4px repeat-x,
+    linear-gradient(90deg, transparent 6px, var(--toldo, var(--tomate)) 6px 20px, transparent 20px) 0 12px / 52px 3px repeat-x,
+    linear-gradient(90deg, transparent 32px, var(--mayo) 32px 46px, transparent 46px) 0 12px / 52px 3px repeat-x,
+    linear-gradient(90deg, transparent 9px, var(--toldo, var(--tomate)) 9px 17px, transparent 17px) 0 15px / 52px 3px repeat-x,
+    linear-gradient(90deg, transparent 35px, var(--mayo) 35px 43px, transparent 43px) 0 15px / 52px 3px repeat-x;
   z-index: 3;
   pointer-events: none;
 }
@@ -179,8 +179,14 @@ img {
   align-self: stretch;
   height: calc(var(--safe-top) + 74px);
   background:
-    radial-gradient(circle at 20px calc(100% - 24px), var(--tomate) 0 20px, transparent 21px) 0 0 / 80px 100% repeat-x,
-    radial-gradient(circle at 60px calc(100% - 24px), var(--mayo) 0 20px, transparent 21px) 0 0 / 80px 100% repeat-x,
+    linear-gradient(90deg, transparent 0px, var(--tomate) 0px 40px, transparent 40px) 0 calc(100% - 14px) / 80px 10px repeat-x,
+    linear-gradient(90deg, transparent 40px, var(--mayo) 40px 80px, transparent 80px) 0 calc(100% - 14px) / 80px 10px repeat-x,
+    linear-gradient(90deg, transparent 4px, var(--tomate) 4px 36px, transparent 36px) 0 calc(100% - 8px) / 80px 6px repeat-x,
+    linear-gradient(90deg, transparent 44px, var(--mayo) 44px 76px, transparent 76px) 0 calc(100% - 8px) / 80px 6px repeat-x,
+    linear-gradient(90deg, transparent 8px, var(--tomate) 8px 32px, transparent 32px) 0 calc(100% - 4px) / 80px 4px repeat-x,
+    linear-gradient(90deg, transparent 48px, var(--mayo) 48px 72px, transparent 72px) 0 calc(100% - 4px) / 80px 4px repeat-x,
+    linear-gradient(90deg, transparent 12px, var(--tomate) 12px 28px, transparent 28px) 0 calc(100% - 0px) / 80px 4px repeat-x,
+    linear-gradient(90deg, transparent 52px, var(--mayo) 52px 68px, transparent 68px) 0 calc(100% - 0px) / 80px 4px repeat-x,
     repeating-linear-gradient(90deg, var(--tomate) 0 40px, var(--mayo) 40px 80px) 0 0 / 100% calc(100% - 24px) no-repeat;
 }
 
@@ -254,7 +260,6 @@ img {
   padding: 2px;
   background: var(--mayo);
   border: var(--borde-fino);
-  border-radius: 5px;
   overflow: hidden;
   z-index: 3;
 }
@@ -333,7 +338,6 @@ img {
   width: 100%;
   padding: 16px 18px 18px;
   border: var(--borde);
-  border-radius: var(--radio-extra);
   background: var(--papel);
   box-shadow: var(--sombra);
 }
@@ -341,14 +345,11 @@ img {
   content: '';
   position: absolute;
   left: 50%;
-  bottom: -19px;
-  width: 22px;
-  height: 22px;
-  margin-left: -11px;
-  border-right: var(--borde);
-  border-bottom: var(--borde);
-  background: var(--papel);
-  transform: rotate(45deg);
+  bottom: -12px;
+  width: 20px;
+  height: 12px;
+  margin-left: -10px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 5 3' shape-rendering='crispEdges'%3E%3Cpath fill='%234a2511' d='M0 0h5v1H4v1H3v1H2V2H1V1H0z'/%3E%3Cpath fill='%23fff' d='M1 0h3v1H3v1H2V1H1z'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat;
 }
 .story-bubble strong {
   display: block;
@@ -412,7 +413,6 @@ img {
   padding: 14px;
   background: var(--mostaza);
   border: var(--borde);
-  border-radius: var(--radio-grande);
   box-shadow: var(--sombra);
 }
 .piggy small {
@@ -432,7 +432,6 @@ img {
   padding: 10px 12px;
   background: var(--papel);
   border: var(--borde-fino);
-  border-radius: var(--radio);
 }
 .shop-art {
   flex: none;
@@ -464,7 +463,6 @@ img {
   width: 16px;
   height: 10px;
   border: 2px solid var(--cafe);
-  border-radius: 5px;
   background: var(--mayo);
 }
 .pips i.on {
@@ -523,7 +521,6 @@ img {
   flex: none;
   width: 44px;
   height: 44px;
-  border-radius: var(--radio);
   background: var(--mayo);
   border: var(--borde-fino);
   display: grid;
@@ -558,7 +555,6 @@ img {
   align-items: flex-start;
   background: var(--papel);
   border: var(--borde);
-  border-radius: var(--radio-grande);
   padding: 12px 14px;
   box-shadow: var(--sombra-chica);
 }
@@ -566,7 +562,6 @@ img {
   flex: none;
   width: 34px;
   height: 34px;
-  border-radius: 50%;
   background: var(--tomate);
   color: var(--mayo);
   border: var(--borde-fino);
@@ -634,7 +629,6 @@ img {
   flex: none;
   width: 58px;
   height: 58px;
-  border-radius: 50%;
   border: var(--borde);
   display: grid;
   place-items: center;
@@ -651,7 +645,6 @@ img {
   gap: 8px;
   background: var(--papel);
   border: var(--borde);
-  border-radius: var(--radio-grande);
   padding: 9px 12px;
   box-shadow: var(--sombra-chica);
 }
@@ -721,7 +714,6 @@ img {
   align-items: center;
   background: var(--mostaza);
   border: var(--borde-fino);
-  border-radius: var(--radio);
   padding: 8px 4px;
   font-family: var(--display);
   font-size: 20px;
@@ -743,7 +735,6 @@ img {
 .recipe-card {
   background: var(--papel);
   border: var(--borde);
-  border-radius: var(--radio-grande);
   padding: 12px;
   box-shadow: var(--sombra-chica);
 }
@@ -770,7 +761,6 @@ img {
 .new-badge {
   background: var(--tomate);
   color: var(--mayo);
-  border-radius: 999px;
   padding: 2px 10px;
   font-size: 12px;
   font-weight: 900;
@@ -785,7 +775,6 @@ img {
   align-items: center;
   gap: 4px;
   padding: 3px 10px 3px 4px;
-  border-radius: 18px;
   background: var(--mayo);
   border: 2px solid var(--cafe);
   font-size: 14px;
@@ -863,7 +852,6 @@ img.ingrediente.ingrediente {
   width: 100%;
   background: var(--mayo);
   border: var(--borde);
-  border-radius: var(--radio-extra);
   padding: 14px 18px;
   box-shadow: var(--sombra);
   display: flex;
@@ -889,7 +877,6 @@ img.ingrediente.ingrediente {
   align-self: flex-start;
   background: var(--mostaza);
   border: 2px solid var(--cafe);
-  border-radius: 999px;
   padding: 2px 12px;
   font-weight: 900;
   font-size: 14px;
@@ -924,7 +911,6 @@ img.ingrediente.ingrediente {
   overflow-y: auto;
   background: var(--mayo);
   border: var(--borde);
-  border-radius: var(--radio-extra);
   padding: 18px;
   box-shadow: var(--sombra);
   display: flex;
@@ -969,7 +955,6 @@ img.ingrediente.ingrediente {
   flex: none;
   width: 44px;
   height: 44px;
-  border-radius: var(--radio);
   background: var(--cafe);
   color: var(--mayo);
   display: grid;
@@ -1002,7 +987,6 @@ img.ingrediente.ingrediente {
   position: relative;
   height: 10px;
   margin-top: 4px;
-  border-radius: 99px;
   background: var(--cafe);
   overflow: hidden;
 }
@@ -1010,7 +994,6 @@ img.ingrediente.ingrediente {
   height: 100%;
   width: 0;
   background: var(--mostaza);
-  border-radius: 99px;
   transition: width 0.3s;
 }
 .goal-fill.reached {
@@ -1027,7 +1010,6 @@ img.ingrediente.ingrediente {
 .hud-time {
   flex: none;
   background: var(--cafe);
-  border-radius: var(--radio-chico);
   padding: 8px 10px;
   font-family: var(--display);
   font-size: 21px;
@@ -1149,7 +1131,6 @@ img.ingrediente.ingrediente {
   position: absolute;
   top: 26px;
   z-index: 3;
-  border-radius: 999px;
   font-weight: 900;
   font-size: 13px;
   padding: 5px 12px;
@@ -1335,22 +1316,18 @@ img.ingrediente.ingrediente {
   max-width: 116px;
   background: var(--papel);
   border: var(--borde-fino);
-  border-radius: var(--radio);
   padding: 4px 4px 5px;
   margin-bottom: 7px;
 }
 .bubble::after {
   content: '';
   position: absolute;
-  bottom: -10px;
+  bottom: -9px;
   left: 50%;
-  width: 14px;
-  height: 14px;
+  width: 15px;
+  height: 9px;
   margin-left: -7px;
-  background: var(--papel);
-  border-right: 3px solid var(--cafe);
-  border-bottom: 3px solid var(--cafe);
-  transform: rotate(45deg);
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 5 3' shape-rendering='crispEdges'%3E%3Cpath fill='%234a2511' d='M0 0h5v1H4v1H3v1H2V2H1V1H0z'/%3E%3Cpath fill='%23fff' d='M1 0h3v1H3v1H2V1H1z'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat;
 }
 .seat.impatient .bubble {
   border-color: var(--tomate);
@@ -1383,7 +1360,6 @@ img.ingrediente.ingrediente {
 }
 .want-drink {
   background: #e3f4fc;
-  border-radius: var(--radio-chico);
 }
 .want.done {
   opacity: 0.3;
@@ -1423,7 +1399,6 @@ img.ingrediente.ingrediente {
   height: 10px;
   background: #e0d4bc;
   border: 2px solid var(--cafe);
-  border-radius: 99px;
   overflow: hidden;
 }
 .patience-fill {
@@ -1478,7 +1453,6 @@ img.ingrediente.ingrediente {
   font-size: 13px;
   letter-spacing: 1px;
   padding: 1px 10px;
-  border-radius: var(--radio-chico);
 }
 
 .rain {
@@ -1539,7 +1513,6 @@ img.ingrediente.ingrediente {
   display: flex;
   flex-direction: column;
   border: var(--borde);
-  border-radius: var(--radio-grande);
   padding: 6px;
 }
 .station-olla {
@@ -1588,7 +1561,6 @@ img.ingrediente.ingrediente {
   position: relative;
   flex: 1;
   min-height: 44px;
-  border-radius: var(--radio-chico);
   background: rgba(255, 255, 255, 0.35);
   overflow: hidden;
 }
@@ -1731,7 +1703,6 @@ img.ingrediente.ingrediente {
   background: url('./art/cocina/madera.png') 0 0 / 120px;
   image-rendering: pixelated;
   border: var(--borde);
-  border-radius: var(--radio);
   padding: 6px;
   display: flex;
   flex-direction: column;
@@ -1754,7 +1725,6 @@ img.ingrediente.ingrediente {
   min-height: 44px;
   padding: 2px;
   border: 3px dashed rgba(74, 37, 17, 0.45);
-  border-radius: var(--radio-chico);
   display: grid;
   overflow: hidden;
 }
@@ -1797,7 +1767,6 @@ img.ingrediente.ingrediente {
 }
 .tray-label:not(:empty) {
   padding: 0 6px;
-  border-radius: 12px;
   background: var(--mayo);
 }
 /* Con ingredientes de más, los íconos se achican en vez de ensanchar la tabla */
@@ -1835,7 +1804,6 @@ img.ingrediente.ingrediente {
 .trash-btn {
   margin-top: 4px;
   padding: 3px 12px;
-  border-radius: 999px;
   background: var(--mayo);
   border: 2px solid var(--cafe);
   font-size: 12px;
@@ -1855,7 +1823,6 @@ img.ingrediente.ingrediente {
   justify-content: center;
   background: var(--papel);
   border: var(--borde-fino);
-  border-radius: var(--radio);
   padding: 3px 2px;
 }
 .topping {
@@ -1880,7 +1847,6 @@ img.ingrediente.ingrediente {
   gap: 6px;
   background: var(--agua);
   border: var(--borde);
-  border-radius: var(--radio);
   padding: 6px;
 }
 .drink {
@@ -1888,7 +1854,6 @@ img.ingrediente.ingrediente {
   flex: 1 1 0;
   min-width: 0;
   min-height: 44px;
-  border-radius: var(--radio-chico);
   box-shadow: var(--sombra-chica);
   padding: 2px;
 }
@@ -1918,7 +1883,6 @@ img.ingrediente.ingrediente {
   font-weight: 900;
   font-size: 15px;
   padding: 10px 16px;
-  border-radius: var(--radio);
   text-align: center;
   opacity: 0;
   pointer-events: none;
@@ -1940,7 +1904,6 @@ img.ingrediente.ingrediente {
   font-size: 15px;
   line-height: 1.3;
   padding: 10px 14px;
-  border-radius: var(--radio);
   box-shadow: var(--sombra);
   z-index: 15;
   pointer-events: none;
@@ -1978,7 +1941,6 @@ img.ingrediente.ingrediente {
   background: var(--tomate);
   border: 2px solid var(--cafe);
   padding: 4px 10px;
-  border-radius: var(--radio-chico);
   font-weight: 900;
   font-size: 14px;
 }
@@ -2115,4 +2077,129 @@ img.ingrediente.ingrediente {
   .slot {
     --px-comida: var(--cocina-s);
   }
+}
+
+/* Esquinas escalonadas: cada caja corta un cuadrado del grosor de su borde y conserva su sombra dura */
+.btn,
+.story-bubble,
+.piggy,
+.shop-row,
+.pips i,
+.back-btn,
+.howto li,
+.howto-num,
+.stop-badge,
+.stop-card,
+.intro-facts span,
+.recipe-card,
+.new-badge,
+.chip,
+.result-card,
+.record,
+.overlay-card,
+.icon-btn,
+.goal-bar,
+.hud-time,
+.place,
+.combo,
+.queue,
+.want-drink,
+.patience,
+.counter span,
+.station,
+.slot,
+.board,
+.tray-side,
+.tray-label:not(:empty),
+.trash-btn,
+.topping,
+.cooler,
+.drink,
+.toast,
+.tutorial,
+.reject-pop,
+.decor-foto {
+  --e: 3px;
+  --s: 0px;
+  clip-path: polygon(
+    var(--e) 0,
+    calc(100% - var(--e)) 0,
+    calc(100% - var(--e)) var(--e),
+    100% var(--e),
+    100% calc(100% + var(--s) - var(--e)),
+    calc(100% - var(--e)) calc(100% + var(--s) - var(--e)),
+    calc(100% - var(--e)) calc(100% + var(--s)),
+    var(--e) calc(100% + var(--s)),
+    var(--e) calc(100% + var(--s) - var(--e)),
+    0 calc(100% + var(--s) - var(--e)),
+    0 var(--e),
+    var(--e) var(--e)
+  );
+}
+.btn,
+.story-bubble,
+.piggy,
+.howto li,
+.stop-card,
+.recipe-card,
+.result-card,
+.overlay-card,
+.station,
+.board,
+.cooler,
+.tutorial {
+  --e: 4px;
+}
+.btn,
+.piggy,
+.result-card,
+.overlay-card,
+.tutorial {
+  --s: 6px;
+}
+.back-btn,
+.howto li,
+.stop-card,
+.recipe-card,
+.topping,
+.drink {
+  --s: 4px;
+}
+.btn:active {
+  --s: 1px;
+}
+.btn.ghost,
+.buy-btn:disabled,
+.back-btn:active,
+.topping:active,
+.drink:active {
+  --s: 0px;
+}
+.bubble,
+.story-bubble {
+  --c: 8px;
+  --a: 6px;
+  clip-path: polygon(
+    var(--e, 3px) 0,
+    calc(100% - var(--e, 3px)) 0,
+    calc(100% - var(--e, 3px)) var(--e, 3px),
+    100% var(--e, 3px),
+    100% calc(100% - var(--e, 3px)),
+    calc(100% - var(--e, 3px)) calc(100% - var(--e, 3px)),
+    calc(100% - var(--e, 3px)) 100%,
+    calc(50% + var(--c)) 100%,
+    calc(50% + var(--c)) calc(100% + var(--a)),
+    calc(50% - var(--c)) calc(100% + var(--a)),
+    calc(50% - var(--c)) 100%,
+    var(--e, 3px) 100%,
+    var(--e, 3px) calc(100% - var(--e, 3px)),
+    0 calc(100% - var(--e, 3px)),
+    0 var(--e, 3px),
+    var(--e, 3px) var(--e, 3px)
+  );
+}
+.story-bubble {
+  --c: 10px;
+  --a: 8px;
+  box-shadow: none;
 }
