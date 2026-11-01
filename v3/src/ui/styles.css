@@ -1538,6 +1538,19 @@ img.ingrediente.ingrediente {
   --px-comida: var(--cocina-xs);
   height: 100%;
 }
+.station.compact .slots {
+  gap: 3px;
+}
+/* Cuatro puestos en una columna: excepción a los 44 px aprobada en la biblia del juego */
+.station.compact .slot {
+  --px-comida: var(--cocina-s);
+  min-height: 34px;
+}
+@media (max-height: 700px) {
+  .station.compact .slot {
+    min-height: 30px;
+  }
+}
 .kitchen-top:has(.board.big) .station:not(.wide) .slot {
   --px-comida: var(--cocina-s);
 }
@@ -2202,4 +2215,57 @@ img.ingrediente.ingrediente {
   --c: 10px;
   --a: 8px;
   box-shadow: none;
+}
+
+/* Mejoras que se notan a la vista */
+.decor-banquitos {
+  left: 50%;
+  bottom: 48px;
+  width: calc(var(--px-s) * 55);
+  height: calc(var(--px-s) * 25);
+  margin-left: calc(var(--px-s) * -27);
+  background: url('./art/carrito/banquitos-calle.png') 0 0 / 100% 100%;
+  image-rendering: pixelated;
+  z-index: 0;
+}
+.fuego-parejo,
+.toalla-gruesa {
+  flex: none;
+  margin-top: 4px;
+  image-rendering: pixelated;
+}
+.fuego-parejo {
+  height: calc(var(--cocina-m) * 12);
+  background: var(--cafe) url('./art/cocina/fuego-parejo.png') center bottom / calc(var(--cocina-m) * 11) 100% repeat-x;
+}
+.toalla-gruesa {
+  align-self: center;
+  width: calc(var(--cocina-s) * 70);
+  height: calc(var(--cocina-s) * 16);
+  background: url('./art/cocina/toalla-gruesa.png') 0 0 / 100% 100%;
+}
+/* En pantallas bajas no hay alto de sobra: van junto al dibujo, en lugar del nombre */
+@media (max-height: 700px) {
+  .station {
+    position: relative;
+  }
+  .station:has(.fuego-parejo, .toalla-gruesa) .station-title {
+    font-size: 0;
+  }
+  .fuego-parejo,
+  .toalla-gruesa {
+    position: absolute;
+    top: 8px;
+    right: 6px;
+    margin: 0;
+  }
+  .fuego-parejo {
+    width: calc(var(--cocina-s) * 44);
+    height: calc(var(--cocina-s) * 12);
+    background-size: calc(var(--cocina-s) * 11) 100%;
+  }
+  .toalla-gruesa {
+    width: calc(var(--cocina-xs) * 70);
+    height: calc(var(--cocina-xs) * 16);
+  }
 }

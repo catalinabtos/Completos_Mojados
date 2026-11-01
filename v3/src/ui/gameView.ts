@@ -2,7 +2,7 @@
 
 import { DRINKS, RECIPES, TOPPINGS, formatCLP, type LevelConfig } from '../engine/data';
 import { Game, type Customer, type GameEvent, type StationId } from '../engine/game';
-import type { DecorId, GameOptions } from '../engine/upgrades';
+import type { DecorId, GameOptions, UpgradeLevels } from '../engine/upgrades';
 import { play } from './audio';
 import { CUSTOMER_ART, DECOR_ART, DRINK_ART, LEVEL_BG, STATION_ART, TOPPING_ART, UPGRADE_ART, img } from './art';
 import { completoEl } from './completo';
@@ -29,8 +29,8 @@ export interface GameViewOptions {
   options: Partial<GameOptions>;
   /** Decoraciones puestas en el carrito. */
   decor: DecorId[];
-  /** La radio comprada se ve sobre el mostrador. */
-  radio: boolean;
+  /** Mejoras compradas: las que se notan a la vista se dibujan en el carrito. */
+  upgrades: UpgradeLevels;
   tutorial: boolean;
   onPause: () => void;
   onRecipes: () => void;
@@ -222,7 +222,10 @@ export class GameView {
       this.slotEls[station].push(slot);
     }
     const title = el('div', { class: 'station-title' }, img(STATION_ART[station], '', 'station-art'), label.title);
-    return el('div', { class: `station station-${station}${count >= 4 ? ' wide' : ''}` }, title, slots);
+    const layout = count >= 5 ? ' wide' : count === 4 ? ' compact' : '';
+    const mejora = station === 'olla' ? this.opts.upgrades.fuego : this.opts.upgrades.toalla;
+    const extra = mejora ? [el('div', { class: station === 'olla' ? 'fuego-parejo' : 'toalla-gruesa' })] : [];
+    return el('div', { class: `station station-${station}${layout}` }, title, slots, ...extra);
   }
 
   private createSeat(seat: number): SeatView {
@@ -248,10 +251,11 @@ export class GameView {
     const has = (id: DecorId) => this.opts.decor.includes(id) && DECOR_ART[id];
     const strip = (id: DecorId) => (has(id) ? [el('div', { class: `decor decor-strip decor-${id}`, style: `background-image:url("${DECOR_ART[id]}")` })] : []);
     const piece = (id: DecorId) => (has(id) ? [img(DECOR_ART[id]!, '', `decor decor-${id}`)] : []);
-    const radio = this.opts.radio && UPGRADE_ART.radio ? [img(UPGRADE_ART.radio, '', 'decor decor-radio')] : [];
+    const radio = this.opts.upgrades.radio && UPGRADE_ART.radio ? [img(UPGRADE_ART.radio, '', 'decor decor-radio')] : [];
+    const banquitos = this.opts.upgrades.banquitos ? [el('div', { class: 'decor decor-banquitos' })] : [];
     const sign = has('letrero') ? [el('div', { class: 'decor decor-letrero' }, img(DECOR_ART.letrero!), el('span', {}, 'Completos Mojados'))] : [];
     const photo = has('foto') ? [el('div', { class: 'decor decor-foto' }, img(DECOR_ART.foto!))] : [];
-    return [...strip('luces'), ...strip('banderitas'), ...sign, ...piece('macetero'), ...photo, ...radio];
+    return [...strip('luces'), ...strip('banderitas'), ...banquitos, ...sign, ...piece('macetero'), ...photo, ...radio];
   }
 
   private createRain(): HTMLElement {

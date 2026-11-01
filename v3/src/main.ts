@@ -108,7 +108,7 @@ function startLevel(level: LevelConfig) {
     level: applyUpgrades(level, save.upgrades),
     options: gameOptions(save.upgrades),
     decor: save.decorOn,
-    radio: save.upgrades.radio !== undefined,
+    upgrades: save.upgrades,
     tutorial: level.id === 1 && !save.tutorialDone,
     onPause: () => pause(view, level),
     onRecipes: () => showRecipes(view),

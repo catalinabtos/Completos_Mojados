@@ -30,7 +30,7 @@ Recetas actuales: Completo (tomate, palta, chucrut, mayo), Italiano (tomate, pal
 - Una novedad por esquina como máximo, presentada en la pantalla de introducción.
 - Ningún nivel puede depender de reflejos imposibles: se calibra con el bot (`v3/tests/game.test.ts`). La curva sube suave; los saltos bruscos de dificultad son un error.
 - Perder debe sentirse justo y explicable ("se te agüaron 4 panes"), nunca arbitrario.
-- Todo botón jugable mide al menos 44×44 px y se usa con el pulgar.
+- Todo botón jugable mide al menos 44×44 px y se usa con el pulgar. Excepción aprobada por Catalina: con cuatro puestos en la olla o la vaporera, cada puesto puede medir al menos 30 px de alto para ir en una sola columna.
 - Los textos se leen en menos de 5 segundos.
 
 ## Lo que nunca se hace
