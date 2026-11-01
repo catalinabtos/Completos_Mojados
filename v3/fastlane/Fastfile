@@ -19,6 +19,16 @@ platform :ios do
       key_filepath: key_path
     )
 
+    # Cada máquina de GitHub es nueva y crea su propio certificado de desarrollo:
+    # sin esta limpieza se llena el cupo de la cuenta y falla la firma.
+    desarrollo = Spaceship::ConnectAPI::Certificate.all.select do |cert|
+      %w[DEVELOPMENT IOS_DEVELOPMENT].include?(cert.certificate_type)
+    end
+    de_maquinas = desarrollo.select { |cert| "#{cert.name} #{cert.display_name}".include?('Created via API') }
+    revocar = de_maquinas.empty? ? desarrollo : de_maquinas
+    revocar.each(&:delete!)
+    puts "::notice::Certificados de desarrollo: #{desarrollo.size}; revocados: #{revocar.size}"
+
     bundle_id = ENV['IOS_BUNDLE_ID'].to_s.empty? ? 'cl.completosmojados.app' : ENV['IOS_BUNDLE_ID']
     team_id = ENV.fetch('APPLE_TEAM_ID')
     auth = "-allowProvisioningUpdates -authenticationKeyPath #{key_path} " \
