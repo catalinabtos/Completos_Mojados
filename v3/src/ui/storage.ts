@@ -1,4 +1,7 @@
-// Progreso guardado en el dispositivo (localStorage del WebView).
+// Progreso guardado en el dispositivo. Preferences usa el almacenamiento nativo, que iOS no
+// limpia como el del WebView; localStorage queda de respaldo y trae el progreso de versiones anteriores.
+
+import { Preferences } from '@capacitor/preferences';
 
 import { sanitizeCart, type CartState } from '../engine/upgrades';
 
@@ -28,17 +31,36 @@ export function parseSave(raw: string | null): SaveData {
   }
 }
 
-export function loadSave(): SaveData {
+function readLocal(): string | null {
   try {
-    return parseSave(localStorage.getItem(KEY));
+    return localStorage.getItem(KEY);
   } catch {
-    return defaults();
+    return null;
   }
 }
 
+function writeNative(raw: string): void {
+  Preferences.set({ key: KEY, value: raw }).catch(() => {
+    // Sin almacenamiento nativo queda la copia de localStorage.
+  });
+}
+
+export async function loadSave(): Promise<SaveData> {
+  const stored = await Preferences.get({ key: KEY }).then(
+    (result) => result.value,
+    () => null
+  );
+  if (stored) return parseSave(stored);
+  const local = readLocal();
+  if (local) writeNative(local);
+  return parseSave(local);
+}
+
 export function writeSave(save: SaveData): void {
+  const raw = JSON.stringify(save);
+  writeNative(raw);
   try {
-    localStorage.setItem(KEY, JSON.stringify(save));
+    localStorage.setItem(KEY, raw);
   } catch {
     // Sin almacenamiento disponible: el juego sigue funcionando sin guardar.
   }

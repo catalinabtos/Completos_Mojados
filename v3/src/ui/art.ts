@@ -52,9 +52,7 @@ export const TOPPING_ART: Record<ToppingId, string> = {
   chucrut,
   americana,
   poroto_verde: poroto,
-  aji,
-  // Sin ilustración propia todavía: se usa la de la americana.
-  salsa_verde: americana
+  aji
 };
 
 export const DRINK_ART: Record<DrinkId, string> = { bebida, jugo, mote };

@@ -6,7 +6,6 @@ export type ToppingId =
   | 'mayo'
   | 'chucrut'
   | 'americana'
-  | 'salsa_verde'
   | 'aji'
   | 'poroto_verde';
 
@@ -16,7 +15,6 @@ export type DrinkId = 'bebida' | 'jugo' | 'mote';
 export interface ToppingInfo {
   id: ToppingId;
   name: string;
-  icon: string;
   color: string;
 }
 
@@ -30,7 +28,6 @@ export interface RecipeInfo {
 export interface DrinkInfo {
   id: DrinkId;
   name: string;
-  icon: string;
   price: number;
 }
 
@@ -71,14 +68,13 @@ export interface LevelConfig {
 }
 
 export const TOPPINGS: Record<ToppingId, ToppingInfo> = {
-  tomate: { id: 'tomate', name: 'Tomate', icon: '🍅', color: '#e53935' },
-  palta: { id: 'palta', name: 'Palta', icon: '🥑', color: '#7cb342' },
-  mayo: { id: 'mayo', name: 'Mayo', icon: '⚪', color: '#fff6d5' },
-  chucrut: { id: 'chucrut', name: 'Chucrut', icon: '🥬', color: '#e6dd8a' },
-  americana: { id: 'americana', name: 'Americana', icon: '🥒', color: '#c0ca33' },
-  salsa_verde: { id: 'salsa_verde', name: 'Salsa verde', icon: '🌿', color: '#2e7d32' },
-  aji: { id: 'aji', name: 'Ají verde', icon: '🌶️', color: '#2f7a2a' },
-  poroto_verde: { id: 'poroto_verde', name: 'Poroto verde', icon: '🫛', color: '#558b2f' }
+  tomate: { id: 'tomate', name: 'Tomate', color: '#e53935' },
+  palta: { id: 'palta', name: 'Palta', color: '#7cb342' },
+  mayo: { id: 'mayo', name: 'Mayo', color: '#fff6d5' },
+  chucrut: { id: 'chucrut', name: 'Chucrut', color: '#e6dd8a' },
+  americana: { id: 'americana', name: 'Americana', color: '#c0ca33' },
+  aji: { id: 'aji', name: 'Ají verde', color: '#2f7a2a' },
+  poroto_verde: { id: 'poroto_verde', name: 'Poroto verde', color: '#558b2f' }
 };
 
 export const RECIPES: Record<RecipeId, RecipeInfo> = {
@@ -99,9 +95,9 @@ export const RECIPES: Record<RecipeId, RecipeInfo> = {
 };
 
 export const DRINKS: Record<DrinkId, DrinkInfo> = {
-  bebida: { id: 'bebida', name: 'Bebida', icon: '🥤', price: 1000 },
-  jugo: { id: 'jugo', name: 'Jugo', icon: '🧃', price: 900 },
-  mote: { id: 'mote', name: 'Mote con huesillo', icon: '🍑', price: 1500 }
+  bebida: { id: 'bebida', name: 'Bebida', price: 1000 },
+  jugo: { id: 'jugo', name: 'Jugo', price: 900 },
+  mote: { id: 'mote', name: 'Mote con huesillo', price: 1500 }
 };
 
 const BASE = ['tomate', 'palta', 'chucrut', 'mayo'] as ToppingId[];

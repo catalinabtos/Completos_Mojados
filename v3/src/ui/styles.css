@@ -1103,28 +1103,6 @@ img.ingrediente.ingrediente {
 .street.weather-tormenta::before {
   background: linear-gradient(180deg, rgba(10, 15, 35, 0.85), rgba(10, 15, 35, 0.5));
 }
-.scenery {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 46%;
-  display: flex;
-  justify-content: space-around;
-  align-items: flex-end;
-  font-size: 46px;
-  line-height: 1;
-  opacity: 0.85;
-  pointer-events: none;
-  z-index: 1;
-}
-.scenery span:nth-child(2n) {
-  font-size: 58px;
-}
-.street.weather-noche .scenery,
-.street.weather-tormenta .scenery,
-.street.weather-lluvia .scenery {
-  filter: saturate(0.6) brightness(0.75);
-}
 .place,
 .combo,
 .queue {
@@ -1814,8 +1792,16 @@ img.ingrediente.ingrediente {
   height: 100%;
   image-rendering: pixelated;
 }
+/* El botón mide 44 pt de alto, pero el relleno y los márgenes negativos no empujan la cocina */
 .trash-btn {
-  margin-top: 4px;
+  align-self: stretch;
+  margin: -10px 0 -8px;
+  padding: 14px 0 8px;
+  background: none;
+  border: 0;
+}
+.trash-btn span {
+  display: block;
   padding: 3px 12px;
   background: var(--mayo);
   border: 2px solid var(--cafe);
@@ -1878,7 +1864,7 @@ img.ingrediente.ingrediente {
 .topping:active,
 .drink:active,
 .slot:active,
-.trash-btn:active,
+.trash-btn:active span,
 .seat:active .person {
   transform: translateY(3px);
   box-shadow: 0 1px 0 var(--cafe);
@@ -2021,12 +2007,6 @@ img.ingrediente.ingrediente {
   .station-title {
     margin-bottom: 2px;
   }
-  .scenery {
-    font-size: 36px;
-  }
-  .scenery span:nth-child(2n) {
-    font-size: 46px;
-  }
   .title-art {
     width: var(--mascota-baja);
   }
@@ -2124,7 +2104,7 @@ img.ingrediente.ingrediente {
 .board,
 .tray-side,
 .tray-label:not(:empty),
-.trash-btn,
+.trash-btn span,
 .topping,
 .cooler,
 .drink,

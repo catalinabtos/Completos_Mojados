@@ -8,16 +8,6 @@ import { CUSTOMER_ART, DECOR_ART, DRINK_ART, LEVEL_BG, STATION_ART, TOPPING_ART,
 import { completoEl } from './completo';
 import { el, svgIcon } from './dom';
 
-const SCENERY: Record<LevelConfig['scene'], string[]> = {
-  calle: ['🏠', '🌳', '🏪', '🌳', '🏠'],
-  plaza: ['🌳', '⛪', '🌳', '⛲', '🌳'],
-  mercado: ['🏪', '🍎', '🥕', '🌽', '🏪'],
-  universidad: ['🌳', '🏫', '📚', '🏫', '🌳'],
-  estacion: ['🚉', '🚃', '🚃', '🚃', '🌳'],
-  estadio: ['🚩', '🏟️', '🚩', '🏟️', '🚩'],
-  rio: ['🌳', '🌊', '🛶', '🌊', '🌳'],
-  feria: ['🎪', '🇨🇱', '🎡', '🇨🇱', '🎪']
-};
 const STATION_LABEL: Record<StationId, { title: string; empty: string; item: string }> = {
   olla: { title: 'Olla', empty: '+ vienesa', item: 'Vienesa' },
   vapor: { title: 'Vaporera', empty: '+ pan', item: 'Pan' }
@@ -126,7 +116,6 @@ export class GameView {
       el('div', { class: 'cart-post left' }),
       el('div', { class: 'cart-post right' }),
       ...this.createDecor(),
-      LEVEL_BG[level.id] ? null : el('div', { class: 'scenery' }, ...SCENERY[level.scene].map((icon) => el('span', {}, icon))),
       this.comboEl,
       this.queueEl,
       seatsEl,
@@ -152,7 +141,7 @@ export class GameView {
       : this.trayEls[0];
     this.trayLabel = el('div', { class: 'tray-label' }, '');
     this.heldDrinkEl = el('div', { class: 'held-drink' });
-    const trashBtn = el('button', { class: 'trash-btn', 'aria-label': 'Botar lo que hay en la tabla' }, 'Botar');
+    const trashBtn = el('button', { class: 'trash-btn', 'aria-label': 'Botar lo que hay en la tabla' }, el('span', {}, 'Botar'));
     this.tap(trashBtn, () => this.game.trashTray());
     const board = el('div', { class: `board${big ? ' big' : ''}` }, el('div', { class: 'station-title' }, 'Tabla'), trayArea, this.trayLabel, this.heldDrinkEl, trashBtn);
     const toppings = el('div', { class: 'toppings' });

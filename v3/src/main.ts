@@ -16,7 +16,7 @@ import { loadSave, resetSave, writeSave } from './ui/storage';
 const app = document.getElementById('app')!;
 applyPixelGrid(app);
 window.addEventListener('resize', () => applyPixelGrid(app));
-let save = loadSave();
+let save = await loadSave();
 setSoundEnabled(save.sound);
 let current: GameView | null = null;
 let currentLevel: LevelConfig | null = null;
