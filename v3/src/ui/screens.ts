@@ -21,8 +21,7 @@ function awning(): HTMLElement {
   return el('div', { class: 'awning big' });
 }
 
-export function titleScreen(save: SaveData, onPlay: () => void, onHowTo: () => void, onToggleSound: () => void): HTMLElement {
-  const sound = button([svgIcon(save.sound ? 'sound' : 'mute'), save.sound ? 'Sonido' : 'Sin sonido'], onToggleSound, 'btn secondary');
+export function titleScreen(onPlay: () => void, onHowTo: () => void, onSettings: () => void): HTMLElement {
   return el(
     'div',
     { class: 'screen title-screen' },
@@ -37,7 +36,7 @@ export function titleScreen(save: SaveData, onPlay: () => void, onHowTo: () => v
         'div',
         { class: 'menu' },
         button('¡Jugar!', onPlay, 'btn primary big'),
-        el('div', { class: 'menu-row' }, button('Cómo jugar', onHowTo, 'btn secondary'), sound)
+        el('div', { class: 'menu-row' }, button('Cómo jugar', onHowTo, 'btn secondary'), button('Ajustes', onSettings, 'btn secondary'))
       )
     ),
     el('p', { class: 'made-in' }, 'Hecho en el Maule')
@@ -65,8 +64,8 @@ export function howToScreen(onBack: () => void): HTMLElement {
       el('div', { class: 'recipe-items' }, ...LEVELS[LEVELS.length - 1].toppings.map((t) => el('span', { class: 'chip' }, img(TOPPING_ART[t], '', 'ingrediente'), TOPPINGS[t].name))),
       el('h3', { class: 'shop-title' }, 'Bebidas'),
       el('div', { class: 'recipe-items' }, ...Object.values(DRINKS).map((d) => el('span', { class: 'chip' }, img(DRINK_ART[d.id], '', 'ingrediente'), d.name))),
-      button('¡Entendido!', onBack, 'btn primary big')
-    )
+    ),
+    el('div', { class: 'panel-footer' }, button('¡Entendido!', onBack, 'btn primary big'))
   );
 }
 
@@ -84,16 +83,20 @@ export function levelSelectScreen(save: SaveData, onPick: (level: LevelConfig) =
     const best = save.best[level.id];
     const state = locked ? 'locked' : current && stars === 0 ? 'current' : 'done';
     const detail = locked ? `Meta ${formatCLP(level.goal)}` : best ? `Récord ${formatCLP(best)}` : `Meta ${formatCLP(level.goal)} · ¡te toca!`;
-    return button(
+    const info = el('span', {}, detail);
+    const stop = button(
       [
         el('span', { class: 'stop-badge' }, locked ? svgIcon('lock', 22) : String(level.id)),
-        el('span', { class: 'stop-card' }, el('span', { class: 'stop-info' }, el('strong', {}, level.name), el('span', {}, detail)), starsEl(stars))
+        el('span', { class: 'stop-card' }, el('span', { class: 'stop-info' }, el('strong', {}, level.name), info), starsEl(stars))
       ],
       () => {
-        if (!locked) onPick(level);
+        if (locked) info.textContent = `Gana la Esquina ${level.id - 1} para abrirla`;
+        else onPick(level);
       },
       `stop ${state}`
     );
+    if (locked) stop.setAttribute('aria-disabled', 'true');
+    return stop;
   });
   const cart = button([el('span', {}, 'Mi carrito'), el('span', { class: 'cart-link-money' }, formatCLP(save.wallet))], onCart, 'btn secondary cart-link');
   return el(
@@ -225,30 +228,71 @@ export function introScreen(level: LevelConfig, onStart: () => void, onBack: () 
         el('span', {}, el('small', {}, 'Turno'), mins),
         el('span', {}, el('small', {}, 'Puestos'), String(level.seats))
       ),
-      recipesPanel(level),
-      button('¡A trabajar!', onStart, 'btn primary big')
-    )
+      el('p', { class: 'intro-stars' }, `2 estrellas: ${formatCLP(level.stars[0])} · 3 estrellas: ${formatCLP(level.stars[1])}`),
+      recipesPanel(level)
+    ),
+    el('div', { class: 'panel-footer' }, button('¡A trabajar!', onStart, 'btn primary big'))
   );
 }
 
 export function overlay(title: string, body: HTMLElement | null, actions: HTMLButtonElement[], art?: string): HTMLElement {
   return el(
     'div',
-    { class: 'overlay' },
+    { class: 'overlay', role: 'dialog', 'aria-modal': 'true', 'aria-label': title },
     el('div', { class: 'overlay-card' }, art ? img(art, '', 'overlay-art') : null, el('h2', {}, title), body, el('div', { class: 'menu' }, ...actions))
   );
 }
 
-export function resultsScreen(game: Game, isRecord: boolean, hasNext: boolean, wallet: number, onNext: () => void, onRetry: () => void, onLevels: () => void): HTMLElement {
+export function confirmBody(text: string): HTMLElement {
+  return el('p', { class: 'reset-text' }, text);
+}
+
+export type SettingId = 'sound' | 'music' | 'bigText' | 'calm';
+
+const SETTINGS: [SettingId, string, string][] = [
+  ['sound', 'Sonido', 'Efectos del juego'],
+  ['music', 'Música', ''],
+  ['bigText', 'Texto grande', 'Para menús y pantallas de lectura'],
+  ['calm', 'Turno tranquilo', 'Los clientes esperan más y la comida aguanta más. Parte en el próximo turno']
+];
+
+export function settingsPanel(save: SaveData, onToggle: (id: SettingId) => void): HTMLElement {
+  const rows = SETTINGS.map(([id, title, hint]) => {
+    const toggle = button(save[id] ? 'Sí' : 'No', () => {
+      onToggle(id);
+      toggle.textContent = save[id] ? 'Sí' : 'No';
+      toggle.setAttribute('aria-checked', String(save[id]));
+    }, 'btn secondary setting-toggle');
+    toggle.setAttribute('role', 'switch');
+    toggle.setAttribute('aria-checked', String(save[id]));
+    toggle.setAttribute('aria-label', title);
+    return el('div', { class: 'setting-row' }, el('div', { class: 'shop-info' }, el('strong', {}, title), hint ? el('span', {}, hint) : null), toggle);
+  });
+  return el('div', { class: 'settings' }, ...rows);
+}
+
+/** La causa que más pesó al perder, o cuánto faltó para la siguiente estrella. */
+function resultNote(game: Game, stars: number): string | null {
+  const { goal, stars: goals } = game.level;
+  const { lost, ruined } = game.stats;
+  if (game.won) return stars < 3 ? `Te faltaron ${formatCLP(goals[stars - 1] - game.money)} para la siguiente estrella.` : null;
+  const missing = `Te faltaron ${formatCLP(goal - game.money)} para la meta.`;
+  if (lost > 0 && lost >= ruined) return `${missing} ${lost === 1 ? 'Se te fue 1 cliente enojado' : `Se te fueron ${lost} clientes enojados`}: adelanta la olla y la vaporera.`;
+  if (ruined > 0) return `${missing} ${ruined === 1 ? 'Se te pasó 1 pan o vienesa: sácalo apenas esté listo' : `Se te pasaron ${ruined} panes o vienesas: sácalos apenas estén listos`}.`;
+  return `${missing} Te faltó vender más: atiende rápido para ganar propina.`;
+}
+
+export function resultsScreen(game: Game, isRecord: boolean, hasNext: boolean, wallet: number, canUpgrade: boolean, onNext: () => void, onRetry: () => void, onLevels: () => void): HTMLElement {
   const level = game.level;
   const stars = starsFor(level, game.money);
   const won = game.won;
   const s = game.stats;
   const primary = won && hasNext ? button('Siguiente esquina', onNext, 'btn primary big') : button(won ? 'Jugar de nuevo' : 'Reintentar', onRetry, 'btn primary big');
   const secondary = [
-    won && hasNext ? button('Otra vez', onRetry, 'btn secondary') : null,
+    won && hasNext ? button('Jugar de nuevo', onRetry, 'btn secondary') : null,
     button('La ruta', onLevels, 'btn secondary')
   ].filter((b): b is HTMLButtonElement => b !== null);
+  const note = resultNote(game, stars);
   const row = (label: string, value: string) => [el('span', {}, label), el('span', { class: 'num' }, value)];
   return el(
     'div',
@@ -264,7 +308,9 @@ export function resultsScreen(game: Game, isRecord: boolean, hasNext: boolean, w
         { class: 'result-card' },
         el('div', { class: 'result-money' }, el('span', { class: 'money-big' }, formatCLP(game.money)), el('span', {}, `meta ${formatCLP(level.goal)}`)),
         isRecord ? el('div', { class: 'record' }, '¡Nuevo récord!') : null,
+        note ? el('p', { class: 'result-note' }, note) : null,
         el('div', { class: 'result-piggy' }, `A la alcancía: +${formatCLP(game.money)} · Total ${formatCLP(wallet)}`),
+        canUpgrade ? el('p', { class: 'result-note' }, '¡Te alcanza para una mejora en Mi carrito!') : null,
         el(
           'div',
           { class: 'result-stats' },

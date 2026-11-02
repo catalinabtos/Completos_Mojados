@@ -304,7 +304,7 @@ img {
   line-height: 0.92;
   text-align: center;
   color: var(--mayo);
-  text-shadow: 0 3px 0 var(--cafe);
+  text-shadow: 2px 0 0 var(--cafe), -2px 0 0 var(--cafe), 0 2px 0 var(--cafe), 0 -2px 0 var(--cafe), 2px 2px 0 var(--cafe), -2px 2px 0 var(--cafe), 2px -2px 0 var(--cafe), -2px -2px 0 var(--cafe), 0 5px 0 var(--cafe);
   text-wrap: balance;
 }
 .tagline {
@@ -828,6 +828,10 @@ img.ingrediente.ingrediente {
 .results.lost {
   background: var(--agua);
 }
+.results.lost h2 {
+  color: var(--cafe);
+  text-shadow: none;
+}
 .result-art {
   flex: none;
   width: var(--mascota-resultado);
@@ -1140,7 +1144,7 @@ img.ingrediente.ingrediente {
   max-height: 210px;
 }
 .seats[style*='--seats:5'] .bubble-title {
-  font-size: 11px !important;
+  font-size: 12px !important;
   letter-spacing: -0.2px;
 }
 .seats[style*='--seats:5'] .bubble {
@@ -1193,7 +1197,7 @@ img.ingrediente.ingrediente {
     gap: 0;
   }
   .seats[style*='--seats:5'] .bubble-title {
-    font-size: 10px !important;
+    font-size: 12px !important;
     letter-spacing: -0.3px;
     text-overflow: clip;
   }
@@ -1444,7 +1448,7 @@ img.ingrediente.ingrediente {
   gap: 8px;
 }
 .station-title {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -2037,7 +2041,7 @@ img.ingrediente.ingrediente {
     --px-completo: var(--cocina-m);
   }
   .station .station-title {
-    font-size: 10px;
+    font-size: 12px;
     letter-spacing: 0;
   }
 }
@@ -2232,5 +2236,107 @@ img.ingrediente.ingrediente {
     grid-auto-flow: column;
     grid-auto-columns: minmax(0, 1fr);
     gap: 4px;
+  }
+}
+
+/* Foco para teclado: va por dentro porque el recorte escalonado cortaría un marco exterior */
+:focus {
+  outline: none;
+}
+:focus-visible {
+  outline: 3px solid var(--noche);
+  outline-offset: -7px;
+}
+[tabindex='-1']:focus-visible {
+  outline: none;
+}
+
+.panel-footer {
+  flex: none;
+  padding: 10px 18px calc(var(--safe-bottom) + 12px);
+  background: var(--mayo);
+  border-top: var(--borde);
+}
+.panel-footer .btn {
+  width: 100%;
+}
+.intro-stars {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 900;
+  text-align: center;
+}
+.result-note {
+  margin: 8px 0 0;
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1.2;
+  text-align: center;
+}
+.setting-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  text-align: left;
+}
+.setting-row .shop-info {
+  flex: 1;
+  min-width: 0;
+}
+.setting-toggle {
+  flex: none;
+  width: 64px;
+  min-height: 44px;
+  padding: 0;
+}
+.setting-toggle[aria-checked='true'] {
+  background: var(--palta);
+  color: var(--mayo);
+}
+
+/* Lo listo se dice con palabras, no solo con el borde verde */
+.slot.ready::after {
+  content: 'sacar';
+  position: absolute;
+  left: 50%;
+  bottom: 3px;
+  transform: translateX(-50%);
+  padding: 0 4px;
+  background: var(--cafe);
+  color: var(--mayo);
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 14px;
+}
+.trash-btn[aria-disabled='true'] span {
+  opacity: 0.55;
+}
+
+:root[data-texto-grande] .panel-body,
+:root[data-texto-grande] .overlay-card,
+:root[data-texto-grande] .results-body,
+:root[data-texto-grande] .story-body {
+  zoom: 1.2;
+}
+:root[data-texto-grande] .tutorial,
+:root[data-texto-grande] .toast {
+  font-size: 17px;
+}
+
+@keyframes pop-quieto {
+  0%,
+  70% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pop {
+    animation: pop-quieto 1.2s linear forwards !important;
   }
 }

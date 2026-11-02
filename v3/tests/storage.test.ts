@@ -57,6 +57,12 @@ describe('guardado', () => {
     expect((await loadSave()).wallet).toBe(300);
   });
 
+  it('quien había apagado el sonido sigue sin música', () => {
+    expect(parseSave(JSON.stringify({ sound: false })).music).toBe(false);
+    expect(parseSave(JSON.stringify({ sound: true })).music).toBe(true);
+    expect(parseSave(null).music).toBe(true);
+  });
+
   it('parte de cero sin nada guardado', async () => {
     expect((await loadSave()).wallet).toBe(0);
   });

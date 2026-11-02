@@ -71,6 +71,16 @@ export function applyUpgrades(level: LevelConfig, levels: UpgradeLevels): LevelC
   };
 }
 
+/** Turno tranquilo: más paciencia y más aguante, sin tocar precios ni metas. */
+export function applyCalm(level: LevelConfig): LevelConfig {
+  return {
+    ...level,
+    olla: { ...level.olla, hold: level.olla.hold * 1.5 },
+    vapor: { ...level.vapor, hold: level.vapor.hold * 1.5 },
+    patience: level.patience * 1.5
+  };
+}
+
 export function gameOptions(levels: UpgradeLevels): GameOptions {
   return { bigBoard: upgradeLevel(levels, 'tabla') > 0, tipBonus: 0.05 * upgradeLevel(levels, 'radio') };
 }

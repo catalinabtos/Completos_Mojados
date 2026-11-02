@@ -10,6 +10,9 @@ export interface SaveData extends CartState {
   best: Record<number, number>;
   stars: Record<number, number>;
   sound: boolean;
+  music: boolean;
+  bigText: boolean;
+  calm: boolean;
   tutorialDone: boolean;
   storySeen: number[];
 }
@@ -17,7 +20,7 @@ export interface SaveData extends CartState {
 const KEY = 'completos-mojados-save-v1';
 
 function defaults(): SaveData {
-  return { unlocked: 1, best: {}, stars: {}, sound: true, tutorialDone: false, storySeen: [], wallet: 0, upgrades: {}, decorOwned: [], decorOn: [] };
+  return { unlocked: 1, best: {}, stars: {}, sound: true, music: true, bigText: false, calm: false, tutorialDone: false, storySeen: [], wallet: 0, upgrades: {}, decorOwned: [], decorOn: [] };
 }
 
 /** Lee un guardado; los de versiones anteriores, sin alcancía, parten con ella vacía. */
@@ -25,7 +28,9 @@ export function parseSave(raw: string | null): SaveData {
   if (!raw) return defaults();
   try {
     const data = JSON.parse(raw) as Partial<SaveData>;
-    return { ...defaults(), ...data, ...sanitizeCart(data), storySeen: Array.isArray(data.storySeen) ? data.storySeen : [] };
+    // Antes un solo botón apagaba música y efectos.
+    const music = data.music ?? data.sound ?? true;
+    return { ...defaults(), ...data, ...sanitizeCart(data), music, storySeen: Array.isArray(data.storySeen) ? data.storySeen : [] };
   } catch {
     return defaults();
   }
@@ -68,5 +73,5 @@ export function writeSave(save: SaveData): void {
 
 /** Progreso de cero: se conservan solo las preferencias del jugador. */
 export function resetSave(save: SaveData): SaveData {
-  return { ...defaults(), sound: save.sound, tutorialDone: save.tutorialDone };
+  return { ...defaults(), sound: save.sound, music: save.music, bigText: save.bigText, calm: save.calm, tutorialDone: save.tutorialDone };
 }

@@ -1,7 +1,7 @@
 // Pantalla de juego: dibuja el estado del motor en el DOM y traduce toques en acciones.
 
 import { DRINKS, RECIPES, TOPPINGS, formatCLP, type LevelConfig } from '../engine/data';
-import { Game, type Customer, type GameEvent, type StationId } from '../engine/game';
+import { Game, type Customer, type GameEvent, type SlotState, type StationId } from '../engine/game';
 import type { DecorId, GameOptions, UpgradeLevels } from '../engine/upgrades';
 import { play } from './audio';
 import { CUSTOMER_ART, DECOR_ART, DRINK_ART, LEVEL_BG, STATION_ART, TOPPING_ART, UPGRADE_ART, img } from './art';
@@ -12,6 +12,18 @@ const STATION_LABEL: Record<StationId, { title: string; empty: string; item: str
   olla: { title: 'Olla', empty: '+ vienesa', item: 'Vienesa' },
   vapor: { title: 'Vaporera', empty: '+ pan', item: 'Pan' }
 };
+
+const SLOT_STATE: Record<SlotState, (item: string, listo: string) => string> = {
+  empty: () => 'vacío, toca para poner',
+  cooking: (item) => `${item} calentándose`,
+  ready: (item, listo) => `${item} ${listo}, toca para sacar`,
+  ruined: () => `se echó a perder, toca para botar`
+};
+
+function slotName(station: StationId, index: number, state: SlotState): string {
+  const { title, item } = STATION_LABEL[station];
+  return `${title} ${index + 1}: ${SLOT_STATE[state](item.toLowerCase(), station === 'olla' ? 'lista' : 'listo')}`;
+}
 
 export interface GameViewOptions {
   /** Esquina con las mejoras ya aplicadas. */
@@ -61,6 +73,7 @@ export class GameView {
   private readonly trayLabel: HTMLElement;
   private trayLabelKey = '';
   private readonly heldDrinkEl: HTMLElement;
+  private readonly trashBtn: HTMLElement;
   private readonly toastEl: HTMLElement;
   private readonly tutorialEl: HTMLElement;
   private readonly fxLayer: HTMLElement;
@@ -74,19 +87,13 @@ export class GameView {
 
     // ── HUD
     const pauseBtn = el('button', { class: 'icon-btn', 'aria-label': 'Pausa' }, svgIcon('pause'));
-    pauseBtn.addEventListener('pointerdown', (e) => {
-      e.preventDefault();
-      opts.onPause();
-    });
+    this.press(pauseBtn, () => opts.onPause());
     this.moneyEl = el('span', { class: 'money' }, formatCLP(0));
     this.goalFill = el('div', { class: 'goal-fill' });
     this.timeEl = el('span', { class: 'time' }, '');
     this.comboEl = el('span', { class: 'combo' }, '');
     const recipesBtn = el('button', { class: 'icon-btn', 'aria-label': 'Recetas' }, svgIcon('book'));
-    recipesBtn.addEventListener('pointerdown', (e) => {
-      e.preventDefault();
-      opts.onRecipes();
-    });
+    this.press(recipesBtn, () => opts.onRecipes());
     const hud = el(
       'header',
       { class: 'hud' },
@@ -111,7 +118,7 @@ export class GameView {
     }
     const street = el(
       'section',
-      { class: `street scene-${level.scene} weather-${level.weather}${LEVEL_BG[level.id] ? ' has-bg' : ''}${this.toldoClass}` },
+      { class: `street scene-${level.scene} weather-${level.weather}${LEVEL_BG[level.id] ? ' has-bg' : ''}${this.toldoClass}`, 'aria-label': 'Clientes' },
       el('div', { class: 'awning' }),
       el('div', { class: 'cart-post left' }),
       el('div', { class: 'cart-post right' }),
@@ -141,10 +148,10 @@ export class GameView {
       : this.trayEls[0];
     this.trayLabel = el('div', { class: 'tray-label' }, '');
     this.heldDrinkEl = el('div', { class: 'held-drink' });
-    const trashBtn = el('button', { class: 'trash-btn', 'aria-label': 'Botar lo que hay en la tabla' }, el('span', {}, 'Botar'));
-    this.tap(trashBtn, () => this.game.trashTray());
-    const board = el('div', { class: `board${big ? ' big' : ''}` }, el('div', { class: 'station-title' }, 'Tabla'), trayArea, this.trayLabel, this.heldDrinkEl, trashBtn);
-    const toppings = el('div', { class: 'toppings' });
+    this.trashBtn = el('button', { class: 'trash-btn', 'aria-label': 'Botar lo que hay en la tabla' }, el('span', {}, 'Botar'));
+    this.tap(this.trashBtn, () => this.game.trashTray());
+    const board = el('div', { class: `board${big ? ' big' : ''}` }, el('div', { class: 'station-title' }, 'Tabla'), trayArea, this.trayLabel, this.heldDrinkEl, this.trashBtn);
+    const toppings = el('div', { class: 'toppings', role: 'group', 'aria-label': 'Ingredientes' });
     for (const id of level.toppings) {
       const t = TOPPINGS[id];
       const btn = el('button', { class: 'topping', style: `--c:${t.color}`, 'aria-label': t.name }, img(TOPPING_ART[id], '', 'big-icon ingrediente'));
@@ -158,7 +165,7 @@ export class GameView {
       toppings
     ];
     if (level.drinks.length > 0) {
-      const cooler = el('div', { class: 'cooler' });
+      const cooler = el('div', { class: 'cooler', role: 'group', 'aria-label': 'Hielera' });
       for (const id of level.drinks) {
         const btn = el('button', { class: 'drink', 'aria-label': DRINKS[id].name }, img(DRINK_ART[id], '', 'big-icon ingrediente'));
         this.tap(btn, () => this.game.tapDrink(id));
@@ -166,10 +173,10 @@ export class GameView {
       }
       kitchenChildren.push(cooler);
     }
-    const kitchen = el('section', { class: 'kitchen' }, ...kitchenChildren);
+    const kitchen = el('section', { class: 'kitchen', 'aria-label': 'Cocina' }, ...kitchenChildren);
 
-    this.toastEl = el('div', { class: 'toast' });
-    this.tutorialEl = el('div', { class: 'tutorial' });
+    this.toastEl = el('div', { class: 'toast', role: 'status' });
+    this.tutorialEl = el('div', { class: 'tutorial', role: 'status' });
     this.tutorialEl.hidden = !opts.tutorial;
     this.fxLayer = el('div', { class: 'fx-layer' });
 
@@ -179,9 +186,22 @@ export class GameView {
     this.render();
   }
 
-  private tap(target: HTMLElement, action: () => void) {
+  /** Responde al primer contacto; el `click` queda para teclado y lectores de pantalla. */
+  private press(target: HTMLElement, action: () => void) {
+    let pressed = false;
     target.addEventListener('pointerdown', (e) => {
       e.preventDefault();
+      pressed = true;
+      action();
+    });
+    target.addEventListener('click', () => {
+      if (!pressed) action();
+      pressed = false;
+    });
+  }
+
+  private tap(target: HTMLElement, action: () => void) {
+    this.press(target, () => {
       if (this.paused || this.finished) return;
       action();
       this.handleEvents();
@@ -200,7 +220,7 @@ export class GameView {
     for (let i = 0; i < count; i += 1) {
       const slot = el(
         'button',
-        { class: 'slot empty', 'aria-label': `${label.title} ${i + 1}` },
+        { class: 'slot empty', 'aria-label': slotName(station, i, 'empty') },
         el('div', { class: station === 'olla' ? 'item vienesa' : 'item pan' }),
         el('div', { class: 'steam' }, el('i'), el('i'), el('i')),
         el('div', { class: 'progress' })
@@ -225,7 +245,7 @@ export class GameView {
     const patienceFill = el('div', { class: 'patience-fill' });
     const patience = el('div', { class: 'patience' }, patienceFill);
     const person = el('div', { class: 'person' }, face);
-    const root = el('button', { class: 'seat empty', 'aria-label': `Cliente ${seat + 1}` }, bubble, person, patience);
+    const root = el('button', { class: 'seat empty', 'aria-label': `Puesto ${seat + 1} vacío` }, bubble, person, patience);
     this.tap(root, () => this.game.serve(seat));
     return { root, person, face, bubble, bubbleTitle, bubbleItems, patience, patienceFill, shownId: null, key: '' };
   }
@@ -398,11 +418,14 @@ export class GameView {
           view.root.className = 'seat empty';
           view.shownId = null;
           view.key = '';
+          view.root.setAttribute('aria-label', `Puesto ${s + 1} vacío`);
         }
         return;
       }
 
-      const key = `${c.id}|${c.state}|${c.mood}|${c.gotCompleto}|${c.gotDrink}`;
+      const ratio = c.patience / c.patienceMax;
+      const impatient = c.state === 'seated' && ratio < 0.35;
+      const key = `${c.id}|${c.state}|${c.mood}|${c.gotCompleto}|${c.gotDrink}|${impatient}`;
       if (key !== view.key) {
         view.key = key;
         if (view.shownId !== c.id) view.shownId = c.id;
@@ -414,12 +437,12 @@ export class GameView {
           el('span', { class: `want completo${c.gotCompleto ? ' done' : ''}` }, ...recipe.toppings.map((t) => img(TOPPING_ART[t], TOPPINGS[t].name, 'ingrediente'))),
           ...(c.drink ? [el('span', { class: `want want-drink${c.gotDrink ? ' done' : ''}` }, img(DRINK_ART[c.drink], DRINKS[c.drink].name, 'ingrediente'))] : [])
         );
+        const wants = [c.gotCompleto ? '' : recipe.name, c.drink && !c.gotDrink ? DRINKS[c.drink].name : ''].filter(Boolean).join(' y ');
+        view.root.setAttribute('aria-label', `Cliente ${s + 1}: ${wants}${impatient ? ', se está aburriendo' : ''}`);
       }
 
-      const ratio = c.patience / c.patienceMax;
       view.patienceFill.style.width = `${Math.max(0, ratio * 100)}%`;
       view.patienceFill.style.background = `var(--${ratio > 0.6 ? 'palta' : ratio > 0.3 ? 'mostaza' : 'tomate'})`;
-      const impatient = c.state === 'seated' && ratio < 0.35;
       view.root.classList.toggle('impatient', impatient);
       const art = CUSTOMER_ART[c.face % CUSTOMER_ART.length];
       const src = c.mood === 'angry' ? art.enojado : impatient ? art.impaciente : art.normal;
@@ -437,7 +460,10 @@ export class GameView {
       g.slots(station).forEach((slot, i) => {
         const elSlot = this.slotEls[station][i];
         const cls = `slot ${slot.state}`;
-        if (elSlot.className !== cls) elSlot.className = cls;
+        if (elSlot.className !== cls) {
+          elSlot.className = cls;
+          elSlot.setAttribute('aria-label', slotName(station, i, slot.state));
+        }
         let progress = 0;
         if (slot.state === 'cooking') progress = slot.t / cook;
         else if (slot.state === 'ready') progress = (slot.t - cook) / hold;
@@ -469,6 +495,7 @@ export class GameView {
     this.trayLabel.classList.toggle('ok', !!recipe);
     this.heldDrinkEl.replaceChildren(...(g.heldDrink ? [img(DRINK_ART[g.heldDrink], DRINKS[g.heldDrink].name, 'ingrediente')] : []));
     this.heldDrinkEl.hidden = !g.heldDrink;
+    this.trashBtn.setAttribute('aria-disabled', String(!tray && !g.heldDrink));
   }
 
   private renderTutorial() {

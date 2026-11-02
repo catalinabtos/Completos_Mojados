@@ -6,6 +6,7 @@ type Sfx = 'tap' | 'sizzle' | 'splash' | 'ready' | 'burnt' | 'cash' | 'angry' | 
 
 let ctx: AudioContext | null = null;
 let enabled = true;
+let musicEnabled = true;
 
 /** Más bajo que los efectos, para no taparlos. */
 const MUSIC_GAIN = 0.4;
@@ -17,6 +18,10 @@ let music: { mode: MusicMode; out: GainNode; timer: number; bar: number; nextTim
 
 export function setSoundEnabled(value: boolean) {
   enabled = value;
+}
+
+export function setMusicEnabled(value: boolean) {
+  musicEnabled = value;
   syncMusic();
 }
 
@@ -27,7 +32,7 @@ export function setMusic(mode: MusicMode | null) {
 }
 
 function syncMusic() {
-  const mode = enabled ? wantedMusic : null;
+  const mode = musicEnabled ? wantedMusic : null;
   if (music?.mode === mode) return;
   stopMusic();
   if (mode && ctx) startMusic(ctx, mode);

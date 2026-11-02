@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { LEVELS, RECIPES, starsFor } from '../src/engine/data';
 import { Game } from '../src/engine/game';
 import { simulate } from '../src/engine/bot';
-import { DECOR, UPGRADES, applyUpgrades, buyDecor, buyUpgrade, gameOptions, sanitizeCart, toggleDecor, type CartState, type UpgradeLevels } from '../src/engine/upgrades';
+import { DECOR, UPGRADES, applyCalm, applyUpgrades, buyDecor, buyUpgrade, gameOptions, sanitizeCart, toggleDecor, type CartState, type UpgradeLevels } from '../src/engine/upgrades';
 import { STORY, STORY_ENDING } from '../src/engine/story';
 import { SONG } from '../src/ui/music';
 import { parseSave, resetSave } from '../src/ui/storage';
@@ -110,6 +110,17 @@ describe('Game', () => {
 });
 
 describe('levels are playable', () => {
+  it('Turno tranquilo solo hace más fácil cada esquina', () => {
+    for (const level of LEVELS) {
+      const calm = applyCalm(level);
+      expect(calm.patience).toBeGreaterThan(level.patience);
+      expect(calm.olla.hold).toBeGreaterThan(level.olla.hold);
+      expect(calm.goal).toBe(level.goal);
+      const wins = (l: typeof level) => Array.from({ length: 20 }, (_, i) => simulate(l, i + 1, 1.2)).filter((r) => r.won).length;
+      expect(wins(calm)).toBeGreaterThanOrEqual(wins(level));
+    }
+  });
+
   for (const level of LEVELS) {
     it(`level ${level.id} (${level.name}) has reachable star goals`, () => {
       expect(level.goal).toBeLessThan(level.stars[0]);
