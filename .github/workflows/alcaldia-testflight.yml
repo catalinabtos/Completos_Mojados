@@ -1,0 +1,88 @@
+name: Talca en tus Manos · TestFlight
+
+on:
+  push:
+    branches: [main, 'claude/**']
+    paths: ['alcaldia/**', '.github/workflows/alcaldia-testflight.yml']
+  workflow_dispatch:
+
+concurrency:
+  group: alcaldia-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: alcaldia
+
+jobs:
+  test:
+    name: Tests y build web
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: alcaldia/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+
+  ios:
+    name: Build iOS y subida a TestFlight
+    needs: test
+    runs-on: macos-15
+    env:
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: alcaldia/package-lock.json
+      - run: npm ci
+      - name: Build web y sync con Xcode
+        run: npm run ios:sync
+
+      - name: Compilar para simulador (sin firma)
+        if: env.ASC_KEY_ID == ''
+        run: |
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO build | tail -n 40
+          echo "::warning::Faltan los secretos de App Store Connect: se compiló pero no se subió a TestFlight."
+
+      - name: Compilar, firmar y subir a TestFlight
+        if: env.ASC_KEY_ID != ''
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}${{ github.run_attempt }}
+          FASTLANE_DISABLE_COLORS: 1
+        run: |
+          set -o pipefail
+          fastlane ios beta 2>&1 | tee fastlane.log
+
+      # El registro exige sesión en GitHub; las anotaciones se leen sin ella.
+      - name: Mostrar la causa del fallo
+        if: failure() && env.ASC_KEY_ID != ''
+        run: |
+          cat fastlane.log ~/Library/Logs/gym/*.log 2>/dev/null \
+            | grep -E '\[!\]|error:|Error |No profiles|[Cc]ertificate|agreement|Falta crear' \
+            | grep -v authenticationKey | cut -c1-300 | awk '!visto[$0]++' | tail -n 8 \
+            | while IFS= read -r linea; do echo "::error::$linea"; done
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: talca-ios
+          path: |
+            alcaldia/build/*.ipa
+            alcaldia/fastlane.log
+          if-no-files-found: ignore

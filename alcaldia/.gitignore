@@ -1,0 +1,6 @@
+node_modules
+dist
+build
+fastlane/AuthKey.p8
+fastlane/report.xml
+ios/App/App/public

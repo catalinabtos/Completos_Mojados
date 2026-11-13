@@ -1,0 +1,74 @@
+# Compila Talca en tus Manos y la sube a TestFlight usando la API key de App Store Connect.
+# Usa los mismos secretos que Completos Mojados:
+#   ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8   API key de App Store Connect (rol Admin o App Manager)
+#   APPLE_TEAM_ID                            Team ID de la cuenta Apple Developer
+#   BUILD_NUMBER                             número de build único
+
+default_platform(:ios)
+
+BUNDLE_ID = 'cl.talcaentusmanos.app'
+APP_NAME = 'Talca en tus Manos'
+
+platform :ios do
+  desc 'Compila y sube un build a TestFlight'
+  lane :beta do
+    key_path = File.expand_path('AuthKey.p8', __dir__)
+    File.write(key_path, ENV.fetch('ASC_KEY_P8'))
+
+    api_key = app_store_connect_api_key(
+      key_id: ENV.fetch('ASC_KEY_ID'),
+      issuer_id: ENV.fetch('ASC_ISSUER_ID'),
+      key_filepath: key_path
+    )
+
+    # Registra el identificador de la app en la cuenta de Apple (solo la primera vez).
+    if Spaceship::ConnectAPI::BundleId.find(BUNDLE_ID).nil?
+      Spaceship::ConnectAPI::BundleId.create(name: APP_NAME, identifier: BUNDLE_ID, platform: 'IOS')
+      puts "::notice::Se registró el identificador #{BUNDLE_ID} en la cuenta de Apple."
+    end
+
+    # Cada máquina de GitHub es nueva y crea su propio certificado de desarrollo:
+    # sin esta limpieza se llena el cupo de la cuenta y falla la firma (igual que en Completos Mojados).
+    desarrollo = Spaceship::ConnectAPI::Certificate.all.select do |cert|
+      %w[DEVELOPMENT IOS_DEVELOPMENT].include?(cert.certificate_type)
+    end
+    de_maquinas = desarrollo.select { |cert| "#{cert.name} #{cert.display_name}".include?('Created via API') }
+    revocar = de_maquinas.empty? ? desarrollo : de_maquinas
+    revocar.each(&:delete!)
+
+    team_id = ENV.fetch('APPLE_TEAM_ID')
+    auth = "-allowProvisioningUpdates -authenticationKeyPath #{key_path} " \
+           "-authenticationKeyID #{ENV['ASC_KEY_ID']} -authenticationKeyIssuerID #{ENV['ASC_ISSUER_ID']}"
+
+    build_app(
+      project: 'ios/App/App.xcodeproj',
+      scheme: 'App',
+      configuration: 'Release',
+      export_method: 'app-store',
+      output_directory: 'build',
+      output_name: 'TalcaEnTusManos.ipa',
+      clean: true,
+      xcargs: "#{auth} DEVELOPMENT_TEAM=#{team_id} PRODUCT_BUNDLE_IDENTIFIER=#{BUNDLE_ID} " \
+              "CODE_SIGN_STYLE=Automatic CURRENT_PROJECT_VERSION=#{ENV.fetch('BUILD_NUMBER', '1')}",
+      # fastlane agrega la API key al exportar; repetirla hace fallar a xcodebuild.
+      export_xcargs: '-allowProvisioningUpdates',
+      export_options: {
+        signingStyle: 'automatic',
+        teamID: team_id,
+        manageAppVersionAndBuildNumber: false
+      }
+    )
+
+    # La API de Apple no permite crear apps: la ficha se crea una vez a mano en App Store Connect.
+    if Spaceship::ConnectAPI::App.find(BUNDLE_ID).nil?
+      UI.user_error!("Falta crear la app en App Store Connect: Apps > + > Nueva app, con el identificador #{BUNDLE_ID}. " \
+                     'El build ya compiló y firmó bien; vuelve a ejecutar el flujo después de crearla.')
+    end
+
+    upload_to_testflight(
+      api_key: api_key,
+      app_identifier: BUNDLE_ID,
+      skip_waiting_for_build_processing: true
+    )
+  end
+end

@@ -1,0 +1,10 @@
+{
+  "appId": "cl.talcaentusmanos.app",
+  "appName": "Talca en tus Manos",
+  "webDir": "dist",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#2b2135",
+    "scrollEnabled": false
+  }
+}
