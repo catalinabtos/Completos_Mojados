@@ -6,7 +6,7 @@
 
 default_platform(:ios)
 
-BUNDLE_ID = 'cl.talcaentusmanos.app'
+BUNDLE_ID = 'cl.munitalca.app'
 APP_NAME = 'Muni Talca'
 
 platform :ios do

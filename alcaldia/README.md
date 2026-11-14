@@ -38,4 +38,4 @@ npx tsx scripts/balance.ts   # tabla de victorias del bot por estilo de juego
 
 El flujo `.github/workflows/alcaldia-testflight.yml` compila y sube cada push a `main` o `claude/**`
 que toque `alcaldia/`, con los mismos secretos de App Store Connect que Completos Mojados.
-Identificador: `cl.talcaentusmanos.app`. La ficha de la app se crea una sola vez a mano en App Store Connect.
+Identificador: `cl.munitalca.app`. La ficha de la app se crea una sola vez a mano en App Store Connect.
