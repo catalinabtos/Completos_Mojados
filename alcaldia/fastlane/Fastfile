@@ -61,6 +61,9 @@ platform :ios do
 
     # La API de Apple no permite crear apps: la ficha se crea una vez a mano en App Store Connect.
     if Spaceship::ConnectAPI::App.find(BUNDLE_ID).nil?
+      Spaceship::ConnectAPI::App.all.each do |app|
+        UI.error("App en App Store Connect: #{app.name} -> #{app.bundle_id}")
+      end
       UI.user_error!("Falta crear la app en App Store Connect: Apps > + > Nueva app, con el identificador #{BUNDLE_ID}. " \
                      'El build ya compiló y firmó bien; vuelve a ejecutar el flujo después de crearla.')
     end
