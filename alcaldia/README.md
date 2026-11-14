@@ -1,4 +1,4 @@
-# Talca en tus Manos
+# Muni Talca
 
 Juego gratuito para iPhone: gestionas la Municipalidad de Talca durante un mandato de cuatro años.
 Mezcla de simulador de ciudad y de *time management*: despachas cuadrillas a los problemas de seis barrios,

@@ -1,6 +1,6 @@
 {
   "appId": "cl.talcaentusmanos.app",
-  "appName": "Talca en tus Manos",
+  "appName": "Muni Talca",
   "webDir": "dist",
   "ios": {
     "contentInset": "never",

@@ -154,7 +154,7 @@ export class App {
     this.demo.approval = this.demo.approval.map(() => 70);
 
     const panel = el('div', 'title-panel');
-    panel.append(el('div', 'logo', '<span class="l1">TALCA</span><span class="l2">en tus manos</span>'));
+    panel.append(el('div', 'logo', '<span class="l2">la muni de</span><span class="l1">TALCA</span>'));
     panel.append(el('p', 'tagline', 'Gestiona tu ciudad, toma decisiones y descubre qué deberíamos exigirle a una alcaldía.'));
     const saved = await loadGame();
     const savedState = saved ? deserialize(saved) : null;

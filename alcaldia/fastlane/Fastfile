@@ -1,4 +1,4 @@
-# Compila Talca en tus Manos y la sube a TestFlight usando la API key de App Store Connect.
+# Compila Muni Talca y la sube a TestFlight usando la API key de App Store Connect.
 # Usa los mismos secretos que Completos Mojados:
 #   ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8   API key de App Store Connect (rol Admin o App Manager)
 #   APPLE_TEAM_ID                            Team ID de la cuenta Apple Developer
@@ -7,7 +7,7 @@
 default_platform(:ios)
 
 BUNDLE_ID = 'cl.talcaentusmanos.app'
-APP_NAME = 'Talca en tus Manos'
+APP_NAME = 'Muni Talca'
 
 platform :ios do
   desc 'Compila y sube un build a TestFlight'
@@ -46,7 +46,7 @@ platform :ios do
       configuration: 'Release',
       export_method: 'app-store',
       output_directory: 'build',
-      output_name: 'TalcaEnTusManos.ipa',
+      output_name: 'MuniTalca.ipa',
       clean: true,
       xcargs: "#{auth} DEVELOPMENT_TEAM=#{team_id} PRODUCT_BUNDLE_IDENTIFIER=#{BUNDLE_ID} " \
               "CODE_SIGN_STYLE=Automatic CURRENT_PROJECT_VERSION=#{ENV.fetch('BUILD_NUMBER', '1')}",
